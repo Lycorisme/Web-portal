@@ -15,11 +15,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
+        // Create Super Admin account
         User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+            'name' => 'Administrator',
+            'email' => 'admin@portalnews.id',
+            'password' => bcrypt('Admin123!'),
+            'role' => 'super_admin',
+            'email_verified_at' => now(),
         ]);
+
+        // Optional: Create additional test users
+        // User::factory(10)->create();
     }
 }
