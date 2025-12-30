@@ -1,10 +1,28 @@
 @import "tailwindcss";
 
+/* ===================== DYNAMIC THEME REDESIGN ===================== */
 :root {
   --font-inter: "Inter", sans-serif;
   --font-merriweather: "Merriweather", serif;
 
-  /* News Color Palette */
+  /* Initial Theme seeds - updated by ThemeContext */
+  --theme-primary: #0a1628;
+  --theme-accent: #3b82f6;
+  --theme-sidebar: #061122;
+  --theme-gradient-from: #0ea5e9;
+  --theme-gradient-via: #3b82f6;
+  --theme-gradient-to: #6366f1;
+  --theme-hover: #0f2847;
+  --theme-selection-bg: #3b82f6;
+  --theme-selection-text: #ffffff;
+  --theme-icon-accent: #60a5fa;
+
+  /* Soft Theme Tokens - Refined for better blending */
+  --theme-bg-soft: color-mix(in srgb, var(--theme-soft-tint) 15%, #f8fafc);
+  --theme-surface-soft: color-mix(in srgb, var(--theme-soft-tint) 5%, #ffffff);
+  --theme-border-soft: color-mix(in srgb, var(--theme-soft-tint) 25%, #dae1e7);
+
+  /* Static Colors */
   --news-900: #0f172a;
   --news-800: #1e293b;
   --news-700: #334155;
@@ -12,93 +30,77 @@
   --news-blue: #2563eb;
 }
 
+.dark-mode {
+  --theme-bg-soft: color-mix(in srgb, var(--theme-soft-tint) 12%, #02040a);
+  --theme-surface-soft: color-mix(in srgb, var(--theme-soft-tint) 8%, #0f131a);
+  --theme-border-soft: color-mix(in srgb, var(--theme-soft-tint) 20%, #1e293b);
+}
+
 body {
   font-family: var(--font-inter), sans-serif;
-  background-color: #f8fafc;
+  background-color: var(--theme-bg-soft);
+  color: #1e293b;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
 }
 
-/* Custom Scrollbar - Main */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+.dark-mode body {
+  color: #f8fafc;
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
+/* ===================== DYNAMIC SELECTION ===================== */
+::selection {
+  background-color: var(--theme-selection-bg);
+  color: var(--theme-selection-text);
 }
 
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
+/* = :root derived utilities = */
+.sidebar-themed {
+  background-color: var(--theme-sidebar);
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+.theme-gradient {
+  background: linear-gradient(135deg, var(--theme-gradient-from), var(--theme-gradient-via), var(--theme-gradient-to));
 }
 
-/* Sidebar Scrollbar */
-.sidebar-scroll::-webkit-scrollbar {
-  width: 4px;
+.theme-gradient-text {
+  background: linear-gradient(135deg, var(--theme-gradient-from), var(--theme-gradient-to));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.sidebar-scroll::-webkit-scrollbar-track {
-  background: transparent;
+/* ===================== SOFT THEMED OVERRIDES ===================== */
+.card,
+.bg-white,
+.header-desktop,
+header,
+.sidebar-themed {
+  background-color: var(--theme-surface-soft) !important;
+  border-color: var(--theme-border-soft) !important;
 }
 
-.sidebar-scroll::-webkit-scrollbar-thumb {
-  background: #334155;
-  border-radius: 2px;
+.dark-mode .card,
+.dark-mode .bg-white,
+.dark-mode header,
+.dark-mode .header-desktop {
+  background-color: var(--theme-surface-soft) !important;
+  border-color: var(--theme-border-soft) !important;
 }
 
-.sidebar-scroll::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+.dark-mode .main-content {
+  background-color: var(--theme-bg-soft) !important;
 }
 
-/* Glass Effects */
-.glass-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+.dark-mode input,
+.dark-mode textarea,
+.dark-mode select {
+  background-color: var(--theme-surface-soft) !important;
+  color: #f8fafc !important;
+  border-color: var(--theme-border-soft) !important;
 }
 
-.glass-panel {
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Input AutoFill Hack */
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus,
-input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 30px white inset !important;
-}
-
-/* ========================= */
-/* FAST ANIMATIONS (150-200ms for snappy feel) */
-/* ========================= */
-
-@keyframes blob {
-  0% {
-    transform: translate(0px, 0px) scale(1);
-  }
-
-  33% {
-    transform: translate(30px, -50px) scale(1.1);
-  }
-
-  66% {
-    transform: translate(-20px, 20px) scale(0.9);
-  }
-
-  100% {
-    transform: translate(0px, 0px) scale(1);
-  }
-}
-
+/* ===================== ANIMATIONS ===================== */
 @keyframes fadeIn {
   0% {
     opacity: 0;
@@ -109,22 +111,22 @@ input:-webkit-autofill:active {
   }
 }
 
-@keyframes fadeInUp {
-  0% {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 @keyframes slideDown {
   0% {
     opacity: 0;
-    transform: translateY(-8px);
+    transform: translateY(-12px) scale(0.96);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideUpEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
   }
 
   100% {
@@ -133,27 +135,15 @@ input:-webkit-autofill:active {
   }
 }
 
-@keyframes slideInRight {
+@keyframes slideUpExit {
   0% {
-    opacity: 0;
-    transform: translateX(20px);
+    opacity: 1;
+    transform: translateY(0);
   }
 
   100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideInLeft {
-  0% {
     opacity: 0;
-    transform: translateX(-20px);
-  }
-
-  100% {
-    opacity: 1;
-    transform: translateX(0);
+    transform: translateY(20px);
   }
 }
 
@@ -169,191 +159,184 @@ input:-webkit-autofill:active {
   }
 }
 
-@keyframes scroll {
+@keyframes scaleOut {
   0% {
-    transform: translateX(100%);
-  }
-
-  100% {
-    transform: translateX(-100%);
-  }
-}
-
-@keyframes ping {
-
-  75%,
-  100% {
-    transform: scale(2);
-    opacity: 0;
-  }
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes pulse {
-
-  0%,
-  100% {
     opacity: 1;
+    transform: scale(1);
   }
 
-  50% {
-    opacity: 0.5;
-  }
-}
-
-@keyframes shake {
-
-  0%,
   100% {
-    transform: translateX(0);
+    opacity: 0;
+    transform: scale(0.95);
   }
-
-  10%,
-  30%,
-  50%,
-  70%,
-  90% {
-    transform: translateX(-2px);
-  }
-
-  20%,
-  40%,
-  60%,
-  80% {
-    transform: translateX(2px);
-  }
-}
-
-@keyframes bounce {
-
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-4px);
-  }
-}
-
-/* Animation Classes - FAST (150ms default) */
-.animate-blob {
-  animation: blob 7s infinite;
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.15s ease-out forwards;
-}
-
-.animate-fade-in-up {
-  animation: fadeInUp 0.2s ease-out forwards;
+  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-slide-down {
-  animation: slideDown 0.15s ease-out forwards;
+  animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.animate-slide-in-right {
-  animation: slideInRight 0.2s ease-out forwards;
+.animate-slide-up-enter {
+  animation: slideUpEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.animate-slide-in-left {
-  animation: slideInLeft 0.2s ease-out forwards;
+.animate-slide-up-exit {
+  animation: slideUpExit 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-scale-in {
-  animation: scaleIn 0.15s ease-out forwards;
+  animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.animate-scroll {
-  animation: scroll 15s linear infinite;
+.animate-scale-out {
+  animation: scaleOut 0.2s ease-in forwards;
 }
 
-.animate-ping {
-  animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+.entering {
+  animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.animate-spin {
-  animation: spin 1s linear infinite;
+.exiting {
+  animation: scaleOut 0.2s ease-in forwards;
 }
 
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+/* ===================== SIMPLIFIED ICON TOGGLE ===================== */
+.dark-mode-toggle-simple {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.animate-shake {
-  animation: shake 0.4s ease-in-out;
+.dark-mode-toggle-simple:hover {
+  background-color: rgba(var(--theme-accent-rgb, 59, 130, 246), 0.1);
+  transform: scale(1.05);
 }
 
-.animate-bounce {
-  animation: bounce 0.4s ease-in-out infinite;
+.dark-mode-toggle-simple i {
+  font-size: 1.25rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Animation Delays */
-.animation-delay-75 {
-  animation-delay: 75ms;
+.dark-mode-toggle-simple .sun-icon {
+  color: #fbbf24;
+  transform: translateY(0) rotate(0);
 }
 
-.animation-delay-100 {
-  animation-delay: 100ms;
+.dark-mode-toggle-simple .moon-icon {
+  color: #818cf8;
+  position: absolute;
+  transform: translateY(40px) rotate(45deg);
 }
 
-.animation-delay-150 {
-  animation-delay: 150ms;
+.dark-mode-toggle-simple.dark .sun-icon {
+  transform: translateY(-40px) rotate(-45deg);
 }
 
-.animation-delay-200 {
-  animation-delay: 200ms;
+.dark-mode-toggle-simple.dark .moon-icon {
+  transform: translateY(0) rotate(0);
 }
 
-.animation-delay-2000 {
-  animation-delay: 2s;
+/* ===================== SWEETALERT2 SOFT THEMED ===================== */
+.swal2-popup {
+  background-color: var(--theme-surface-soft) !important;
+  color: inherit !important;
+  border: 1px solid var(--theme-border-soft) !important;
+  border-radius: 1.5rem !important;
 }
 
-/* Selection */
-::selection {
-  background-color: var(--news-red);
-  color: white;
+.dark-mode .swal2-popup {
+  background-color: var(--theme-surface-soft) !important;
+  border-color: var(--theme-border-soft) !important;
+  color: #f8fafc !important;
 }
 
-/* ========================= */
-/* HOVER & FOCUS TRANSITIONS */
-/* ========================= */
-
-/* Global transition speed for interactive elements */
-button,
-a,
-input,
-select,
-textarea {
-  transition-duration: 150ms !important;
-  transition-timing-function: ease-out !important;
+.swal2-title,
+.swal2-html-container {
+  color: inherit !important;
 }
 
-/* Card hover effects */
-.hover-lift {
-  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+/* ===================== NOTIFICATION MODAL STYLES ===================== */
+.notification-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
 }
 
-.hover-lift:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+.notification-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  transition: opacity 0.3s ease;
 }
 
-/* ========================= */
-/* CUSTOM COMPONENTS */
-/* ========================= */
+.notification-modal-content {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 480px;
+  max-height: 80vh;
+  background: var(--theme-surface-soft);
+  border-radius: 1.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  border: 1px solid var(--theme-border-soft);
+}
 
-/* Badge styles */
+.notification-item {
+  transition: all 0.2s ease;
+  border-bottom: 1px solid var(--theme-border-soft);
+}
+
+.notification-item:hover {
+  background-color: color-mix(in srgb, var(--theme-accent) 5%, transparent);
+}
+
+/* modal-close-btn styles removed - handled by Tailwind in component */
+
+/* Glass & Blur overrides */
+.backdrop-blur-md {
+  backdrop-filter: blur(12px) !important;
+}
+
+/* ===================== RESTORED UTILITIES ===================== */
+.sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: 0.5rem;
+  transition: all 0.15s ease-out;
+  color: #cbd5e1;
+}
+
+.sidebar-nav-item:hover {
+  background-color: var(--theme-hover);
+  color: #ffffff;
+}
+
+.sidebar-nav-item.active {
+  background-color: var(--theme-hover);
+  color: #ffffff;
+  border-left: 4px solid var(--theme-accent);
+}
+
 .badge {
   display: inline-flex;
   align-items: center;
@@ -361,53 +344,10 @@ textarea {
   font-size: 0.75rem;
   font-weight: 600;
   border-radius: 9999px;
-  transition: all 0.15s ease-out;
 }
 
-.badge-success {
-  background-color: rgba(34, 197, 94, 0.1);
-  color: #16a34a;
-  border: 1px solid rgba(34, 197, 94, 0.2);
-}
-
-.badge-danger {
-  background-color: rgba(239, 68, 68, 0.1);
-  color: #dc2626;
-  border: 1px solid rgba(239, 68, 68, 0.2);
-}
-
-.badge-warning {
-  background-color: rgba(245, 158, 11, 0.1);
-  color: #d97706;
-  border: 1px solid rgba(245, 158, 11, 0.2);
-}
-
-.badge-info {
-  background-color: rgba(59, 130, 246, 0.1);
-  color: #2563eb;
-  border: 1px solid rgba(59, 130, 246, 0.2);
-}
-
-/* Focus ring utility */
-.focus-ring {
-  outline: none;
-}
-
-.focus-ring:focus-visible {
-  box-shadow: 0 0 0 2px var(--news-blue);
-}
-
-/* ========================= */
-/* RESPONSIVE UTILITIES */
-/* ========================= */
-
-@media (prefers-reduced-motion: reduce) {
-
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+.badge-themed {
+  background: color-mix(in srgb, var(--theme-accent) 15%, transparent);
+  color: var(--theme-accent);
+  border: 1px solid color-mix(in srgb, var(--theme-accent) 30%, transparent);
 }

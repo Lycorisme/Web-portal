@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, Merriweather } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@/contexts/ThemeContext";
+import DynamicHead from "@/components/layout/DynamicHead";
 
 const inter = Inter({
     variable: "--font-inter",
@@ -32,11 +34,16 @@ export default function RootLayout({
                     rel="stylesheet"
                     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
                 />
+                {/* SweetAlert2 CDN */}
+                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
             </head>
             <body
                 className={`${inter.variable} ${merriweather.variable} antialiased`}
             >
-                {children}
+                <ThemeProvider>
+                    <DynamicHead />
+                    {children}
+                </ThemeProvider>
             </body>
         </html>
     );

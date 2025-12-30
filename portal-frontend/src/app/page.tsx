@@ -3,55 +3,11 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getUser, login, isLoggedIn } from "@/lib/auth";
-
-// Toast Component
-function Toast({
-    show,
-    message,
-    type,
-    onClose,
-}: {
-    show: boolean;
-    message: string;
-    type: "success" | "error" | "info";
-    onClose: () => void;
-}) {
-    if (!show) return null;
-
-    const bgColor =
-        type === "success"
-            ? "bg-green-500"
-            : type === "error"
-                ? "bg-red-500"
-                : "bg-blue-500";
-
-    const icon =
-        type === "success"
-            ? "fa-check-circle"
-            : type === "error"
-                ? "fa-times-circle"
-                : "fa-info-circle";
-
-    return (
-        <div className="fixed bottom-6 right-6 z-50 animate-fade-in-up">
-            <div
-                className={`${bgColor} text-white px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3 min-w-[300px]`}
-            >
-                <i className={`fa-solid ${icon} text-xl`}></i>
-                <span className="font-medium">{message}</span>
-                <button
-                    onClick={onClose}
-                    className="ml-auto hover:opacity-75 transition-opacity"
-                >
-                    <i className="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-        </div>
-    );
-}
+import { useTheme } from "@/contexts/ThemeContext";
+import Toast, { ToastData } from "@/components/ui/Toast";
 
 // Password Strength Indicator
-function PasswordStrength({ password }: { password: string }) {
+function PasswordStrength({ password, theme }: { password: string; theme: any }) {
     if (password.length === 0) return null;
 
     const getStrengthLabel = () => {
@@ -69,22 +25,22 @@ function PasswordStrength({ password }: { password: string }) {
 
     const getBarColor = (index: number) => {
         if (index === 0) {
-            if (password.length >= 8) return "bg-green-500";
-            if (password.length >= 4) return "bg-yellow-500";
-            if (password.length >= 1) return "bg-red-400";
-            return "bg-gray-200";
+            if (password.length >= 8) return theme.gradientTo;
+            if (password.length >= 4) return "#eab308";
+            if (password.length >= 1) return "#f87171";
+            return "#e2e8f0";
         }
         if (index === 1) {
-            if (password.length >= 8) return "bg-green-500";
-            if (password.length >= 4) return "bg-yellow-500";
-            return "bg-gray-200";
+            if (password.length >= 8) return theme.gradientVia || theme.gradientFrom;
+            if (password.length >= 4) return "#eab308";
+            return "#e2e8f0";
         }
         if (index === 2) {
-            if (password.length >= 8) return "bg-green-500";
-            return "bg-gray-200";
+            if (password.length >= 8) return theme.gradientFrom;
+            return "#e2e8f0";
         }
-        if (password.length >= 12) return "bg-green-500";
-        return "bg-gray-200";
+        if (password.length >= 12) return theme.accent;
+        return "#e2e8f0";
     };
 
     return (
@@ -93,9 +49,8 @@ function PasswordStrength({ password }: { password: string }) {
                 {[0, 1, 2, 3].map((i) => (
                     <div
                         key={i}
-                        className={`h-1 flex-1 rounded-full transition-all duration-300 ${getBarColor(
-                            i
-                        )}`}
+                        className="h-1 flex-1 rounded-full transition-all duration-300"
+                        style={{ backgroundColor: getBarColor(i) }}
                     />
                 ))}
             </div>
@@ -108,15 +63,12 @@ function PasswordStrength({ password }: { password: string }) {
 
 export default function LoginPage() {
     const router = useRouter();
+    const { theme, settings } = useTheme();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [toast, setToast] = useState<{
-        show: boolean;
-        message: string;
-        type: "success" | "error" | "info";
-    }>({ show: false, message: "", type: "success" });
+    const [toast, setToast] = useState<ToastData>({ show: false, message: "", type: "success" });
 
     // Check if already logged in
     useEffect(() => {
@@ -125,7 +77,7 @@ export default function LoginPage() {
         }
     }, [router]);
 
-    const showToast = (message: string, type: "success" | "error" | "info") => {
+    const showToast = (message: string, type: ToastData["type"]) => {
         setToast({ show: true, message, type });
         setTimeout(() => setToast((prev) => ({ ...prev, show: false })), 4000);
     };
@@ -156,11 +108,20 @@ export default function LoginPage() {
         router.push("/dashboard");
     };
 
+    // Get site name from settings
+    const siteName = settings.site_name || "PORTALNEWS";
+    const siteNameParts = siteName.split(" ");
+    const firstWord = siteNameParts[0] || "PORTAL";
+    const restWords = siteNameParts.slice(1).join(" ") || "NEWS";
+
     return (
         <div className="h-screen w-full overflow-hidden font-[family-name:var(--font-inter)] text-slate-600">
             <div className="flex min-h-full flex-col lg:flex-row">
                 {/* Mobile Header */}
-                <div className="relative h-64 w-full bg-[#0f172a] lg:hidden overflow-hidden">
+                <div
+                    className="relative h-64 w-full lg:hidden overflow-hidden"
+                    style={{ backgroundColor: theme.sidebar }}
+                >
                     <img
                         src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=2070&auto=format&fit=crop"
                         className="absolute inset-0 h-full w-full object-cover opacity-60 mix-blend-overlay"
@@ -169,11 +130,14 @@ export default function LoginPage() {
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent to-slate-50/90"></div>
 
                     <div className="absolute top-6 left-6 flex items-center gap-2">
-                        <div className="flex h-8 w-8 items-center justify-center rounded bg-[#dc2626] text-white font-[family-name:var(--font-merriweather)] font-bold shadow-lg">
-                            P
+                        <div
+                            className="flex h-8 w-8 items-center justify-center rounded text-white font-[family-name:var(--font-merriweather)] font-bold shadow-lg"
+                            style={{ background: `linear-gradient(135deg, ${theme.gradientFrom}, ${theme.gradientTo})` }}
+                        >
+                            {firstWord.charAt(0)}
                         </div>
                         <span className="text-xl font-bold tracking-tight text-white font-[family-name:var(--font-merriweather)] drop-shadow-md">
-                            PORTAL<span className="text-[#dc2626]">NEWS</span>
+                            {firstWord}<span style={{ color: theme.gradientFrom }}>{restWords}</span>
                         </span>
                     </div>
                 </div>
@@ -183,21 +147,30 @@ export default function LoginPage() {
                     <div className="mx-auto w-full max-w-sm lg:w-96 animate-fade-in-up">
                         {/* Desktop Logo */}
                         <div className="hidden lg:flex items-center gap-3 mb-10">
-                            <div className="flex h-10 w-10 items-center justify-center rounded bg-[#dc2626] text-xl font-bold text-white font-[family-name:var(--font-merriweather)] shadow-md">
-                                P
+                            <div
+                                className="flex h-10 w-10 items-center justify-center rounded text-xl font-bold text-white font-[family-name:var(--font-merriweather)] shadow-md"
+                                style={{ background: `linear-gradient(135deg, ${theme.gradientFrom}, ${theme.gradientTo})` }}
+                            >
+                                {firstWord.charAt(0)}
                             </div>
-                            <span className="text-2xl font-bold tracking-tight text-[#0f172a] font-[family-name:var(--font-merriweather)]">
-                                PORTAL<span className="text-[#dc2626]">NEWS</span>
+                            <span
+                                className="text-2xl font-bold tracking-tight font-[family-name:var(--font-merriweather)]"
+                                style={{ color: theme.sidebar }}
+                            >
+                                {firstWord}<span style={{ color: theme.gradientFrom }}>{restWords}</span>
                             </span>
                         </div>
 
                         {/* Header Text */}
                         <div className="text-center lg:text-left mb-8">
-                            <h2 className="text-2xl font-bold leading-9 tracking-tight text-[#0f172a]">
+                            <h2
+                                className="text-2xl font-bold leading-9 tracking-tight"
+                                style={{ color: theme.sidebar }}
+                            >
                                 Masuk ke Ruang Redaksi
                             </h2>
                             <p className="mt-2 text-sm leading-6 text-gray-500">
-                                Kelola berita, pantau trafik, dan amankan sistem.
+                                {settings.site_tagline || "Kelola berita, pantau trafik, dan amankan sistem."}
                             </p>
                         </div>
 
@@ -207,13 +180,17 @@ export default function LoginPage() {
                             <div>
                                 <label
                                     htmlFor="email"
-                                    className="block text-sm font-medium leading-6 text-[#0f172a]"
+                                    className="block text-sm font-medium leading-6"
+                                    style={{ color: theme.sidebar }}
                                 >
                                     Email Redaksi
                                 </label>
                                 <div className="relative mt-2 group">
                                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                                        <i className="fa-regular fa-envelope text-gray-400 group-focus-within:text-[#2563eb] transition-colors duration-300"></i>
+                                        <i
+                                            className="fa-regular fa-envelope text-gray-400 group-focus-within:text-current transition-colors duration-300"
+                                            style={{ color: email ? theme.accent : undefined }}
+                                        ></i>
                                     </div>
                                     <input
                                         id="email"
@@ -223,8 +200,11 @@ export default function LoginPage() {
                                         required
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        className="block w-full rounded-md border-0 py-3 pl-10 text-[#0f172a] shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[#2563eb] sm:text-sm sm:leading-6 transition-all duration-200"
-                                        placeholder="nama@portalnews.id"
+                                        className="block w-full rounded-md border-0 py-3 pl-10 text-slate-800 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 transition-all duration-200"
+                                        style={{
+                                            "--tw-ring-color": theme.accent
+                                        } as React.CSSProperties}
+                                        placeholder={settings.site_email || "nama@portalnews.id"}
                                     />
                                 </div>
                             </div>
@@ -233,13 +213,17 @@ export default function LoginPage() {
                             <div>
                                 <label
                                     htmlFor="password"
-                                    className="block text-sm font-medium leading-6 text-[#0f172a]"
+                                    className="block text-sm font-medium leading-6"
+                                    style={{ color: theme.sidebar }}
                                 >
                                     Kata Sandi
                                 </label>
                                 <div className="relative mt-2 group">
                                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                                        <i className="fa-solid fa-lock text-gray-400 group-focus-within:text-[#2563eb] transition-colors duration-300"></i>
+                                        <i
+                                            className="fa-solid fa-lock text-gray-400 group-focus-within:text-current transition-colors duration-300"
+                                            style={{ color: password ? theme.accent : undefined }}
+                                        ></i>
                                     </div>
                                     <input
                                         id="password"
@@ -249,7 +233,10 @@ export default function LoginPage() {
                                         required
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        className="block w-full rounded-md border-0 py-3 pl-10 pr-10 text-[#0f172a] shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[#2563eb] sm:text-sm sm:leading-6 transition-all duration-200"
+                                        className="block w-full rounded-md border-0 py-3 pl-10 pr-10 text-slate-800 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 transition-all duration-200"
+                                        style={{
+                                            "--tw-ring-color": theme.accent
+                                        } as React.CSSProperties}
                                         placeholder="••••••••"
                                     />
                                     <button
@@ -266,7 +253,7 @@ export default function LoginPage() {
                                         ></i>
                                     </button>
                                 </div>
-                                <PasswordStrength password={password} />
+                                <PasswordStrength password={password} theme={theme} />
                             </div>
 
                             {/* Remember Me & Forgot Password */}
@@ -276,7 +263,10 @@ export default function LoginPage() {
                                         id="remember-me"
                                         name="remember-me"
                                         type="checkbox"
-                                        className="h-4 w-4 rounded border-gray-300 text-[#2563eb] focus:ring-[#2563eb] cursor-pointer"
+                                        className="h-4 w-4 rounded border-gray-300 cursor-pointer"
+                                        style={{
+                                            accentColor: theme.accent
+                                        }}
                                     />
                                     <label
                                         htmlFor="remember-me"
@@ -288,7 +278,8 @@ export default function LoginPage() {
                                 <div className="text-sm leading-6">
                                     <a
                                         href="#"
-                                        className="font-semibold text-[#2563eb] hover:text-blue-500 transition-colors"
+                                        className="font-semibold hover:opacity-80 transition-colors"
+                                        style={{ color: theme.accent }}
                                     >
                                         Lupa sandi?
                                     </a>
@@ -300,8 +291,11 @@ export default function LoginPage() {
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className={`flex w-full justify-center items-center gap-2 rounded-md bg-[#0f172a] px-3 py-3 text-sm font-bold leading-6 text-white shadow-sm hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0f172a] transition-all duration-300 transform hover:scale-[1.02] disabled:hover:scale-100 ${loading ? "opacity-75 cursor-not-allowed" : ""
+                                    className={`flex w-full justify-center items-center gap-2 rounded-md px-3 py-3 text-sm font-bold leading-6 text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 transition-all duration-300 transform hover:scale-[1.02] disabled:hover:scale-100 ${loading ? "opacity-75 cursor-not-allowed" : ""
                                         }`}
+                                    style={{
+                                        background: `linear-gradient(135deg, ${theme.gradientFrom}, ${theme.gradientVia || theme.gradientFrom}, ${theme.gradientTo})`,
+                                    }}
                                 >
                                     {loading && (
                                         <svg
@@ -332,10 +326,18 @@ export default function LoginPage() {
 
                         {/* Footer */}
                         <div className="mt-10 border-t border-gray-200 pt-6">
-                            <div className="flex items-center justify-center gap-2 text-xs text-gray-500 bg-white/50 py-2 rounded-full border border-gray-100 shadow-sm">
+                            <div
+                                className="flex items-center justify-center gap-2 text-xs text-gray-500 bg-white/50 py-2 rounded-full border border-gray-100 shadow-sm"
+                            >
                                 <span className="relative flex h-2 w-2">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                                    <span
+                                        className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+                                        style={{ backgroundColor: theme.gradientFrom }}
+                                    ></span>
+                                    <span
+                                        className="relative inline-flex rounded-full h-2 w-2"
+                                        style={{ backgroundColor: theme.accent }}
+                                    ></span>
                                 </span>
                                 <span className="font-medium">Sistem Keamanan Aktif</span>
                                 <span className="text-gray-300">|</span>
@@ -346,22 +348,40 @@ export default function LoginPage() {
                 </div>
 
                 {/* Right Panel - Desktop Only */}
-                <div className="relative hidden w-0 flex-1 lg:block bg-[#0f172a] overflow-hidden">
+                <div
+                    className="relative hidden w-0 flex-1 lg:block overflow-hidden"
+                    style={{ backgroundColor: theme.sidebar }}
+                >
                     <img
                         className="absolute inset-0 h-full w-full object-cover opacity-30 mix-blend-overlay scale-105"
                         src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=2070&auto=format&fit=crop"
                         alt="Newsroom background"
                     />
 
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-transparent to-transparent"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-current via-transparent to-transparent" style={{ color: theme.sidebar }}></div>
 
                     {/* Animated Blobs */}
-                    <div className="absolute top-0 -left-4 w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply filter blur-[100px] opacity-20 animate-blob"></div>
-                    <div className="absolute bottom-0 -right-4 w-96 h-96 bg-purple-600 rounded-full mix-blend-multiply filter blur-[100px] opacity-20 animate-blob animation-delay-2000"></div>
+                    <div
+                        className="absolute top-0 -left-4 w-96 h-96 rounded-full mix-blend-multiply filter blur-[100px] opacity-20 animate-blob"
+                        style={{ backgroundColor: theme.gradientFrom }}
+                    ></div>
+                    <div
+                        className="absolute bottom-0 -right-4 w-96 h-96 rounded-full mix-blend-multiply filter blur-[100px] opacity-20 animate-blob animation-delay-2000"
+                        style={{ backgroundColor: theme.gradientTo }}
+                    ></div>
 
                     {/* Scrolling News Bar */}
-                    <div className="absolute top-10 left-0 right-0 bg-[#dc2626]/10 backdrop-blur border-y border-[#dc2626]/20 py-2 overflow-hidden">
-                        <div className="whitespace-nowrap animate-scroll flex items-center gap-8 text-[#dc2626] font-mono text-xs font-bold tracking-widest uppercase">
+                    <div
+                        className="absolute top-10 left-0 right-0 backdrop-blur border-y py-2 overflow-hidden"
+                        style={{
+                            backgroundColor: `${theme.gradientFrom}15`,
+                            borderColor: `${theme.gradientFrom}30`
+                        }}
+                    >
+                        <div
+                            className="whitespace-nowrap animate-scroll flex items-center gap-8 font-mono text-xs font-bold tracking-widest uppercase"
+                            style={{ color: theme.gradientFrom }}
+                        >
                             <span>BREAKING: SISTEM PORTAL BERITA MENDETEKSI LONJAKAN TRAFIK AMAN</span>
                             <span>•</span>
                             <span>UPDATE: FITUR RATE LIMITING BERHASIL MEMBLOKIR 15 IP MENCURIGAKAN</span>
@@ -375,7 +395,10 @@ export default function LoginPage() {
 
                     {/* Status Panel */}
                     <div className="absolute inset-0 flex flex-col items-center justify-center p-12">
-                        <div className="glass-panel rounded-2xl p-8 max-w-md w-full border-l-4 border-[#dc2626] transform transition hover:scale-105 duration-500 shadow-2xl">
+                        <div
+                            className="glass-panel rounded-2xl p-8 max-w-md w-full transform transition hover:scale-105 duration-500 shadow-2xl"
+                            style={{ borderLeftColor: theme.gradientFrom, borderLeftWidth: "4px" }}
+                        >
                             <div className="flex justify-between items-start mb-6">
                                 <div>
                                     <h3 className="text-white font-bold text-xl font-[family-name:var(--font-merriweather)]">
@@ -385,19 +408,22 @@ export default function LoginPage() {
                                         Realtime Monitoring Log
                                     </p>
                                 </div>
-                                <i className="fa-solid fa-shield-cat text-2xl text-green-400"></i>
+                                <i
+                                    className="fa-solid fa-shield-cat text-2xl"
+                                    style={{ color: theme.accent }}
+                                ></i>
                             </div>
 
                             <div className="space-y-5">
                                 <div>
                                     <div className="flex justify-between text-xs font-medium mb-2">
                                         <span className="text-slate-300">Traffic Load (Redis Cache)</span>
-                                        <span className="text-green-400">Stable (45ms)</span>
+                                        <span style={{ color: theme.accent }}>Stable (45ms)</span>
                                     </div>
                                     <div className="w-full bg-slate-700/50 rounded-full h-2">
                                         <div
-                                            className="bg-blue-500 h-2 rounded-full relative overflow-hidden"
-                                            style={{ width: "45%" }}
+                                            className="h-2 rounded-full relative overflow-hidden"
+                                            style={{ width: "45%", backgroundColor: theme.gradientFrom }}
                                         >
                                             <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
                                         </div>
@@ -411,7 +437,7 @@ export default function LoginPage() {
                                     </div>
                                     <div className="w-full bg-slate-700/50 rounded-full h-2">
                                         <div
-                                            className="bg-[#dc2626] h-2 rounded-full"
+                                            className="bg-red-500 h-2 rounded-full"
                                             style={{ width: "15%" }}
                                         ></div>
                                     </div>
@@ -438,7 +464,10 @@ export default function LoginPage() {
                             <p className="text-slate-400 font-[family-name:var(--font-merriweather)] italic text-lg leading-relaxed">
                                 &quot;The truth is not always beautiful, nor beautiful words the truth.&quot;
                             </p>
-                            <p className="text-[#dc2626] text-sm font-bold mt-2 tracking-widest uppercase">
+                            <p
+                                className="text-sm font-bold mt-2 tracking-widest uppercase"
+                                style={{ color: theme.gradientFrom }}
+                            >
                                 - Editorial System
                             </p>
                         </div>
@@ -448,9 +477,7 @@ export default function LoginPage() {
 
             {/* Toast Notification */}
             <Toast
-                show={toast.show}
-                message={toast.message}
-                type={toast.type}
+                data={toast}
                 onClose={() => setToast((prev) => ({ ...prev, show: false }))}
             />
         </div>
