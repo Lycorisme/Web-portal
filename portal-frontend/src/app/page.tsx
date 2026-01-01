@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getUser, login, isLoggedIn } from "@/lib/auth";
+import { getUser, login, isLoggedIn, wasDeviceRemembered } from "@/lib/auth";
 import { useTheme } from "@/contexts/ThemeContext";
 import Toast, { ToastData } from "@/components/ui/Toast";
 
@@ -44,38 +44,64 @@ function PasswordStrength({ password, theme }: { password: string; theme: any })
     };
 
     return (
-        <div className="mt-2 animate-fade-in-up">
+        <div className="mt-2 login-animate-in" style={{ animationDelay: "0.1s" }}>
             <div className="flex gap-1">
                 {[0, 1, 2, 3].map((i) => (
                     <div
                         key={i}
-                        className="h-1 flex-1 rounded-full transition-all duration-300"
+                        className="h-1 flex-1 rounded-full transition-all duration-200"
                         style={{ backgroundColor: getBarColor(i) }}
                     />
                 ))}
             </div>
-            <p className={`text-xs mt-1 transition-colors duration-200 ${getStrengthColor()}`}>
+            <p className={`text-xs mt-1 transition-colors duration-150 ${getStrengthColor()}`}>
                 {getStrengthLabel()}
             </p>
         </div>
     );
 }
 
+// Default SSR-safe values - MUST match exactly on server and client initial render
+const DEFAULT_THEME = {
+    sidebar: "#061122",
+    gradientFrom: "#0ea5e9",
+    gradientVia: "#3b82f6",
+    gradientTo: "#6366f1",
+    accent: "#3b82f6",
+    primary: "#0a1628",
+    hoverColor: "#0f2847",
+    softTint: "#7dd3fc",
+};
+const DEFAULT_SITE_NAME = "PORTALNEWS";
+const DEFAULT_SITE_TAGLINE = "Kelola berita, pantau trafik, dan amankan sistem.";
+const DEFAULT_SITE_EMAIL = "nama@portalnews.id";
+
 export default function LoginPage() {
     const router = useRouter();
-    const { theme, settings } = useTheme();
+    const { theme, settings, isDarkMode } = useTheme();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState<ToastData>({ show: false, message: "", type: "success" });
+    const [mounted, setMounted] = useState(false);
+    const [rememberDevice, setRememberDevice] = useState(false);
+
+    // Set mounted state after hydration and check if device was previously remembered
+    useEffect(() => {
+        setMounted(true);
+        // Auto-check the box if device was previously remembered
+        if (wasDeviceRemembered()) {
+            setRememberDevice(true);
+        }
+    }, []);
 
     // Check if already logged in
     useEffect(() => {
-        if (isLoggedIn()) {
+        if (mounted && isLoggedIn()) {
             router.push("/dashboard");
         }
-    }, [router]);
+    }, [router, mounted]);
 
     const showToast = (message: string, type: ToastData["type"]) => {
         setToast({ show: true, message, type });
@@ -93,8 +119,8 @@ export default function LoginPage() {
 
         setLoading(true);
 
-        // Call API login
-        const result = await login(email, password);
+        // Call API login with remember device option
+        const result = await login(email, password, rememberDevice);
 
         if (!result.success) {
             setLoading(false);
@@ -108,19 +134,41 @@ export default function LoginPage() {
         router.push("/dashboard");
     };
 
-    // Get site name from settings
-    const siteName = settings.site_name || "PORTALNEWS";
+    // Use actual values only after mounting to prevent hydration mismatch
+    // For SSR, use default values that will be the same on server and client
+    const currentTheme = mounted ? theme : DEFAULT_THEME;
+    const siteName = mounted ? (settings.site_name || DEFAULT_SITE_NAME) : DEFAULT_SITE_NAME;
+    const siteTagline = mounted ? (settings.site_tagline || DEFAULT_SITE_TAGLINE) : DEFAULT_SITE_TAGLINE;
+    const siteEmail = mounted ? (settings.site_email || DEFAULT_SITE_EMAIL) : DEFAULT_SITE_EMAIL;
+    const logoUrl = mounted ? (settings.logo_url || "") : "";
+    const currentIsDarkMode = mounted ? isDarkMode : false;
+
     const siteNameParts = siteName.split(" ");
     const firstWord = siteNameParts[0] || "PORTAL";
     const restWords = siteNameParts.slice(1).join(" ") || "NEWS";
 
+    // Dynamic background based on dark mode and theme
+    const pageBackground = currentIsDarkMode
+        ? currentTheme.primary
+        : "#f8fafc";
+
+    const formSectionBg = currentIsDarkMode
+        ? `linear-gradient(180deg, ${currentTheme.sidebar}ee, ${currentTheme.primary})`
+        : "#f8fafc";
+
+    const textColor = currentIsDarkMode ? "#f1f5f9" : "#1e293b";
+    const mutedTextColor = currentIsDarkMode ? "#94a3b8" : "#6b7280";
+    const inputBg = currentIsDarkMode ? `${currentTheme.sidebar}` : "#ffffff";
+    const inputBorder = currentIsDarkMode ? `${currentTheme.accent}30` : "#e2e8f0";
+    const inputText = currentIsDarkMode ? "#f1f5f9" : "#1e293b";
+
     return (
-        <div className="h-screen w-full overflow-hidden font-[family-name:var(--font-inter)] text-slate-600">
+        <div className="h-screen w-full overflow-hidden font-[family-name:var(--font-inter)]" style={{ backgroundColor: pageBackground, color: textColor }}>
             <div className="flex min-h-full flex-col lg:flex-row">
                 {/* Mobile Header */}
                 <div
                     className="relative h-64 w-full lg:hidden overflow-hidden"
-                    style={{ backgroundColor: theme.sidebar }}
+                    style={{ backgroundColor: currentTheme.sidebar }}
                 >
                     <img
                         src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=2070&auto=format&fit=crop"
@@ -130,34 +178,50 @@ export default function LoginPage() {
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent to-slate-50/90"></div>
 
                     <div className="absolute top-6 left-6 flex items-center gap-2">
-                        <div
-                            className="flex h-8 w-8 items-center justify-center rounded text-white font-[family-name:var(--font-merriweather)] font-bold shadow-lg"
-                            style={{ background: `linear-gradient(135deg, ${theme.gradientFrom}, ${theme.gradientTo})` }}
-                        >
-                            {firstWord.charAt(0)}
-                        </div>
+                        {logoUrl ? (
+                            <img
+                                src={logoUrl}
+                                alt={siteName}
+                                className="h-8 w-8 rounded object-cover shadow-lg"
+                            />
+                        ) : (
+                            <div
+                                className="flex h-8 w-8 items-center justify-center rounded text-white font-[family-name:var(--font-merriweather)] font-bold shadow-lg"
+                                style={{ background: `linear-gradient(135deg, ${currentTheme.gradientFrom}, ${currentTheme.gradientTo})` }}
+                            >
+                                {firstWord.charAt(0)}
+                            </div>
+                        )}
                         <span className="text-xl font-bold tracking-tight text-white font-[family-name:var(--font-merriweather)] drop-shadow-md">
-                            {firstWord}<span style={{ color: theme.gradientFrom }}>{restWords}</span>
+                            {firstWord}<span style={{ color: currentTheme.gradientFrom }}>{restWords}</span>
                         </span>
                     </div>
                 </div>
 
                 {/* Login Form Section */}
-                <div className="flex flex-1 flex-col justify-center px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24 bg-slate-50 relative -mt-20 lg:mt-0 rounded-t-[2rem] lg:rounded-none z-10 lg:w-1/2">
-                    <div className="mx-auto w-full max-w-sm lg:w-96 animate-fade-in-up">
+                <div className="flex flex-1 flex-col justify-center px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24 relative -mt-20 lg:mt-0 rounded-t-[2rem] lg:rounded-none z-10 lg:w-1/2" style={{ background: formSectionBg }}>
+                    <div className="mx-auto w-full max-w-sm lg:w-96 login-animate-in">
                         {/* Desktop Logo */}
                         <div className="hidden lg:flex items-center gap-3 mb-10">
-                            <div
-                                className="flex h-10 w-10 items-center justify-center rounded text-xl font-bold text-white font-[family-name:var(--font-merriweather)] shadow-md"
-                                style={{ background: `linear-gradient(135deg, ${theme.gradientFrom}, ${theme.gradientTo})` }}
-                            >
-                                {firstWord.charAt(0)}
-                            </div>
+                            {logoUrl ? (
+                                <img
+                                    src={logoUrl}
+                                    alt={siteName}
+                                    className="h-10 w-10 rounded object-cover shadow-md"
+                                />
+                            ) : (
+                                <div
+                                    className="flex h-10 w-10 items-center justify-center rounded text-xl font-bold text-white font-[family-name:var(--font-merriweather)] shadow-md"
+                                    style={{ background: `linear-gradient(135deg, ${currentTheme.gradientFrom}, ${currentTheme.gradientTo})` }}
+                                >
+                                    {firstWord.charAt(0)}
+                                </div>
+                            )}
                             <span
                                 className="text-2xl font-bold tracking-tight font-[family-name:var(--font-merriweather)]"
-                                style={{ color: theme.sidebar }}
+                                style={{ color: currentTheme.sidebar }}
                             >
-                                {firstWord}<span style={{ color: theme.gradientFrom }}>{restWords}</span>
+                                {firstWord}<span style={{ color: currentTheme.gradientFrom }}>{restWords}</span>
                             </span>
                         </div>
 
@@ -165,31 +229,31 @@ export default function LoginPage() {
                         <div className="text-center lg:text-left mb-8">
                             <h2
                                 className="text-2xl font-bold leading-9 tracking-tight"
-                                style={{ color: theme.sidebar }}
+                                style={{ color: currentTheme.sidebar }}
                             >
                                 Masuk ke Ruang Redaksi
                             </h2>
-                            <p className="mt-2 text-sm leading-6 text-gray-500">
-                                {settings.site_tagline || "Kelola berita, pantau trafik, dan amankan sistem."}
+                            <p className="mt-2 text-sm leading-6" style={{ color: mutedTextColor }}>
+                                {siteTagline}
                             </p>
                         </div>
 
                         {/* Login Form */}
                         <form onSubmit={handleSubmit} className="space-y-6">
                             {/* Email Field */}
-                            <div>
+                            <div className="login-animate-in" style={{ animationDelay: "0.1s" }}>
                                 <label
                                     htmlFor="email"
                                     className="block text-sm font-medium leading-6"
-                                    style={{ color: theme.sidebar }}
+                                    style={{ color: textColor }}
                                 >
                                     Email Redaksi
                                 </label>
                                 <div className="relative mt-2 group">
                                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                                         <i
-                                            className="fa-regular fa-envelope text-gray-400 group-focus-within:text-current transition-colors duration-300"
-                                            style={{ color: email ? theme.accent : undefined }}
+                                            className="fa-regular fa-envelope transition-colors duration-150"
+                                            style={{ color: email ? currentTheme.accent : mutedTextColor }}
                                         ></i>
                                     </div>
                                     <input
@@ -200,29 +264,32 @@ export default function LoginPage() {
                                         required
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        className="block w-full rounded-md border-0 py-3 pl-10 text-slate-800 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 transition-all duration-200"
+                                        className="block w-full rounded-md border py-3 pl-10 shadow-sm focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 transition-all duration-150"
                                         style={{
-                                            "--tw-ring-color": theme.accent
+                                            backgroundColor: inputBg,
+                                            borderColor: inputBorder,
+                                            color: inputText,
+                                            "--tw-ring-color": currentTheme.accent
                                         } as React.CSSProperties}
-                                        placeholder={settings.site_email || "nama@portalnews.id"}
+                                        placeholder={siteEmail}
                                     />
                                 </div>
                             </div>
 
                             {/* Password Field */}
-                            <div>
+                            <div className="login-animate-in" style={{ animationDelay: "0.15s" }}>
                                 <label
                                     htmlFor="password"
                                     className="block text-sm font-medium leading-6"
-                                    style={{ color: theme.sidebar }}
+                                    style={{ color: textColor }}
                                 >
                                     Kata Sandi
                                 </label>
                                 <div className="relative mt-2 group">
                                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                                         <i
-                                            className="fa-solid fa-lock text-gray-400 group-focus-within:text-current transition-colors duration-300"
-                                            style={{ color: password ? theme.accent : undefined }}
+                                            className="fa-solid fa-lock transition-colors duration-150"
+                                            style={{ color: password ? currentTheme.accent : mutedTextColor }}
                                         ></i>
                                     </div>
                                     <input
@@ -233,16 +300,20 @@ export default function LoginPage() {
                                         required
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        className="block w-full rounded-md border-0 py-3 pl-10 pr-10 text-slate-800 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 transition-all duration-200"
+                                        className="block w-full rounded-md border py-3 pl-10 pr-10 shadow-sm focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 transition-all duration-150"
                                         style={{
-                                            "--tw-ring-color": theme.accent
+                                            backgroundColor: inputBg,
+                                            borderColor: inputBorder,
+                                            color: inputText,
+                                            "--tw-ring-color": currentTheme.accent
                                         } as React.CSSProperties}
                                         placeholder="••••••••"
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer text-gray-400 hover:text-gray-600 transition-colors duration-200 focus:outline-none"
+                                        className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer transition-colors duration-150 focus:outline-none"
+                                        style={{ color: mutedTextColor }}
                                     >
                                         <i
                                             className={
@@ -253,24 +324,28 @@ export default function LoginPage() {
                                         ></i>
                                     </button>
                                 </div>
-                                <PasswordStrength password={password} theme={theme} />
+                                <PasswordStrength password={password} theme={currentTheme} />
                             </div>
 
                             {/* Remember Me & Forgot Password */}
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-between login-animate-in" style={{ animationDelay: "0.2s" }}>
                                 <div className="flex items-center">
                                     <input
                                         id="remember-me"
                                         name="remember-me"
                                         type="checkbox"
-                                        className="h-4 w-4 rounded border-gray-300 cursor-pointer"
+                                        checked={rememberDevice}
+                                        onChange={(e) => setRememberDevice(e.target.checked)}
+                                        className="h-4 w-4 rounded cursor-pointer"
                                         style={{
-                                            accentColor: theme.accent
+                                            accentColor: currentTheme.accent,
+                                            borderColor: inputBorder
                                         }}
                                     />
                                     <label
                                         htmlFor="remember-me"
-                                        className="ml-2 block text-sm leading-6 text-gray-700 cursor-pointer"
+                                        className="ml-2 block text-sm leading-6 cursor-pointer"
+                                        style={{ color: mutedTextColor }}
                                     >
                                         Ingat perangkat ini
                                     </label>
@@ -278,8 +353,8 @@ export default function LoginPage() {
                                 <div className="text-sm leading-6">
                                     <a
                                         href="#"
-                                        className="font-semibold hover:opacity-80 transition-colors"
-                                        style={{ color: theme.accent }}
+                                        className="font-semibold hover:opacity-80 transition-opacity duration-150"
+                                        style={{ color: currentTheme.accent }}
                                     >
                                         Lupa sandi?
                                     </a>
@@ -287,14 +362,15 @@ export default function LoginPage() {
                             </div>
 
                             {/* Submit Button */}
-                            <div>
+                            <div className="login-animate-in" style={{ animationDelay: "0.25s" }}>
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className={`flex w-full justify-center items-center gap-2 rounded-md px-3 py-3 text-sm font-bold leading-6 text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 transition-all duration-300 transform hover:scale-[1.02] disabled:hover:scale-100 ${loading ? "opacity-75 cursor-not-allowed" : ""
+                                    className={`flex w-full justify-center items-center gap-2 rounded-md px-3 py-3 text-sm font-bold leading-6 text-white shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 transition-all duration-200 transform hover:scale-[1.01] hover:shadow-xl disabled:hover:scale-100 ${loading ? "opacity-75 cursor-not-allowed" : ""
                                         }`}
                                     style={{
-                                        background: `linear-gradient(135deg, ${theme.gradientFrom}, ${theme.gradientVia || theme.gradientFrom}, ${theme.gradientTo})`,
+                                        background: `linear-gradient(135deg, ${currentTheme.gradientFrom}, ${currentTheme.gradientVia || currentTheme.gradientFrom}, ${currentTheme.gradientTo})`,
+                                        boxShadow: `0 4px 20px ${currentTheme.gradientFrom}40`
                                     }}
                                 >
                                     {loading && (
@@ -325,22 +401,27 @@ export default function LoginPage() {
                         </form>
 
                         {/* Footer */}
-                        <div className="mt-10 border-t border-gray-200 pt-6">
+                        <div className="mt-10 pt-6 login-animate-in" style={{ animationDelay: "0.3s", borderTop: `1px solid ${inputBorder}` }}>
                             <div
-                                className="flex items-center justify-center gap-2 text-xs text-gray-500 bg-white/50 py-2 rounded-full border border-gray-100 shadow-sm"
+                                className="flex items-center justify-center gap-2 text-xs py-2 rounded-full shadow-sm"
+                                style={{
+                                    backgroundColor: currentIsDarkMode ? `${currentTheme.sidebar}80` : "rgba(255,255,255,0.5)",
+                                    color: mutedTextColor,
+                                    border: `1px solid ${inputBorder}`
+                                }}
                             >
                                 <span className="relative flex h-2 w-2">
                                     <span
                                         className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
-                                        style={{ backgroundColor: theme.gradientFrom }}
+                                        style={{ backgroundColor: currentTheme.gradientFrom }}
                                     ></span>
                                     <span
                                         className="relative inline-flex rounded-full h-2 w-2"
-                                        style={{ backgroundColor: theme.accent }}
+                                        style={{ backgroundColor: currentTheme.accent }}
                                     ></span>
                                 </span>
                                 <span className="font-medium">Sistem Keamanan Aktif</span>
-                                <span className="text-gray-300">|</span>
+                                <span style={{ color: inputBorder }}>|</span>
                                 <span>v1.2.0 (Next.js)</span>
                             </div>
                         </div>
@@ -350,7 +431,7 @@ export default function LoginPage() {
                 {/* Right Panel - Desktop Only */}
                 <div
                     className="relative hidden w-0 flex-1 lg:block overflow-hidden"
-                    style={{ backgroundColor: theme.sidebar }}
+                    style={{ backgroundColor: currentTheme.sidebar }}
                 >
                     <img
                         className="absolute inset-0 h-full w-full object-cover opacity-30 mix-blend-overlay scale-105"
@@ -358,29 +439,29 @@ export default function LoginPage() {
                         alt="Newsroom background"
                     />
 
-                    <div className="absolute inset-0 bg-gradient-to-t from-current via-transparent to-transparent" style={{ color: theme.sidebar }}></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-current via-transparent to-transparent" style={{ color: currentTheme.sidebar }}></div>
 
                     {/* Animated Blobs */}
                     <div
                         className="absolute top-0 -left-4 w-96 h-96 rounded-full mix-blend-multiply filter blur-[100px] opacity-20 animate-blob"
-                        style={{ backgroundColor: theme.gradientFrom }}
+                        style={{ backgroundColor: currentTheme.gradientFrom }}
                     ></div>
                     <div
                         className="absolute bottom-0 -right-4 w-96 h-96 rounded-full mix-blend-multiply filter blur-[100px] opacity-20 animate-blob animation-delay-2000"
-                        style={{ backgroundColor: theme.gradientTo }}
+                        style={{ backgroundColor: currentTheme.gradientTo }}
                     ></div>
 
                     {/* Scrolling News Bar */}
                     <div
                         className="absolute top-10 left-0 right-0 backdrop-blur border-y py-2 overflow-hidden"
                         style={{
-                            backgroundColor: `${theme.gradientFrom}15`,
-                            borderColor: `${theme.gradientFrom}30`
+                            backgroundColor: `${currentTheme.gradientFrom}15`,
+                            borderColor: `${currentTheme.gradientFrom}30`
                         }}
                     >
                         <div
                             className="whitespace-nowrap animate-scroll flex items-center gap-8 font-mono text-xs font-bold tracking-widest uppercase"
-                            style={{ color: theme.gradientFrom }}
+                            style={{ color: currentTheme.gradientFrom }}
                         >
                             <span>BREAKING: SISTEM PORTAL BERITA MENDETEKSI LONJAKAN TRAFIK AMAN</span>
                             <span>•</span>
@@ -396,8 +477,8 @@ export default function LoginPage() {
                     {/* Status Panel */}
                     <div className="absolute inset-0 flex flex-col items-center justify-center p-12">
                         <div
-                            className="glass-panel rounded-2xl p-8 max-w-md w-full transform transition hover:scale-105 duration-500 shadow-2xl"
-                            style={{ borderLeftColor: theme.gradientFrom, borderLeftWidth: "4px" }}
+                            className="glass-panel rounded-2xl p-8 max-w-md w-full transform transition hover:scale-[1.02] duration-300 shadow-2xl"
+                            style={{ borderLeftColor: currentTheme.gradientFrom, borderLeftWidth: "4px" }}
                         >
                             <div className="flex justify-between items-start mb-6">
                                 <div>
@@ -410,7 +491,7 @@ export default function LoginPage() {
                                 </div>
                                 <i
                                     className="fa-solid fa-shield-cat text-2xl"
-                                    style={{ color: theme.accent }}
+                                    style={{ color: currentTheme.accent }}
                                 ></i>
                             </div>
 
@@ -418,12 +499,12 @@ export default function LoginPage() {
                                 <div>
                                     <div className="flex justify-between text-xs font-medium mb-2">
                                         <span className="text-slate-300">Traffic Load (Redis Cache)</span>
-                                        <span style={{ color: theme.accent }}>Stable (45ms)</span>
+                                        <span style={{ color: currentTheme.accent }}>Stable (45ms)</span>
                                     </div>
                                     <div className="w-full bg-slate-700/50 rounded-full h-2">
                                         <div
                                             className="h-2 rounded-full relative overflow-hidden"
-                                            style={{ width: "45%", backgroundColor: theme.gradientFrom }}
+                                            style={{ width: "45%", backgroundColor: currentTheme.gradientFrom }}
                                         >
                                             <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
                                         </div>
@@ -466,7 +547,7 @@ export default function LoginPage() {
                             </p>
                             <p
                                 className="text-sm font-bold mt-2 tracking-widest uppercase"
-                                style={{ color: theme.gradientFrom }}
+                                style={{ color: currentTheme.gradientFrom }}
                             >
                                 - Editorial System
                             </p>

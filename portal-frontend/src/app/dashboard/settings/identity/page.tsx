@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
 import { useTheme } from "@/contexts/ThemeContext";
 import { SiteSettings } from "@/lib/settings";
 import SettingsShell from "@/components/layout/SettingsShell";
@@ -45,17 +44,8 @@ export default function IdentitySettingsPage() {
     return (
         <SettingsShell>
             <div className="space-y-8">
-                {/* Page Title & Back Button */}
+                {/* Page Title */}
                 <div className="flex items-center gap-4 mb-8">
-                    <Link
-                        href="/dashboard"
-                        className={`p-3 rounded-xl transition-all hover:scale-105 ${isDarkMode
-                            ? 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'
-                            : 'bg-white shadow-sm border border-slate-200 text-slate-500 hover:text-slate-800 hover:border-slate-300'
-                            }`}
-                    >
-                        <i className="fa-solid fa-arrow-left"></i>
-                    </Link>
                     <div
                         className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transform transition-transform hover:scale-105"
                         style={{
@@ -285,6 +275,66 @@ export default function IdentitySettingsPage() {
                                 placeholder="https://linkedin.com/company/yourcompany"
                                 style={{ "--tw-ring-color": theme.accent } as React.CSSProperties}
                             />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Footer Settings */}
+                <div className={cardClass} style={cardStyle}>
+                    <h3 className={`text-lg font-bold mb-6 flex items-center gap-3 ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-amber-500/10">
+                            <i className="fa-solid fa-table-columns text-amber-500"></i>
+                        </div>
+                        Pengaturan Footer
+                    </h3>
+                    <div className="grid grid-cols-1 gap-6">
+                        <div className="space-y-1">
+                            <label className={labelClass}>Teks Footer</label>
+                            <textarea
+                                value={localSettings.footer_text || ""}
+                                onChange={(e) => handleChange("footer_text", e.target.value)}
+                                rows={2}
+                                className={inputClass}
+                                placeholder="Teks yang muncul di footer, contoh: Portal berita terpercaya sejak 2020"
+                                style={{ "--tw-ring-color": theme.accent } as React.CSSProperties}
+                            />
+                            <p className={helperClass}>Teks ini akan muncul di area footer website publik</p>
+                        </div>
+                        <div className="space-y-1">
+                            <label className={labelClass}>Teks Copyright</label>
+                            <input
+                                type="text"
+                                value={localSettings.footer_copyright || ""}
+                                onChange={(e) => handleChange("footer_copyright", e.target.value)}
+                                className={inputClass}
+                                placeholder="© 2025 Portal News. All rights reserved."
+                                style={{ "--tw-ring-color": theme.accent } as React.CSSProperties}
+                            />
+                            <p className={helperClass}>Teks hak cipta yang muncul di bagian bawah footer</p>
+                        </div>
+                        <div className={`flex items-center justify-between p-5 rounded-2xl border ${isDarkMode ? 'bg-slate-900/50 border-slate-700/50' : 'bg-slate-50 border-slate-200'}`}>
+                            <div>
+                                <h4 className={`font-bold ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>Tampilkan Link Media Sosial</h4>
+                                <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                                    Menampilkan icon media sosial di footer berdasarkan URL yang telah diisi di atas
+                                </p>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={localSettings.footer_show_social ?? true}
+                                    onChange={(e) => handleChange("footer_show_social", e.target.checked)}
+                                    className="sr-only peer"
+                                />
+                                <div
+                                    className={`w-14 h-7 peer-focus:outline-none peer-focus:ring-4 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:start-[4px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all transition-colors ${isDarkMode ? 'bg-slate-700 border-slate-600' : 'bg-slate-200'
+                                        }`}
+                                    style={{
+                                        backgroundColor: localSettings.footer_show_social ? theme.accent : undefined,
+                                        "--tw-ring-color": `${theme.accent}40`,
+                                    } as React.CSSProperties}
+                                ></div>
+                            </label>
                         </div>
                     </div>
                 </div>

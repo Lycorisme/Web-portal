@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import Link from "next/link";
 import { useTheme } from "@/contexts/ThemeContext";
 import { SiteSettings } from "@/lib/settings";
 import SettingsShell from "@/components/layout/SettingsShell";
@@ -74,17 +73,8 @@ export default function MediaSettingsPage() {
     return (
         <SettingsShell>
             <div className="space-y-8">
-                {/* Page Title & Back Button */}
+                {/* Page Title */}
                 <div className="flex items-center gap-4 mb-8">
-                    <Link
-                        href="/dashboard"
-                        className={`p-3 rounded-xl transition-all hover:scale-105 ${isDarkMode
-                            ? 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'
-                            : 'bg-white shadow-sm border border-slate-200 text-slate-500 hover:text-slate-800 hover:border-slate-300'
-                            }`}
-                    >
-                        <i className="fa-solid fa-arrow-left"></i>
-                    </Link>
                     <div
                         className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transform transition-transform hover:scale-105"
                         style={{

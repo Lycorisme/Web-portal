@@ -1,6 +1,6 @@
 import { getToken } from "./auth";
 
-const API_BASE_URL = "http://localhost:8001/api";
+const API_BASE_URL = "http://localhost:8000/api";
 
 export interface SiteSettings {
     site_name: string;
@@ -30,6 +30,10 @@ export interface SiteSettings {
     letterhead_url: string;
     signature_url: string;
     stamp_url: string;
+    // Footer Settings
+    footer_text: string;
+    footer_copyright: string;
+    footer_show_social: boolean;
     // Organization & Leader Info (Dynamic for Government/Private)
     organization_type: 'government' | 'private' | 'ngo' | 'other';
     leader_name: string;

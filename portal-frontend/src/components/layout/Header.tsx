@@ -112,22 +112,26 @@ function NotificationModal({
 
             {/* Modal Content - Glassmorphism & Soft Theme */}
             <div
-                className={`notification-modal-content overflow-hidden border transition-all duration-300 ${isExiting ? 'exiting' : 'entering'} ${isDarkMode ? 'bg-slate-900/90 border-slate-700/50' : 'bg-white/90 border-white/60'
+                className={`notification-modal-content overflow-hidden border transition-all duration-300 ${isExiting ? 'exiting' : 'entering'} ${isDarkMode ? 'border-slate-700/50' : 'bg-white/90 border-white/60'
                     }`}
                 style={{
+                    backgroundColor: isDarkMode ? `color-mix(in srgb, ${theme.sidebar} 95%, transparent)` : undefined,
                     boxShadow: isDarkMode
-                        ? `0 25px 50px -12px rgba(0,0,0,0.5), 0 0 0 1px var(--theme-border-soft)`
+                        ? `0 25px 50px -12px rgba(0,0,0,0.5), 0 0 0 1px ${theme.softTint}20`
                         : `0 25px 50px -12px ${theme.accent}15, 0 0 0 1px ${theme.accent}10`
                 }}
             >
                 {/* Header - Softened Redesign */}
-                <div className={`relative px-6 py-6 border-b transition-colors ${isDarkMode ? 'border-slate-700/50 bg-slate-800/20' : 'border-slate-100 bg-slate-50/50'
-                    }`}>
+                <div className={`relative px-6 py-6 border-b transition-colors ${isDarkMode ? 'border-slate-700/50' : 'border-slate-100 bg-slate-50/50'
+                    }`}
+                    style={{ backgroundColor: isDarkMode ? `color-mix(in srgb, ${theme.sidebar} 80%, black)` : undefined }}
+                >
                     <button
                         onClick={onClose}
                         className={`modal-close-btn absolute top-5 right-5 w-8 h-8 rounded-full flex items-center justify-center transition-all ${isDarkMode
                             ? 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white'
                             : 'bg-white text-slate-500 hover:bg-slate-100 hover:text-slate-700 shadow-sm border border-slate-100'}`}
+                        style={{ backgroundColor: isDarkMode ? `${theme.softTint}10` : undefined }}
                         aria-label="Close"
                     >
                         <i className="fa-solid fa-times text-sm"></i>
@@ -163,7 +167,7 @@ function NotificationModal({
                                 className="w-20 h-20 rounded-full flex items-center justify-center mb-4 transition-transform hover:scale-110 duration-500"
                                 style={{ backgroundColor: `${theme.accent}10` }}
                             >
-                                <i className="fa-regular fa-bell-slash text-4xl" style={{ color: theme.accent }}></i>
+                                <i className="fa-solid fa-bell-slash text-4xl" style={{ color: theme.accent }}></i>
                             </div>
                             <h4 className={`text-lg font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
                                 Tidak Ada Notifikasi
@@ -199,7 +203,9 @@ function NotificationModal({
                                             backgroundColor: !notif.read ? (isDarkMode ? `${theme.accent}08` : `${theme.accent}05`) : 'transparent'
                                         }}
                                     >
-                                        <div className={`flex-shrink-0 w-11 h-11 rounded-xl ${isDarkMode ? 'bg-slate-800' : 'bg-white'} shadow-sm flex items-center justify-center z-10 border ${isDarkMode ? 'border-slate-700' : 'border-slate-100'}`}>
+                                        <div className={`flex-shrink-0 w-11 h-11 rounded-xl ${isDarkMode ? 'bg-slate-800' : 'bg-white'} shadow-sm flex items-center justify-center z-10 border ${isDarkMode ? 'border-slate-700' : 'border-slate-100'}`}
+                                            style={{ backgroundColor: isDarkMode ? `${theme.sidebar}` : undefined, borderColor: isDarkMode ? `${theme.softTint}20` : undefined }}
+                                        >
                                             <i className={`fa-solid ${icon} text-lg ${color}`}></i>
                                         </div>
                                         <div className="flex-1 min-w-0 z-10">
@@ -207,7 +213,8 @@ function NotificationModal({
                                                 <p className={`text-sm font-bold truncate ${isDarkMode ? 'text-slate-200' : 'text-slate-800'}`}>
                                                     {notif.title}
                                                 </p>
-                                                <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${isDarkMode ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-500'}`}>
+                                                <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${isDarkMode ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-500'}`}
+                                                    style={{ backgroundColor: isDarkMode ? `${theme.softTint}10` : undefined }}>
                                                     {notif.time}
                                                 </span>
                                             </div>
@@ -225,7 +232,9 @@ function NotificationModal({
                 {/* Footer */}
                 {notifications.length > 0 && (
                     <div className={`p-4 border-t flex items-center justify-between ${isDarkMode ? 'bg-slate-800/40 border-slate-700' : 'bg-slate-50/80 border-slate-100'
-                        }`}>
+                        }`}
+                        style={{ backgroundColor: isDarkMode ? `color-mix(in srgb, ${theme.sidebar} 90%, black)` : undefined, borderColor: isDarkMode ? `${theme.softTint}10` : undefined }}
+                    >
                         <button
                             onClick={onClearAll}
                             className={`text-xs font-bold transition-colors flex items-center gap-2 px-4 py-2.5 rounded-xl ${isDarkMode
@@ -272,11 +281,13 @@ export default function Header({
     const [dropdownVisible, setDropdownVisible] = useState(false);
     const [dropdownExiting, setDropdownExiting] = useState(false);
 
-    // Apply dark mode class to body - Moved to ThemeContext but keeping here for insurance
+    // Apply dark mode class to html and body - Sync with ThemeContext
     useEffect(() => {
         if (isDarkMode) {
+            document.documentElement.classList.add('dark-mode');
             document.body.classList.add('dark-mode');
         } else {
+            document.documentElement.classList.remove('dark-mode');
             document.body.classList.remove('dark-mode');
         }
     }, [isDarkMode]);
@@ -359,7 +370,11 @@ export default function Header({
             <div
                 className={`lg:hidden flex items-center justify-between p-3 sticky top-0 z-30 shadow-md transform-gpu transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-white'
                     }`}
-                style={{ backgroundColor: theme.sidebar }}
+                style={{
+                    background: isDarkMode
+                        ? `linear-gradient(to right, ${theme.sidebar}, ${theme.primary})`
+                        : theme.sidebar
+                }}
             >
                 <button
                     onClick={onToggleSidebar}
@@ -408,30 +423,52 @@ export default function Header({
                 </div>
             </div>
 
-            {/* Desktop Header */}
-            <header className={`hidden lg:flex h-16 backdrop-blur-md border-b items-center justify-between px-6 sticky top-0 z-20 header-desktop transition-all duration-300 ${isDarkMode
-                ? 'bg-slate-900/95 border-slate-700'
-                : 'bg-white/80 border-slate-200'
-                }`}>
-                <div className="relative w-64">
+            {/* Desktop Header - Theme Integrated */}
+            <header className={`hidden lg:flex h-16 backdrop-blur-xl border-b items-center justify-between px-6 sticky top-0 z-20 header-desktop transition-all duration-500 ${isDarkMode
+                ? ''
+                : 'bg-white/90 border-slate-200/80'
+                }`}
+                style={{
+                    backgroundColor: isDarkMode
+                        ? `color-mix(in srgb, ${theme.primary} 95%, ${theme.gradientFrom} 5%)`
+                        : undefined,
+                    borderColor: isDarkMode ? `${theme.accent}20` : undefined,
+                    boxShadow: isDarkMode
+                        ? `0 4px 30px ${theme.gradientFrom}10, inset 0 -1px 0 ${theme.softTint}10`
+                        : '0 4px 20px rgba(0,0,0,0.05)'
+                }}
+            >
+                {/* Subtle gradient overlay for dark mode */}
+                {isDarkMode && (
+                    <div
+                        className="absolute inset-0 opacity-30 pointer-events-none"
+                        style={{
+                            background: `linear-gradient(90deg, transparent 0%, ${theme.gradientFrom}08 50%, transparent 100%)`
+                        }}
+                    />
+                )}
+
+                <div className="relative w-64 z-10">
                     <i
-                        className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-sm"
+                        className="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-sm transition-colors duration-300"
                         style={{ color: theme.accent }}
                     ></i>
                     <input
                         type="text"
                         placeholder="Cari berita atau log..."
-                        className={`w-full pl-10 pr-4 py-2 border-none rounded-full text-sm focus:bg-white transition-all duration-300 header-search-input ${isDarkMode
-                            ? 'bg-slate-800 text-slate-200 placeholder-slate-500'
-                            : 'bg-slate-100 text-slate-800 placeholder-slate-400'
+                        className={`w-full pl-10 pr-4 py-2.5 border rounded-xl text-sm transition-all duration-300 focus:ring-2 focus:border-transparent ${isDarkMode
+                            ? 'text-slate-200 placeholder-slate-500 border-transparent'
+                            : 'bg-slate-100/80 text-slate-800 placeholder-slate-400 border-slate-200/50 focus:bg-white'
                             }`}
                         style={{
-                            "--tw-ring-color": theme.accent
+                            "--tw-ring-color": theme.accent,
+                            backgroundColor: isDarkMode ? `color-mix(in srgb, ${theme.sidebar} 90%, ${theme.accent} 5%)` : undefined,
+                            boxShadow: isDarkMode ? `inset 0 1px 2px ${theme.primary}80` : undefined
                         } as React.CSSProperties}
                     />
                 </div>
 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 z-10">
                     {/* Dark Mode Toggle - Desktop */}
                     <DarkModeToggle
                         isDarkMode={isDarkMode}
@@ -439,20 +476,27 @@ export default function Header({
                         toggleRef={toggleBtnRef}
                     />
 
-                    {/* Notification Button */}
+                    {/* Notification Button - Theme Integrated */}
                     <button
                         onClick={handleNotifToggle}
-                        className={`relative transition-colors duration-150 p-2 rounded-lg ${isDarkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'
+                        className={`relative transition-all duration-300 p-2.5 rounded-xl ${isDarkMode
+                            ? 'hover:bg-white/5'
+                            : 'hover:bg-slate-100'
                             }`}
-                        style={{ color: notifOpen ? theme.accent : isDarkMode ? '#94a3b8' : '#64748b' }}
+                        style={{
+                            color: notifOpen ? theme.accent : isDarkMode ? theme.softTint : '#64748b',
+                            backgroundColor: notifOpen && isDarkMode ? `${theme.accent}10` : undefined
+                        }}
                     >
                         <i className="fa-regular fa-bell text-xl"></i>
                         {unreadCount > 0 && (
                             <span
-                                className="absolute -top-0.5 -right-0.5 h-5 w-5 rounded-full border-2 text-[10px] text-white flex items-center justify-center font-bold animate-pulse"
+                                className="absolute -top-0.5 -right-0.5 h-5 w-5 rounded-full border-2 text-[10px] text-white flex items-center justify-center font-bold"
                                 style={{
-                                    backgroundColor: theme.gradientFrom,
-                                    borderColor: isDarkMode ? '#0f172a' : 'white'
+                                    background: `linear-gradient(135deg, ${theme.gradientFrom}, ${theme.gradientTo})`,
+                                    borderColor: isDarkMode ? theme.primary : 'white',
+                                    boxShadow: `0 2px 8px ${theme.gradientFrom}60`,
+                                    animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
                                 }}
                             >
                                 {unreadCount}
@@ -460,33 +504,63 @@ export default function Header({
                         )}
                     </button>
 
-                    <div className={`h-8 w-[1px] mx-1 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`}></div>
+                    {/* Themed Divider */}
+                    <div
+                        className="h-8 w-[1px] mx-1 transition-colors duration-300"
+                        style={{
+                            backgroundColor: isDarkMode ? `${theme.softTint}20` : '#e2e8f0'
+                        }}
+                    />
 
+                    {/* View Website Button - Theme Styled */}
                     <a
-                        href="http://localhost:3001"
+                        href="http://localhost:3000"
                         target="_blank"
-                        className="text-sm font-medium flex items-center gap-2 transition-colors duration-150 hover:opacity-80"
-                        style={{ color: theme.accent }}
+                        className="text-sm font-semibold flex items-center gap-2 transition-all duration-300 px-3 py-2 rounded-lg hover:scale-105"
+                        style={{
+                            color: theme.accent,
+                            backgroundColor: isDarkMode ? `${theme.accent}10` : `${theme.accent}08`
+                        }}
                     >
                         <i className="fa-solid fa-arrow-up-right-from-square"></i>
                         Lihat Website
                     </a>
 
-                    {/* User Dropdown */}
+                    {/* User Dropdown - Theme Integrated */}
                     <div className="relative">
                         <button
                             onClick={handleDropdownToggle}
-                            className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-150 ${isDarkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'
+                            className={`flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all duration-300 ${isDarkMode
+                                ? 'hover:bg-white/5'
+                                : 'hover:bg-slate-100'
                                 }`}
+                            style={{
+                                backgroundColor: dropdownOpen && isDarkMode ? `${theme.accent}08` : undefined
+                            }}
                         >
-                            <img
-                                className="h-8 w-8 rounded-full object-cover border-2"
-                                style={{ borderColor: theme.accent }}
-                                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=${theme.accent.replace("#", "")}&color=fff`}
-                                alt="User"
-                            />
-                            <i className={`fa-solid fa-chevron-down text-xs transition-transform duration-150 ${dropdownOpen ? "rotate-180" : ""
-                                } ${isDarkMode ? 'text-slate-400' : 'text-slate-400'}`}></i>
+                            <div className="relative">
+                                <img
+                                    className="h-9 w-9 rounded-full object-cover border-2 transition-all duration-300"
+                                    style={{
+                                        borderColor: dropdownOpen ? theme.accent : `${theme.accent}80`,
+                                        boxShadow: dropdownOpen ? `0 0 0 3px ${theme.accent}20` : 'none'
+                                    }}
+                                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=${theme.accent.replace("#", "")}&color=fff`}
+                                    alt="User"
+                                />
+                                {/* Online indicator */}
+                                <div
+                                    className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2"
+                                    style={{
+                                        backgroundColor: '#22c55e',
+                                        borderColor: isDarkMode ? theme.primary : 'white'
+                                    }}
+                                />
+                            </div>
+                            <i
+                                className={`fa-solid fa-chevron-down text-xs transition-all duration-300 ${dropdownOpen ? "rotate-180" : ""}`}
+                                style={{ color: isDarkMode ? theme.softTint : '#94a3b8' }}
+                            ></i>
                         </button>
 
                         {dropdownVisible && (
@@ -495,49 +569,90 @@ export default function Header({
                                     className={`fixed inset-0 z-40 ${dropdownExiting ? 'animate-fade-out-smooth' : 'animate-fade-in-smooth'}`}
                                     onClick={handleDropdownClose}
                                 ></div>
-                                <div className={`absolute right-0 mt-2 w-56 rounded-xl shadow-xl border overflow-hidden z-50 dropdown-menu ${dropdownExiting ? 'animate-slide-down-exit' : 'animate-slide-down'
-                                    } ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-100'}`}>
-                                    <div className="px-4 py-3 border-b theme-gradient"
-                                        style={{ borderColor: isDarkMode ? '#334155' : '#e2e8f0' }}
+                                <div className={`absolute right-0 mt-2 w-60 rounded-2xl shadow-2xl border overflow-hidden z-50 dropdown-menu ${dropdownExiting ? 'animate-slide-down-exit' : 'animate-slide-down'
+                                    } ${isDarkMode ? '' : 'bg-white border-slate-200/80'}`}
+                                    style={{
+                                        backgroundColor: isDarkMode ? theme.sidebar : undefined,
+                                        borderColor: isDarkMode ? `${theme.accent}15` : undefined,
+                                        boxShadow: isDarkMode
+                                            ? `0 20px 40px -10px rgba(0,0,0,0.5), 0 0 0 1px ${theme.accent}10`
+                                            : '0 20px 40px -10px rgba(0,0,0,0.15)'
+                                    }}
+                                >
+                                    {/* User Info Header */}
+                                    <div
+                                        className="px-4 py-4 border-b"
+                                        style={{
+                                            background: `linear-gradient(135deg, ${theme.gradientFrom}, ${theme.gradientTo})`,
+                                            borderColor: 'transparent'
+                                        }}
                                     >
-                                        <p className="text-sm font-medium text-white">{user.name}</p>
-                                        <p className="text-xs text-white/70">{user.email}</p>
+                                        <p className="text-sm font-bold text-white">{user.name}</p>
+                                        <p className="text-xs text-white/70 mt-0.5">{user.email}</p>
                                     </div>
-                                    <Link
-                                        href="/dashboard/profile"
-                                        className={`flex items-center gap-3 px-4 py-3 text-sm transition-colors duration-150 ${isDarkMode
-                                            ? 'text-slate-300 hover:bg-slate-700'
-                                            : 'text-slate-700 hover:bg-slate-50'
-                                            }`}
+
+                                    {/* Menu Items */}
+                                    <div className="py-2">
+                                        <Link
+                                            href="/dashboard/profile"
+                                            className={`flex items-center gap-3 px-4 py-3 text-sm transition-all duration-200 mx-2 rounded-lg ${isDarkMode
+                                                ? 'text-slate-300 hover:text-white'
+                                                : 'text-slate-700 hover:text-slate-900'
+                                                }`}
+                                            style={{
+                                                backgroundColor: 'transparent',
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.backgroundColor = isDarkMode ? `${theme.accent}10` : `${theme.accent}08`;
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.backgroundColor = 'transparent';
+                                            }}
+                                        >
+                                            <i
+                                                className="fa-solid fa-user w-5"
+                                                style={{ color: theme.accent }}
+                                            ></i>
+                                            Profil Saya
+                                        </Link>
+                                        <Link
+                                            href="/dashboard/settings"
+                                            className={`flex items-center gap-3 px-4 py-3 text-sm transition-all duration-200 mx-2 rounded-lg ${isDarkMode
+                                                ? 'text-slate-300 hover:text-white'
+                                                : 'text-slate-700 hover:text-slate-900'
+                                                }`}
+                                            style={{ backgroundColor: 'transparent' }}
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.backgroundColor = isDarkMode ? `${theme.accent}10` : `${theme.accent}08`;
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.backgroundColor = 'transparent';
+                                            }}
+                                        >
+                                            <i
+                                                className="fa-solid fa-cog w-5"
+                                                style={{ color: theme.accent }}
+                                            ></i>
+                                            Pengaturan
+                                        </Link>
+                                    </div>
+
+                                    {/* Logout Section */}
+                                    <div
+                                        className="border-t py-2"
+                                        style={{ borderColor: isDarkMode ? `${theme.softTint}10` : '#f1f5f9' }}
                                     >
-                                        <i
-                                            className="fa-solid fa-user w-5"
-                                            style={{ color: theme.accent }}
-                                        ></i>
-                                        Profil Saya
-                                    </Link>
-                                    <Link
-                                        href="/dashboard/settings"
-                                        className={`flex items-center gap-3 px-4 py-3 text-sm transition-colors duration-150 ${isDarkMode
-                                            ? 'text-slate-300 hover:bg-slate-700'
-                                            : 'text-slate-700 hover:bg-slate-50'
-                                            }`}
-                                    >
-                                        <i
-                                            className="fa-solid fa-cog w-5"
-                                            style={{ color: theme.accent }}
-                                        ></i>
-                                        Pengaturan
-                                    </Link>
-                                    <hr className={isDarkMode ? 'border-slate-700' : 'border-slate-100'} />
-                                    <button
-                                        onClick={onLogout}
-                                        className={`flex items-center gap-3 w-full px-4 py-3 text-sm text-red-500 transition-colors duration-150 ${isDarkMode ? 'hover:bg-red-500/10' : 'hover:bg-red-50'
-                                            }`}
-                                    >
-                                        <i className="fa-solid fa-sign-out-alt w-5"></i>
-                                        Keluar
-                                    </button>
+                                        <button
+                                            onClick={onLogout}
+                                            className={`flex items-center gap-3 w-[calc(100%-16px)] mx-2 px-4 py-3 text-sm text-red-500 transition-all duration-200 rounded-lg ${isDarkMode
+                                                ? 'hover:bg-red-500/10'
+                                                : 'hover:bg-red-50'
+                                                }`}
+                                        >
+                                            <i className="fa-solid fa-sign-out-alt w-5"></i>
+                                            Keluar
+                                        </button>
+                                    </div>
                                 </div>
                             </>
                         )}

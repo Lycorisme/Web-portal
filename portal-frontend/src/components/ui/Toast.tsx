@@ -112,11 +112,53 @@ export function ToastStack({ toasts, onRemove }: ToastStackProps) {
     );
 }
 
-// Default Single Toast (backward compatible)
+// Default Single Toast (backward compatible) - WITH ENTER/EXIT ANIMATIONS
 export default function Toast({ data, onClose }: ToastProps) {
     const { theme } = useTheme();
+    const [isVisible, setIsVisible] = useState(false);
+    const [isExiting, setIsExiting] = useState(false);
+    const prevShowRef = useRef(data.show);
 
-    if (!data.show) return null;
+    // Handle enter animation
+    useEffect(() => {
+        if (data.show && !prevShowRef.current) {
+            // Toast is being shown - trigger enter animation
+            setIsExiting(false);
+            // Small delay to ensure DOM is ready for animation
+            requestAnimationFrame(() => {
+                setIsVisible(true);
+            });
+        } else if (!data.show && prevShowRef.current) {
+            // Toast is being hidden - trigger exit animation
+            setIsExiting(true);
+            const timer = setTimeout(() => {
+                setIsVisible(false);
+                setIsExiting(false);
+            }, 400); // Match animation duration
+            return () => clearTimeout(timer);
+        }
+        prevShowRef.current = data.show;
+    }, [data.show]);
+
+    // Initial mount
+    useEffect(() => {
+        if (data.show) {
+            requestAnimationFrame(() => {
+                setIsVisible(true);
+            });
+        }
+    }, []);
+
+    // Handle close with animation
+    const handleClose = useCallback(() => {
+        setIsExiting(true);
+        setTimeout(() => {
+            onClose();
+        }, 350); // Slightly less than animation duration for smooth transition
+    }, [onClose]);
+
+    // Don't render if not visible and not showing
+    if (!data.show && !isExiting) return null;
 
     const config = {
         success: {
@@ -140,27 +182,34 @@ export default function Toast({ data, onClose }: ToastProps) {
     const { bg, icon } = config[data.type];
 
     return (
-        <div className="fixed top-6 right-6 z-[100] toast-enter">
+        <div
+            className={`fixed z-[100] ${isExiting ? 'toast-exit' : 'toast-enter'}
+                top-4 right-4 left-4 sm:left-auto sm:right-6 sm:top-6`}
+        >
             <div
-                className={`text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-4 min-w-[320px] backdrop-blur-sm border border-white/20 ${data.type !== "info" ? bg : "theme-gradient"}`}
+                className={`toast-item text-white rounded-xl shadow-2xl flex items-center backdrop-blur-sm border border-white/20 ${data.type !== "info" ? bg : "theme-gradient"}
+                    px-4 py-3 gap-3 sm:px-6 sm:py-4 sm:gap-4 sm:min-w-[320px] sm:max-w-[420px]`}
+                style={{
+                    boxShadow: '0 20px 50px -12px rgba(0, 0, 0, 0.35)'
+                }}
             >
-                <div className="flex-shrink-0 w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                    <i className={`fa-solid ${icon} text-xl`}></i>
+                <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-full flex items-center justify-center">
+                    <i className={`fa-solid ${icon} text-base sm:text-xl`}></i>
                 </div>
-                <div className="flex-1">
-                    <p className="font-semibold text-sm uppercase tracking-wide opacity-90">
+                <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-xs sm:text-sm uppercase tracking-wide opacity-90">
                         {data.type === "success" && "Berhasil"}
                         {data.type === "error" && "Error"}
                         {data.type === "warning" && "Peringatan"}
                         {data.type === "info" && "Info"}
                     </p>
-                    <p className="text-white/90 text-sm">{data.message}</p>
+                    <p className="text-white/90 text-xs sm:text-sm truncate sm:whitespace-normal">{data.message}</p>
                 </div>
                 <button
-                    onClick={onClose}
-                    className="hover:bg-white/20 p-2 rounded-full transition-all duration-150"
+                    onClick={handleClose}
+                    className="flex-shrink-0 hover:bg-white/20 p-1.5 sm:p-2 rounded-full transition-all duration-150 hover:scale-110 active:scale-95"
                 >
-                    <i className="fa-solid fa-xmark"></i>
+                    <i className="fa-solid fa-xmark text-sm sm:text-base"></i>
                 </button>
             </div>
         </div>

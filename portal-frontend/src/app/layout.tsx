@@ -3,6 +3,7 @@ import { Inter, Merriweather } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import DynamicHead from "@/components/layout/DynamicHead";
+import DarkModeScript from "@/components/layout/DarkModeScript";
 
 const inter = Inter({
     variable: "--font-inter",
@@ -28,8 +29,10 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="id">
+        <html lang="id" suppressHydrationWarning>
             <head>
+                {/* Dark Mode Script - Runs before React hydration to prevent flash */}
+                <DarkModeScript />
                 <link
                     rel="stylesheet"
                     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
@@ -39,6 +42,7 @@ export default function RootLayout({
             </head>
             <body
                 className={`${inter.variable} ${merriweather.variable} antialiased`}
+                suppressHydrationWarning
             >
                 <ThemeProvider>
                     <DynamicHead />

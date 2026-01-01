@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:8001/api";
+const API_BASE_URL = "http://localhost:8000/api";
 
 export interface User {
     id: number;
@@ -21,16 +21,18 @@ export interface ApiError {
     errors?: Record<string, string[]>;
 }
 
-// Get stored token
+// Get stored token - check both localStorage and sessionStorage
 export function getToken(): string | null {
     if (typeof window === "undefined") return null;
-    return localStorage.getItem("auth_token");
+    // First check localStorage (persistent), then sessionStorage (session-only)
+    return localStorage.getItem("auth_token") || sessionStorage.getItem("auth_token");
 }
 
-// Get stored user
+// Get stored user - check both localStorage and sessionStorage
 export function getUser(): User | null {
     if (typeof window === "undefined") return null;
-    const userData = localStorage.getItem("user");
+    // First check localStorage (persistent), then sessionStorage (session-only)
+    const userData = localStorage.getItem("user") || sessionStorage.getItem("user");
     if (!userData) return null;
     try {
         return JSON.parse(userData) as User;
@@ -39,18 +41,45 @@ export function getUser(): User | null {
     }
 }
 
-// Store auth data
-export function setAuthData(token: string, user: User): void {
-    localStorage.setItem("auth_token", token);
-    localStorage.setItem("user", JSON.stringify(user));
-    localStorage.setItem("isLoggedIn", "true");
+// Store auth data - rememberDevice determines storage type
+export function setAuthData(token: string, user: User, rememberDevice: boolean = false): void {
+    // Clear both storages first to prevent conflicts
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("isLoggedIn");
+    sessionStorage.removeItem("auth_token");
+    sessionStorage.removeItem("user");
+    sessionStorage.removeItem("isLoggedIn");
+
+    // Use localStorage for persistent (remember me) or sessionStorage for session-only
+    const storage = rememberDevice ? localStorage : sessionStorage;
+    storage.setItem("auth_token", token);
+    storage.setItem("user", JSON.stringify(user));
+    storage.setItem("isLoggedIn", "true");
+
+    // Also save the "remember" preference for future reference
+    if (rememberDevice) {
+        localStorage.setItem("remember_device", "true");
+    } else {
+        localStorage.removeItem("remember_device");
+    }
 }
 
-// Clear auth data
+// Clear auth data from both storages
 export function removeAuthData(): void {
     localStorage.removeItem("auth_token");
     localStorage.removeItem("user");
     localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("remember_device");
+    sessionStorage.removeItem("auth_token");
+    sessionStorage.removeItem("user");
+    sessionStorage.removeItem("isLoggedIn");
+}
+
+// Check if device was previously remembered
+export function wasDeviceRemembered(): boolean {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("remember_device") === "true";
 }
 
 // Check if logged in
@@ -62,7 +91,8 @@ export function isLoggedIn(): boolean {
 // Login API call
 export async function login(
     email: string,
-    password: string
+    password: string,
+    rememberDevice: boolean = false
 ): Promise<{ success: boolean; message: string; user?: User }> {
     try {
         const response = await fetch(`${API_BASE_URL}/login`, {
@@ -86,7 +116,7 @@ export async function login(
         }
 
         if (data.success && data.data) {
-            setAuthData(data.data.token, data.data.user);
+            setAuthData(data.data.token, data.data.user, rememberDevice);
             return { success: true, message: data.message, user: data.data.user };
         }
 

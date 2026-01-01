@@ -222,15 +222,57 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+// Helper to safely get localStorage value (works only on client)
+function getInitialTheme(): string {
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem('portal_theme') || 'ocean';
+    }
+    return 'ocean';
+}
+
+function getInitialDarkMode(): boolean {
+    if (typeof window !== 'undefined') {
+        const saved = localStorage.getItem('portal_dark_mode');
+        return saved === null ? true : JSON.parse(saved);
+    }
+    return true;
+}
+
 // ===================== THEME PROVIDER =====================
 export function ThemeProvider({ children }: { children: ReactNode }) {
-    const [currentTheme, setCurrentTheme] = useState<string>("ocean");
-    const [initialTheme, setInitialTheme] = useState<string>("ocean");
-    const [settings, setSettings] = useState<Partial<SiteSettings>>({});
+    // Initialize from localStorage immediately to prevent flash
+    const [currentTheme, setCurrentTheme] = useState<string>(getInitialTheme);
+    const [initialTheme, setInitialTheme] = useState<string>(getInitialTheme);
+    const [settings, setSettings] = useState<Partial<SiteSettings>>(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('portal_settings');
+            if (saved) {
+                try {
+                    return JSON.parse(saved);
+                } catch {
+                    return {};
+                }
+            }
+        }
+        return {};
+    });
     const [isLoading, setIsLoading] = useState(true);
     const [hasChanges, setHasChanges] = useState(false);
-    const [initialSettings, setInitialSettings] = useState<Partial<SiteSettings>>({});
-    const [isDarkMode, setIsDarkMode] = useState(true);
+    const [initialSettings, setInitialSettings] = useState<Partial<SiteSettings>>(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('portal_settings');
+            if (saved) {
+                try {
+                    return JSON.parse(saved);
+                } catch {
+                    return {};
+                }
+            }
+        }
+        return {};
+    });
+    // Initialize dark mode from localStorage to prevent flash
+    const [isDarkMode, setIsDarkMode] = useState<boolean>(getInitialDarkMode);
 
     // Get current theme object
     const theme = themePresets[currentTheme] || themePresets.ocean;
@@ -259,26 +301,21 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         root.style.setProperty("--theme-soft-tint", themeData.softTint || themeData.accent);
     }, []);
 
-    // Load settings on mount
+    // Load settings on mount - only run once
+    const hasInitialized = React.useRef(false);
     useEffect(() => {
+        if (hasInitialized.current) return;
+        hasInitialized.current = true;
+
         const loadSettings = async () => {
             try {
-                // Try to load from localStorage first for immediate rendering
-                const savedTheme = localStorage.getItem("portal_theme");
-                const savedSettings = localStorage.getItem("portal_settings");
-
-                if (savedTheme && themePresets[savedTheme]) {
-                    setCurrentTheme(savedTheme);
+                // Apply theme variables immediately for current theme from localStorage
+                const savedTheme = getInitialTheme();
+                if (themePresets[savedTheme]) {
                     applyThemeVariables(themePresets[savedTheme]);
                 }
 
-                if (savedSettings) {
-                    const parsed = JSON.parse(savedSettings);
-                    setSettings(parsed);
-                    setInitialSettings(parsed);
-                }
-
-                // Then try to load from API
+                // Then try to load from API to get latest data
                 const apiSettings = await getSettings();
                 if (apiSettings) {
                     setSettings(apiSettings);
@@ -288,6 +325,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
                         setCurrentTheme(apiSettings.current_theme);
                         setInitialTheme(apiSettings.current_theme);
                         applyThemeVariables(themePresets[apiSettings.current_theme]);
+                        localStorage.setItem("portal_theme", apiSettings.current_theme);
                     }
 
                     localStorage.setItem("portal_settings", JSON.stringify(apiSettings));
@@ -341,32 +379,41 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         return false;
     }, [initialSettings, initialTheme]);
 
-    // Set theme handler
+    // Set theme handler - using functional update to prevent stale closure issues
     const setTheme = useCallback((themeKey: string) => {
         if (themePresets[themeKey]) {
             setCurrentTheme(themeKey);
             const newTheme = themePresets[themeKey];
 
-            // Update settings
-            const newSettings = {
-                ...settings,
-                current_theme: themeKey,
-                theme_color: newTheme.primary,
-                accent_color: newTheme.accent,
-                sidebar_color: newTheme.sidebar,
-            };
-            setSettings(newSettings);
+            // Use functional update to ensure we always have the latest settings
+            setSettings(prevSettings => {
+                const newSettings = {
+                    ...prevSettings,
+                    current_theme: themeKey,
+                    theme_color: newTheme.primary,
+                    accent_color: newTheme.accent,
+                    sidebar_color: newTheme.sidebar,
+                };
+
+                // Save to localStorage for persistence
+                localStorage.setItem("portal_theme", themeKey);
+                localStorage.setItem("portal_settings", JSON.stringify(newSettings));
+
+                return newSettings;
+            });
 
             // Apply immediately without refresh
             applyThemeVariables(newTheme);
 
-            // Save to localStorage for persistence
-            localStorage.setItem("portal_theme", themeKey);
-
-            // Check if returning to initial state
-            setHasChanges(checkSettingsDiff(newSettings, themeKey));
+            // Check if returning to initial state (use timeout to ensure state is updated)
+            setTimeout(() => {
+                setSettings(currentSettings => {
+                    setHasChanges(checkSettingsDiff(currentSettings, themeKey));
+                    return currentSettings;
+                });
+            }, 0);
         }
-    }, [applyThemeVariables, settings, checkSettingsDiff]);
+    }, [applyThemeVariables, checkSettingsDiff]);
 
     // Update site settings
     const updateSiteSettings = useCallback((newSettings: Partial<SiteSettings>) => {
@@ -411,15 +458,36 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         setIsDarkMode(prev => {
             const newValue = !prev;
             localStorage.setItem("portal_dark_mode", JSON.stringify(newValue));
+            // Apply to both html and body
+            if (newValue) {
+                document.documentElement.classList.add('dark-mode');
+                document.body.classList.add('dark-mode');
+            } else {
+                document.documentElement.classList.remove('dark-mode');
+                document.body.classList.remove('dark-mode');
+            }
             return newValue;
         });
     }, []);
 
-    // Load dark mode preference on mount
+    // Load dark mode preference on mount - sync with blocking script
     useEffect(() => {
         const savedDarkMode = localStorage.getItem("portal_dark_mode");
         if (savedDarkMode !== null) {
-            setIsDarkMode(JSON.parse(savedDarkMode));
+            const isDark = JSON.parse(savedDarkMode);
+            setIsDarkMode(isDark);
+            // Sync with document classes
+            if (isDark) {
+                document.documentElement.classList.add('dark-mode');
+                document.body.classList.add('dark-mode');
+            } else {
+                document.documentElement.classList.remove('dark-mode');
+                document.body.classList.remove('dark-mode');
+            }
+        } else {
+            // Default to dark mode
+            document.documentElement.classList.add('dark-mode');
+            document.body.classList.add('dark-mode');
         }
     }, []);
 
