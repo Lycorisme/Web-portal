@@ -27,6 +27,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
+    // Dashboard
+    Route::get('/dashboard', [\App\Http\Controllers\Api\DashboardController::class, 'index']);
+
     // Settings routes (admin only)
     Route::prefix('settings')->group(function () {
         Route::get('/', [SettingsController::class, 'index']);

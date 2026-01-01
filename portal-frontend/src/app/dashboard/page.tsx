@@ -45,8 +45,8 @@ function SecurityLogItem({
 
     return (
         <div className={`flex gap-3 p-3 rounded-lg transition-colors border-b last:border-0 ${isDarkMode
-                ? 'hover:bg-slate-700/50 border-slate-700'
-                : 'hover:bg-slate-50 border-slate-50'
+            ? 'hover:bg-slate-700/50 border-slate-700'
+            : 'hover:bg-slate-50 border-slate-50'
             }`}>
             <div className="mt-1">
                 <div
@@ -141,7 +141,7 @@ export default function DashboardPage() {
         return result.isConfirmed;
     }, [theme.accent]);
 
-    // Auth check
+    // Auth check & Data Fetching
     useEffect(() => {
         if (!isLoggedIn()) {
             router.push("/");
@@ -150,8 +150,47 @@ export default function DashboardPage() {
         const userData = getUser();
         if (userData) {
             setUserState(userData);
+            fetchDashboardData();
         }
     }, [router]);
+
+    const fetchDashboardData = async () => {
+        const token = localStorage.getItem("auth_token");
+        if (!token) return;
+
+        try {
+            const response = await fetch("http://localhost:8001/api/dashboard", {
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Accept": "application/json"
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success && data.data) {
+                    const apiStats = data.data.stats;
+                    setStats({
+                        totalReaders: apiStats.total_readers.toString(),
+                        totalReaderChange: apiStats.total_reader_change,
+                        totalReaderChangeType: apiStats.total_reader_change_type,
+                        totalArticles: apiStats.total_articles.toString(),
+                        totalArticlesChange: apiStats.total_articles_change,
+                        blockedThreats: apiStats.blocked_threats.toString(),
+                        blockedThreatsChange: apiStats.blocked_threats_change,
+                        newComments: apiStats.new_comments.toString(),
+                        newCommentsChange: apiStats.new_comments_change,
+                    });
+
+                    if (data.data.security_logs) {
+                        setSecurityLogs(data.data.security_logs);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error("Failed to fetch dashboard data:", error);
+        }
+    };
 
     // Time updater
     useEffect(() => {
@@ -404,15 +443,15 @@ export default function DashboardPage() {
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                             {/* Traffic Chart */}
                             <div className={`p-6 rounded-xl shadow-sm border lg:col-span-2 stat-card-themed card transition-colors duration-500 ${isDarkMode
-                                    ? 'bg-slate-800 border-slate-700'
-                                    : 'bg-white border-slate-100'
+                                ? 'bg-slate-800 border-slate-700'
+                                : 'bg-white border-slate-100'
                                 }`}>
                                 <div className="flex items-center justify-between mb-6">
                                     <h3 className={`font-bold ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>Analitik Trafik vs Serangan</h3>
                                     <select
                                         className={`text-xs rounded-md px-3 py-1.5 input-themed ${isDarkMode
-                                                ? 'bg-slate-700 border-slate-600 text-slate-300'
-                                                : 'border-slate-200 text-slate-500'
+                                            ? 'bg-slate-700 border-slate-600 text-slate-300'
+                                            : 'border-slate-200 text-slate-500'
                                             }`}
                                     >
                                         <option>7 Hari Terakhir</option>
@@ -426,8 +465,8 @@ export default function DashboardPage() {
 
                             {/* Security Logs */}
                             <div className={`p-0 rounded-xl shadow-sm border overflow-hidden flex flex-col card transition-colors duration-500 ${isDarkMode
-                                    ? 'bg-slate-800 border-slate-700'
-                                    : 'bg-white border-slate-100'
+                                ? 'bg-slate-800 border-slate-700'
+                                : 'bg-white border-slate-100'
                                 }`}>
                                 <div
                                     className="p-5 border-b flex justify-between items-center theme-gradient"

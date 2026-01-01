@@ -463,7 +463,7 @@ export default function Header({
                     <div className={`h-8 w-[1px] mx-1 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`}></div>
 
                     <a
-                        href="http://localhost:3000"
+                        href="http://localhost:3001"
                         target="_blank"
                         className="text-sm font-medium flex items-center gap-2 transition-colors duration-150 hover:opacity-80"
                         style={{ color: theme.accent }}

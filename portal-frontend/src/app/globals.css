@@ -351,3 +351,175 @@ header,
   color: var(--theme-accent);
   border: 1px solid color-mix(in srgb, var(--theme-accent) 30%, transparent);
 }
+
+.badge-success {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.badge-danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.badge-warning {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+/* ===================== ENHANCED DARK MODE ===================== */
+.dark-mode {
+  color-scheme: dark;
+}
+
+.dark-mode .bg-slate-50 {
+  background-color: var(--theme-bg-soft) !important;
+}
+
+.dark-mode .bg-slate-100 {
+  background-color: color-mix(in srgb, var(--theme-soft-tint) 10%, #0f1318) !important;
+}
+
+.dark-mode .text-slate-800 {
+  color: #f1f5f9 !important;
+}
+
+.dark-mode .text-slate-700 {
+  color: #e2e8f0 !important;
+}
+
+.dark-mode .text-slate-600 {
+  color: #cbd5e1 !important;
+}
+
+.dark-mode .border-slate-200 {
+  border-color: var(--theme-border-soft) !important;
+}
+
+.dark-mode .border-slate-100 {
+  border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* ===================== GRADIENT ANIMATIONS ===================== */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient {
+  animation: gradientShift 8s ease infinite;
+}
+
+/* ===================== BUTTON THEMES ===================== */
+.btn-themed {
+  background: linear-gradient(135deg, var(--theme-gradient-from), var(--theme-gradient-to));
+  color: white;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--theme-accent) 40%, transparent);
+}
+
+.btn-themed:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--theme-accent) 50%, transparent);
+}
+
+.btn-themed-outline {
+  border: 2px solid var(--theme-accent);
+  color: var(--theme-accent);
+  background: transparent;
+  transition: all 0.3s ease;
+}
+
+.btn-themed-outline:hover {
+  background: color-mix(in srgb, var(--theme-accent) 10%, transparent);
+}
+
+/* ===================== INPUT THEMES ===================== */
+.input-themed {
+  transition: all 0.3s ease;
+}
+
+.input-themed:focus {
+  --tw-ring-color: var(--theme-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-accent) 20%, transparent);
+}
+
+/* ===================== GLASSMORPHISM ===================== */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark-mode .glass {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ===================== HOVER GLOW ===================== */
+.hover-glow {
+  transition: all 0.3s ease;
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 20px color-mix(in srgb, var(--theme-accent) 20%, transparent);
+}
+
+/* ===================== SIDEBAR SCROLL ===================== */
+.sidebar-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ===================== THEME GRADIENT UTILITIES ===================== */
+.theme-gradient-horizontal {
+  background: linear-gradient(90deg, var(--theme-gradient-from), var(--theme-gradient-to));
+}
+
+.theme-gradient-radial {
+  background: radial-gradient(circle at center, var(--theme-gradient-from), var(--theme-gradient-to));
+}
+
+/* ===================== FADE IN SMOOTH ===================== */
+@keyframes fadeInSmooth {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in-smooth {
+  animation: fadeInSmooth 0.3s ease forwards;
+}

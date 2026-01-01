@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { User } from "@/lib/auth";
@@ -27,6 +28,7 @@ interface NavItem {
     label: string;
     badge?: string;
     badgeColor?: string;
+    subItems?: NavItem[];
 }
 
 interface NavSection {
@@ -68,16 +70,43 @@ export default function Sidebar({ user, sidebarOpen, onClose, onLogout }: Sideba
             title: "Sistem",
             items: [
                 { href: "/dashboard/users", icon: "fa-solid fa-users-gear", label: "Manajemen Pengguna" },
-                { href: "/dashboard/settings", icon: "fa-solid fa-sliders", label: "Pengaturan Situs" },
+                {
+                    href: "#settings",
+                    icon: "fa-solid fa-sliders",
+                    label: "Pengaturan Situs",
+                    subItems: [
+                        { href: "/dashboard/settings/identity", icon: "fa-solid fa-globe", label: "Identitas & SEO" },
+                        { href: "/dashboard/settings/appearance", icon: "fa-solid fa-palette", label: "Tampilan & Tema" },
+                        { href: "/dashboard/settings/media", icon: "fa-solid fa-file-signature", label: "Media & Dokumen" },
+                        { href: "/dashboard/settings/security", icon: "fa-solid fa-shield-halved", label: "Security Core" },
+                    ]
+                },
             ],
         },
     ];
+
+    const [expandedMenus, setExpandedMenus] = useState<string[]>(["#settings"]);
+
+    const toggleMenu = (href: string) => {
+        setExpandedMenus(prev =>
+            prev.includes(href)
+                ? prev.filter(h => h !== href)
+                : [...prev, href]
+        );
+    };
 
     const isActive = (href: string) => {
         if (href === "/dashboard") {
             return pathname === "/dashboard";
         }
         return pathname.startsWith(href);
+    };
+
+    const isParentActive = (item: NavItem) => {
+        if (item.subItems) {
+            return item.subItems.some(sub => pathname.startsWith(sub.href));
+        }
+        return isActive(item.href);
     };
 
     return (
@@ -162,29 +191,81 @@ export default function Sidebar({ user, sidebarOpen, onClose, onLogout }: Sideba
                                 {section.title}
                             </p>
                             {section.items.map((item) => {
-                                const active = isActive(item.href);
+                                const active = !item.subItems && isActive(item.href);
+                                const parentActive = isParentActive(item);
+                                const isExpanded = expandedMenus.includes(item.href);
+                                const hasSubItems = item.subItems && item.subItems.length > 0;
+
                                 return (
-                                    <Link
-                                        key={item.href}
-                                        href={item.href}
-                                        className="sidebar-nav-item"
-                                        style={{
-                                            backgroundColor: active ? theme.hoverColor : "transparent",
-                                            borderLeft: active ? `4px solid ${theme.accent}` : "4px solid transparent",
-                                            color: active ? "#fff" : "#cbd5e1",
-                                        }}
-                                    >
-                                        <i
-                                            className={`${item.icon} w-5 text-center nav-icon`}
-                                            style={{ color: active ? theme.iconAccent : "inherit" }}
-                                        ></i>
-                                        <span className="font-medium text-sm">{item.label}</span>
-                                        {item.badge && (
-                                            <span className={`ml-auto ${item.badgeColor || "bg-blue-600"} text-white text-[10px] px-1.5 py-0.5 rounded-full`}>
-                                                {item.badge}
-                                            </span>
+                                    <div key={item.label}>
+                                        {hasSubItems ? (
+                                            <button
+                                                onClick={() => toggleMenu(item.href)}
+                                                className="sidebar-nav-item w-full flex items-center"
+                                                style={{
+                                                    backgroundColor: parentActive ? `${theme.hoverColor}80` : "transparent",
+                                                    borderLeft: parentActive ? `4px solid ${theme.accent}80` : "4px solid transparent",
+                                                    color: parentActive ? "#fff" : "#cbd5e1",
+                                                }}
+                                            >
+                                                <i
+                                                    className={`${item.icon} w-5 text-center nav-icon`}
+                                                    style={{ color: parentActive ? theme.iconAccent : "inherit" }}
+                                                ></i>
+                                                <span className="font-medium text-sm flex-1 text-left">{item.label}</span>
+                                                <i className={`fa-solid fa-chevron-right text-xs transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`}></i>
+                                            </button>
+                                        ) : (
+                                            <Link
+                                                href={item.href}
+                                                className="sidebar-nav-item"
+                                                style={{
+                                                    backgroundColor: active ? theme.hoverColor : "transparent",
+                                                    borderLeft: active ? `4px solid ${theme.accent}` : "4px solid transparent",
+                                                    color: active ? "#fff" : "#cbd5e1",
+                                                }}
+                                            >
+                                                <i
+                                                    className={`${item.icon} w-5 text-center nav-icon`}
+                                                    style={{ color: active ? theme.iconAccent : "inherit" }}
+                                                ></i>
+                                                <span className="font-medium text-sm">{item.label}</span>
+                                                {item.badge && (
+                                                    <span className={`ml-auto ${item.badgeColor || "bg-blue-600"} text-white text-[10px] px-1.5 py-0.5 rounded-full`}>
+                                                        {item.badge}
+                                                    </span>
+                                                )}
+                                            </Link>
                                         )}
-                                    </Link>
+
+                                        {/* Sub Items */}
+                                        {hasSubItems && (
+                                            <div
+                                                className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
+                                            >
+                                                <div className="mt-1 space-y-1 mb-2">
+                                                    {item.subItems!.map((sub) => {
+                                                        const subActive = isActive(sub.href);
+                                                        return (
+                                                            <Link
+                                                                key={sub.href}
+                                                                href={sub.href}
+                                                                className="flex items-center gap-3 px-4 py-2 text-sm transition-colors rounded-r-lg mr-2 ml-4 border-l-2"
+                                                                style={{
+                                                                    color: subActive ? theme.accent : "#94a3b8",
+                                                                    borderColor: subActive ? theme.accent : "transparent",
+                                                                    backgroundColor: subActive ? `${theme.accent}10` : "transparent",
+                                                                }}
+                                                            >
+                                                                <i className={`${sub.icon} text-xs w-4 text-center`}></i>
+                                                                <span className="font-medium text-xs">{sub.label}</span>
+                                                            </Link>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 );
                             })}
                         </div>

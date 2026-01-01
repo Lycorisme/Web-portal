@@ -1,6 +1,6 @@
 import { getToken } from "./auth";
 
-const API_BASE_URL = "http://localhost:8000/api";
+const API_BASE_URL = "http://localhost:8001/api";
 
 export interface SiteSettings {
     site_name: string;
