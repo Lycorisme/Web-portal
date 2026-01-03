@@ -24,6 +24,14 @@ class DatabaseSeeder extends Seeder
             'email_verified_at' => now(),
         ]);
 
+        // Run other seeders
+        $this->call([
+            CategorySeeder::class,
+            PageSeeder::class,
+            ArticleSeeder::class,
+            ActivityLogSeeder::class,
+        ]);
+
         // Optional: Create additional test users
         // User::factory(10)->create();
     }

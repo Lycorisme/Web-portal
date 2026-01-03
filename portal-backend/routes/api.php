@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\SettingsController;
+use App\Http\Controllers\Api\ArticleController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -29,6 +30,17 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Dashboard
     Route::get('/dashboard', [\App\Http\Controllers\Api\DashboardController::class, 'index']);
+
+    // Articles routes
+    Route::prefix('articles')->group(function () {
+        Route::get('/', [ArticleController::class, 'index']);
+        Route::post('/', [ArticleController::class, 'store']);
+        Route::get('/{article}', [ArticleController::class, 'show']);
+        Route::put('/{article}', [ArticleController::class, 'update']);
+        Route::delete('/{article}', [ArticleController::class, 'destroy']);
+        Route::post('/bulk-delete', [ArticleController::class, 'bulkDelete']);
+        Route::post('/bulk-status', [ArticleController::class, 'bulkUpdateStatus']);
+    });
 
     // Settings routes (admin only)
     Route::prefix('settings')->group(function () {
