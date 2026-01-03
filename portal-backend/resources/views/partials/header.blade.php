@@ -2,14 +2,17 @@
 <header class="sticky top-0 z-30 bg-white/70 dark:bg-surface-900/70 backdrop-blur-xl border-b border-surface-200/50 dark:border-surface-800/50">
     <div class="flex items-center justify-between px-4 lg:px-8 py-4">
         <div class="flex items-center gap-4">
-            {{-- Mobile Menu Button --}}
+            {{-- Sidebar Toggle Button --}}
             <button @click="sidebarOpen = !sidebarOpen"
-                class="lg:hidden p-2 rounded-xl bg-surface-100 dark:bg-surface-800 hover:bg-surface-200 dark:hover:bg-surface-700 transition-colors">
-                <i data-lucide="menu" class="w-5 h-5 text-surface-600 dark:text-surface-400"></i>
+                class="p-2.5 rounded-xl bg-surface-100 dark:bg-surface-800 hover:bg-surface-200 dark:hover:bg-surface-700 transition-all duration-200 group">
+                <i data-lucide="panel-left-close" x-show="sidebarOpen" x-cloak
+                    class="w-5 h-5 text-surface-600 dark:text-surface-400 group-hover:text-theme-600 transition-colors"></i>
+                <i data-lucide="panel-left-open" x-show="!sidebarOpen"
+                    class="w-5 h-5 text-surface-600 dark:text-surface-400 group-hover:text-theme-600 transition-colors"></i>
             </button>
 
             {{-- Search Box --}}
-            <div class="hidden sm:flex items-center gap-3 px-4 py-2.5 bg-surface-100 dark:bg-surface-800/50 rounded-xl border border-transparent focus-within:border-primary-500/50 focus-within:ring-2 focus-within:ring-primary-500/20 transition-all duration-200 w-64 lg:w-80">
+            <div class="hidden sm:flex items-center gap-3 px-4 py-2.5 bg-surface-100 dark:bg-surface-800/50 rounded-xl border border-transparent focus-within:border-theme-500/50 focus-within:ring-2 focus-within:ring-theme-500/20 transition-all duration-200 w-64 lg:w-80">
                 <i data-lucide="search" class="w-4 h-4 text-surface-400"></i>
                 <input type="text" placeholder="Cari sesuatu..."
                     class="flex-1 bg-transparent outline-none text-sm text-surface-700 dark:text-surface-300 placeholder:text-surface-400">
@@ -19,12 +22,12 @@
 
         <div class="flex items-center gap-2 lg:gap-4">
             {{-- Dark Mode Toggle --}}
-            <button @click="darkMode = !darkMode"
+            <button @click="toggleDarkMode()"
                 class="p-2.5 rounded-xl bg-surface-100 dark:bg-surface-800 hover:bg-surface-200 dark:hover:bg-surface-700 transition-all duration-200 group">
-                <i data-lucide="sun" x-show="darkMode"
+                <i data-lucide="sun" x-show="darkMode" x-cloak
                     class="w-5 h-5 text-accent-amber group-hover:rotate-45 transition-transform duration-300"></i>
                 <i data-lucide="moon" x-show="!darkMode"
-                    class="w-5 h-5 text-primary-600 group-hover:-rotate-12 transition-transform duration-300"></i>
+                    class="w-5 h-5 text-theme-600 group-hover:-rotate-12 transition-transform duration-300"></i>
             </button>
 
             {{-- Notifications --}}
@@ -71,8 +74,8 @@
                         </a>
                         <a href="#"
                             class="flex items-start gap-3 p-4 hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors">
-                            <div class="w-10 h-10 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center flex-shrink-0">
-                                <i data-lucide="user-plus" class="w-5 h-5 text-primary-600"></i>
+                            <div class="w-10 h-10 rounded-xl bg-theme-100 flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="user-plus" class="w-5 h-5 text-theme-600"></i>
                             </div>
                             <div class="flex-1 min-w-0">
                                 <p class="text-sm font-medium text-surface-900 dark:text-white">User baru terdaftar</p>
@@ -81,7 +84,7 @@
                         </a>
                     </div>
                     <div class="p-3 border-t border-surface-200 dark:border-surface-800">
-                        <a href="#" class="block text-center text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400">
+                        <a href="#" class="block text-center text-sm font-medium text-theme-600 hover:text-theme-700">
                             Lihat Semua Notifikasi
                         </a>
                     </div>
@@ -92,7 +95,7 @@
             <div class="relative" x-data="{ open: false }">
                 <button @click="open = !open"
                     class="flex items-center gap-3 p-1.5 pr-4 rounded-xl bg-surface-100 dark:bg-surface-800 hover:bg-surface-200 dark:hover:bg-surface-700 transition-all duration-200">
-                    <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-primary-500 to-accent-violet flex items-center justify-center">
+                    <div class="w-9 h-9 rounded-lg bg-theme-gradient flex items-center justify-center shadow-theme">
                         <span class="text-white font-semibold text-sm">{{ strtoupper(substr(Auth::user()->name ?? 'AD', 0, 2)) }}</span>
                     </div>
                     <div class="hidden sm:block text-left">
@@ -122,7 +125,7 @@
                             <i data-lucide="user" class="w-4 h-4 text-surface-500"></i>
                             <span class="text-sm text-surface-700 dark:text-surface-300">Profil Saya</span>
                         </a>
-                        <a href="#"
+                        <a href="{{ route('settings') }}"
                             class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors">
                             <i data-lucide="settings" class="w-4 h-4 text-surface-500"></i>
                             <span class="text-sm text-surface-700 dark:text-surface-300">Pengaturan</span>

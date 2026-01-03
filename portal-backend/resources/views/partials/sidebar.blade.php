@@ -1,119 +1,143 @@
 {{-- Sidebar Component --}}
-<aside :class="sidebarOpen ? 'w-72' : 'w-20'"
-    class="fixed left-0 top-0 h-full bg-white/80 dark:bg-surface-900/80 backdrop-blur-xl border-r border-surface-200/50 dark:border-surface-800/50 transition-all duration-300 ease-out z-50 flex flex-col shadow-xl shadow-surface-900/5"
+@php
+    $siteName = \App\Models\SiteSetting::get('site_name', 'BTIKP');
+    $siteTagline = \App\Models\SiteSetting::get('site_tagline', 'Portal Admin');
+    $logoUrl = \App\Models\SiteSetting::get('logo_url', '');
+@endphp
+
+{{-- Desktop Sidebar --}}
+<aside 
+    :class="sidebarOpen ? 'translate-x-0 w-72' : 'lg:translate-x-0 lg:w-20 -translate-x-full'"
+    class="fixed left-0 top-0 h-full bg-white/95 dark:bg-surface-900/95 backdrop-blur-xl border-r border-surface-200/50 dark:border-surface-800/50 transition-all duration-300 ease-out z-50 flex flex-col shadow-xl shadow-surface-900/5 overflow-hidden"
     x-cloak>
 
     {{-- Logo Section --}}
-    <div class="p-6 border-b border-surface-200/50 dark:border-surface-800/50">
-        <div class="flex items-center gap-3">
+    <div class="p-4 lg:p-5 border-b border-surface-200/50 dark:border-surface-800/50">
+        <div class="flex items-center" :class="sidebarOpen ? 'gap-3' : 'justify-center'">
             <div class="relative flex-shrink-0">
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-500 via-primary-600 to-accent-violet flex items-center justify-center shadow-lg shadow-primary-500/30 transform hover:scale-105 transition-transform duration-300">
-                    <span class="text-white font-space font-bold text-xl">B</span>
-                </div>
-                <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-accent-emerald rounded-full border-2 border-white dark:border-surface-900 animate-pulse"></div>
+                @if(!empty($logoUrl))
+                    <div id="sidebar-logo" class="w-11 h-11 rounded-xl overflow-hidden shadow-theme transform hover:scale-105 transition-transform duration-300">
+                        <img src="{{ $logoUrl }}" alt="{{ $siteName }}" class="w-full h-full object-cover">
+                    </div>
+                @else
+                    <div id="sidebar-logo" class="w-11 h-11 rounded-xl bg-theme-gradient flex items-center justify-center shadow-theme transform hover:scale-105 transition-transform duration-300">
+                        <span id="sidebar-logo-initial" class="text-white font-space font-bold text-lg">{{ strtoupper(substr($siteName, 0, 1)) }}</span>
+                    </div>
+                @endif
+                <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-accent-emerald rounded-full border-2 border-white dark:border-surface-900"></div>
             </div>
-            <div x-show="sidebarOpen" x-transition:enter="transition ease-out duration-200"
+            <div x-show="sidebarOpen" x-cloak x-transition:enter="transition ease-out duration-200"
                 x-transition:enter-start="opacity-0 translate-x-2"
-                x-transition:enter-end="opacity-100 translate-x-0" class="overflow-hidden whitespace-nowrap">
-                <h1 class="font-space font-bold text-lg text-surface-900 dark:text-white">BTIKP</h1>
-                <p class="text-xs text-surface-500 dark:text-surface-400">Portal Admin</p>
+                x-transition:enter-end="opacity-100 translate-x-0" class="flex-1 min-w-0">
+                <h1 id="sidebar-site-name" class="font-space font-bold text-base text-surface-900 dark:text-white truncate">{{ $siteName }}</h1>
+                <p id="sidebar-site-tagline" class="text-xs text-surface-500 dark:text-surface-400 truncate">{{ $siteTagline }}</p>
             </div>
         </div>
     </div>
 
     {{-- Navigation Menu --}}
-    <nav class="flex-1 p-4 space-y-2 overflow-y-auto overflow-x-hidden">
+    <nav class="flex-1 p-3 space-y-1.5 overflow-y-auto overflow-x-hidden">
         {{-- Menu Utama --}}
-        <p x-show="sidebarOpen"
-            class="px-3 text-xs font-semibold text-surface-400 dark:text-surface-500 uppercase tracking-wider mb-4 mt-2 transition-opacity duration-300">
+        <p x-show="sidebarOpen" x-cloak
+            class="px-3 text-xs font-semibold text-surface-400 dark:text-surface-500 uppercase tracking-wider mb-3 mt-2 transition-opacity duration-300">
             Menu Utama</p>
 
         <a href="{{ route('dashboard') }}"
-            :class="'{{ request()->routeIs('dashboard') }}' ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/30' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50'"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group relative overflow-hidden"
+            class="flex items-center rounded-xl transition-all duration-200 group relative overflow-hidden {{ request()->routeIs('dashboard') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
+            :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
             :title="!sidebarOpen ? 'Dashboard' : ''">
             <i data-lucide="layout-dashboard" class="w-5 h-5 flex-shrink-0"></i>
-            <span x-show="sidebarOpen" class="font-medium whitespace-nowrap">Dashboard</span>
+            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Dashboard</span>
         </a>
 
         <a href="#"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50"
+            class="flex items-center rounded-xl transition-all duration-200 group text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50"
+            :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
             :title="!sidebarOpen ? 'Kelola Berita' : ''">
             <i data-lucide="newspaper" class="w-5 h-5 flex-shrink-0"></i>
-            <span x-show="sidebarOpen" class="font-medium whitespace-nowrap">Kelola Berita</span>
-            <span x-show="sidebarOpen"
+            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Kelola Berita</span>
+            <span x-show="sidebarOpen" x-cloak
                 class="ml-auto bg-accent-cyan/20 text-accent-cyan text-xs font-semibold px-2 py-0.5 rounded-full">24</span>
         </a>
 
         <a href="#"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50"
+            class="flex items-center rounded-xl transition-all duration-200 group text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50"
+            :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
             :title="!sidebarOpen ? 'Galeri' : ''">
             <i data-lucide="image" class="w-5 h-5 flex-shrink-0"></i>
-            <span x-show="sidebarOpen" class="font-medium whitespace-nowrap">Galeri</span>
+            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Galeri</span>
         </a>
 
         <a href="#"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50"
+            class="flex items-center rounded-xl transition-all duration-200 group text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50"
+            :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
             :title="!sidebarOpen ? 'Tong Sampah' : ''">
             <i data-lucide="trash-2" class="w-5 h-5 flex-shrink-0"></i>
-            <span x-show="sidebarOpen" class="font-medium whitespace-nowrap">Tong Sampah</span>
-            <span x-show="sidebarOpen"
+            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Tong Sampah</span>
+            <span x-show="sidebarOpen" x-cloak
                 class="ml-auto bg-accent-rose/20 text-accent-rose text-xs font-semibold px-2 py-0.5 rounded-full">3</span>
         </a>
 
-        <div class="my-4 border-t border-surface-200/50 dark:border-surface-800/50 mx-2"></div>
+        <div class="my-3 border-t border-surface-200/50 dark:border-surface-800/50 mx-2"></div>
 
         {{-- Keamanan --}}
-        <p x-show="sidebarOpen"
-            class="px-3 text-xs font-semibold text-surface-400 dark:text-surface-500 uppercase tracking-wider mb-4 transition-opacity duration-300">
+        <p x-show="sidebarOpen" x-cloak
+            class="px-3 text-xs font-semibold text-surface-400 dark:text-surface-500 uppercase tracking-wider mb-3 transition-opacity duration-300">
             Keamanan</p>
 
         <a href="#"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50"
+            class="flex items-center rounded-xl transition-all duration-200 group text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50"
+            :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
             :title="!sidebarOpen ? 'Activity Log' : ''">
             <i data-lucide="activity" class="w-5 h-5 flex-shrink-0"></i>
-            <span x-show="sidebarOpen" class="font-medium whitespace-nowrap">Activity Log</span>
+            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Activity Log</span>
         </a>
 
         <a href="#"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50"
+            class="flex items-center rounded-xl transition-all duration-200 group text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50"
+            :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
             :title="!sidebarOpen ? 'IP Terblokir' : ''">
             <i data-lucide="shield-ban" class="w-5 h-5 flex-shrink-0"></i>
-            <span x-show="sidebarOpen" class="font-medium whitespace-nowrap">IP Terblokir</span>
-            <span x-show="sidebarOpen"
+            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">IP Terblokir</span>
+            <span x-show="sidebarOpen" x-cloak
                 class="ml-auto bg-accent-amber/20 text-accent-amber text-xs font-semibold px-2 py-0.5 rounded-full">2</span>
         </a>
 
-        <div class="my-4 border-t border-surface-200/50 dark:border-surface-800/50 mx-2"></div>
+        <div class="my-3 border-t border-surface-200/50 dark:border-surface-800/50 mx-2"></div>
 
         {{-- Pengaturan --}}
-        <p x-show="sidebarOpen"
-            class="px-3 text-xs font-semibold text-surface-400 dark:text-surface-500 uppercase tracking-wider mb-4 transition-opacity duration-300">
+        <p x-show="sidebarOpen" x-cloak
+            class="px-3 text-xs font-semibold text-surface-400 dark:text-surface-500 uppercase tracking-wider mb-3 transition-opacity duration-300">
             Pengaturan</p>
 
-        <a href="#"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50"
+        <a href="{{ route('settings') }}"
+            class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('settings') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
+            :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
             :title="!sidebarOpen ? 'Pengaturan Situs' : ''">
             <i data-lucide="settings" class="w-5 h-5 flex-shrink-0"></i>
-            <span x-show="sidebarOpen" class="font-medium whitespace-nowrap">Pengaturan Situs</span>
+            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Pengaturan Situs</span>
         </a>
 
         <a href="#"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50"
+            class="flex items-center rounded-xl transition-all duration-200 group text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50"
+            :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
             :title="!sidebarOpen ? 'Kelola User' : ''">
             <i data-lucide="users" class="w-5 h-5 flex-shrink-0"></i>
-            <span x-show="sidebarOpen" class="font-medium whitespace-nowrap">Kelola User</span>
+            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Kelola User</span>
         </a>
     </nav>
 
-    {{-- Sidebar Toggle Button --}}
-    <div class="p-4 border-t border-surface-200/50 dark:border-surface-800/50">
-        <button @click="sidebarOpen = !sidebarOpen"
-            class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-surface-100 dark:bg-surface-800/50 hover:bg-surface-200 dark:hover:bg-surface-800 text-surface-600 dark:text-surface-400 transition-all duration-200">
-            <i data-lucide="panel-left-close" x-show="sidebarOpen" class="w-5 h-5"></i>
-            <i data-lucide="panel-left-open" x-show="!sidebarOpen" class="w-5 h-5"></i>
-            <span x-show="sidebarOpen" class="font-medium text-sm whitespace-nowrap">Tutup Sidebar</span>
-        </button>
+    {{-- Sidebar Footer - Version Info --}}
+    <div x-show="sidebarOpen" x-cloak class="p-4 border-t border-surface-200/50 dark:border-surface-800/50">
+        <div class="flex items-center gap-3 px-3 py-2 bg-surface-100 dark:bg-surface-800/50 rounded-xl">
+            <div class="w-8 h-8 rounded-lg bg-theme-gradient flex items-center justify-center flex-shrink-0">
+                <i data-lucide="sparkles" class="w-4 h-4 text-white"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p id="sidebar-footer-name" class="text-xs font-medium text-surface-700 dark:text-surface-300 truncate">{{ $siteName }}</p>
+                <p class="text-xs text-surface-400">v1.0.0</p>
+            </div>
+        </div>
     </div>
 </aside>
 

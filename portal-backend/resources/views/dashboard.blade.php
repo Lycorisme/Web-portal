@@ -4,7 +4,7 @@
 
 @section('content')
     {{-- Welcome Banner --}}
-    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary-600 via-primary-700 to-accent-violet p-6 lg:p-8 mb-8 animate-fade-in">
+    <div class="relative overflow-hidden rounded-3xl bg-theme-gradient p-6 lg:p-8 mb-8 animate-fade-in">
         <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
         <div class="absolute bottom-0 left-1/4 w-32 h-32 bg-accent-cyan/20 rounded-full blur-2xl"></div>
 

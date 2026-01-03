@@ -1,19 +1,21 @@
 <!DOCTYPE html>
-<html lang="id" class="scroll-smooth"
-    x-data="{ sidebarOpen: true, darkMode: false, activeMenu: 'dashboard', showNotification: false, showProfile: false }"
-    :class="{ 'dark': darkMode }">
+<html lang="id" class="scroll-smooth">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Dashboard Admin') - Portal Berita BTIKP</title>
+    <link rel="icon" id="dynamic-favicon" href="{{ \App\Models\SiteSetting::get('favicon_url', asset('favicon.ico')) }}">
 
     {{-- Tailwind CSS CDN --}}
     <script src="https://cdn.tailwindcss.com"></script>
 
     {{-- Alpine.js --}}
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+
+    {{-- SweetAlert2 --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     {{-- Google Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,6 +29,20 @@
 
     {{-- Chart.js --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    {{-- Initialize Dark Mode & Theme Before Page Render --}}
+    <script>
+        // Initialize dark mode from localStorage before page renders to prevent flash
+        (function() {
+            const darkMode = localStorage.getItem('darkMode') === 'true';
+            const theme = localStorage.getItem('themePreset') || '{{ \App\Models\SiteSetting::get("current_theme", "indigo") }}';
+            
+            if (darkMode) {
+                document.documentElement.classList.add('dark');
+            }
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
 
     <style>
         [x-cloak] {
@@ -54,6 +70,270 @@
 
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
+        }
+
+        /* Hide scrollbar while keeping scroll functionality */
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* ============================================
+           GLOBAL THEME SYSTEM - CSS Variables
+           ============================================ */
+        
+        :root {
+            /* Default: Indigo Theme */
+            --theme-50: 238 242 255;
+            --theme-100: 224 231 255;
+            --theme-200: 199 210 254;
+            --theme-300: 165 180 252;
+            --theme-400: 129 140 248;
+            --theme-500: 99 102 241;
+            --theme-600: 79 70 229;
+            --theme-700: 67 56 202;
+            --theme-800: 55 48 163;
+            --theme-900: 49 46 129;
+            --theme-gradient-from: #6366f1;
+            --theme-gradient-to: #4f46e5;
+        }
+
+        /* Indigo Theme */
+        [data-theme="indigo"] {
+            --theme-50: 238 242 255;
+            --theme-100: 224 231 255;
+            --theme-200: 199 210 254;
+            --theme-300: 165 180 252;
+            --theme-400: 129 140 248;
+            --theme-500: 99 102 241;
+            --theme-600: 79 70 229;
+            --theme-700: 67 56 202;
+            --theme-800: 55 48 163;
+            --theme-900: 49 46 129;
+            --theme-gradient-from: #6366f1;
+            --theme-gradient-to: #4f46e5;
+        }
+
+        /* Emerald Theme */
+        [data-theme="emerald"] {
+            --theme-50: 236 253 245;
+            --theme-100: 209 250 229;
+            --theme-200: 167 243 208;
+            --theme-300: 110 231 183;
+            --theme-400: 52 211 153;
+            --theme-500: 16 185 129;
+            --theme-600: 5 150 105;
+            --theme-700: 4 120 87;
+            --theme-800: 6 95 70;
+            --theme-900: 6 78 59;
+            --theme-gradient-from: #10b981;
+            --theme-gradient-to: #059669;
+        }
+
+        /* Rose Theme */
+        [data-theme="rose"] {
+            --theme-50: 255 241 242;
+            --theme-100: 255 228 230;
+            --theme-200: 254 205 211;
+            --theme-300: 253 164 175;
+            --theme-400: 251 113 133;
+            --theme-500: 244 63 94;
+            --theme-600: 225 29 72;
+            --theme-700: 190 18 60;
+            --theme-800: 159 18 57;
+            --theme-900: 136 19 55;
+            --theme-gradient-from: #f43f5e;
+            --theme-gradient-to: #e11d48;
+        }
+
+        /* Amber Theme */
+        [data-theme="amber"] {
+            --theme-50: 255 251 235;
+            --theme-100: 254 243 199;
+            --theme-200: 253 230 138;
+            --theme-300: 252 211 77;
+            --theme-400: 251 191 36;
+            --theme-500: 245 158 11;
+            --theme-600: 217 119 6;
+            --theme-700: 180 83 9;
+            --theme-800: 146 64 14;
+            --theme-900: 120 53 15;
+            --theme-gradient-from: #f59e0b;
+            --theme-gradient-to: #d97706;
+        }
+
+        /* Cyan Theme */
+        [data-theme="cyan"] {
+            --theme-50: 236 254 255;
+            --theme-100: 207 250 254;
+            --theme-200: 165 243 252;
+            --theme-300: 103 232 249;
+            --theme-400: 34 211 238;
+            --theme-500: 6 182 212;
+            --theme-600: 8 145 178;
+            --theme-700: 14 116 144;
+            --theme-800: 21 94 117;
+            --theme-900: 22 78 99;
+            --theme-gradient-from: #06b6d4;
+            --theme-gradient-to: #0891b2;
+        }
+
+        /* Violet Theme */
+        [data-theme="violet"] {
+            --theme-50: 245 243 255;
+            --theme-100: 237 233 254;
+            --theme-200: 221 214 254;
+            --theme-300: 196 181 253;
+            --theme-400: 167 139 250;
+            --theme-500: 139 92 246;
+            --theme-600: 124 58 237;
+            --theme-700: 109 40 217;
+            --theme-800: 91 33 182;
+            --theme-900: 76 29 149;
+            --theme-gradient-from: #8b5cf6;
+            --theme-gradient-to: #7c3aed;
+        }
+
+        /* Slate Theme */
+        [data-theme="slate"] {
+            --theme-50: 248 250 252;
+            --theme-100: 241 245 249;
+            --theme-200: 226 232 240;
+            --theme-300: 203 213 225;
+            --theme-400: 148 163 184;
+            --theme-500: 100 116 139;
+            --theme-600: 71 85 105;
+            --theme-700: 51 65 85;
+            --theme-800: 30 41 59;
+            --theme-900: 15 23 42;
+            --theme-gradient-from: #64748b;
+            --theme-gradient-to: #475569;
+        }
+
+        /* Ocean Theme */
+        [data-theme="ocean"] {
+            --theme-50: 239 246 255;
+            --theme-100: 219 234 254;
+            --theme-200: 191 219 254;
+            --theme-300: 147 197 253;
+            --theme-400: 96 165 250;
+            --theme-500: 59 130 246;
+            --theme-600: 37 99 235;
+            --theme-700: 29 78 216;
+            --theme-800: 30 64 175;
+            --theme-900: 30 58 138;
+            --theme-gradient-from: #3b82f6;
+            --theme-gradient-to: #0891b2;
+        }
+
+        /* Sunset Theme */
+        [data-theme="sunset"] {
+            --theme-50: 255 247 237;
+            --theme-100: 255 237 213;
+            --theme-200: 254 215 170;
+            --theme-300: 253 186 116;
+            --theme-400: 251 146 60;
+            --theme-500: 249 115 22;
+            --theme-600: 234 88 12;
+            --theme-700: 194 65 12;
+            --theme-800: 154 52 18;
+            --theme-900: 124 45 18;
+            --theme-gradient-from: #f97316;
+            --theme-gradient-to: #e11d48;
+        }
+
+        /* Theme-aware utility classes */
+        .bg-theme-50 { background-color: rgb(var(--theme-50)); }
+        .bg-theme-100 { background-color: rgb(var(--theme-100)); }
+        .bg-theme-200 { background-color: rgb(var(--theme-200)); }
+        .bg-theme-300 { background-color: rgb(var(--theme-300)); }
+        .bg-theme-400 { background-color: rgb(var(--theme-400)); }
+        .bg-theme-500 { background-color: rgb(var(--theme-500)); }
+        .bg-theme-600 { background-color: rgb(var(--theme-600)); }
+        .bg-theme-700 { background-color: rgb(var(--theme-700)); }
+        .bg-theme-800 { background-color: rgb(var(--theme-800)); }
+        .bg-theme-900 { background-color: rgb(var(--theme-900)); }
+
+        .text-theme-50 { color: rgb(var(--theme-50)); }
+        .text-theme-100 { color: rgb(var(--theme-100)); }
+        .text-theme-200 { color: rgb(var(--theme-200)); }
+        .text-theme-300 { color: rgb(var(--theme-300)); }
+        .text-theme-400 { color: rgb(var(--theme-400)); }
+        .text-theme-500 { color: rgb(var(--theme-500)); }
+        .text-theme-600 { color: rgb(var(--theme-600)); }
+        .text-theme-700 { color: rgb(var(--theme-700)); }
+        .text-theme-800 { color: rgb(var(--theme-800)); }
+        .text-theme-900 { color: rgb(var(--theme-900)); }
+
+        .border-theme-500 { border-color: rgb(var(--theme-500)); }
+        .border-theme-600 { border-color: rgb(var(--theme-600)); }
+
+        .ring-theme-500 { --tw-ring-color: rgb(var(--theme-500)); }
+        .ring-theme-600 { --tw-ring-color: rgb(var(--theme-600)); }
+
+        .bg-theme-gradient {
+            background: linear-gradient(135deg, var(--theme-gradient-from), var(--theme-gradient-to));
+        }
+
+        .shadow-theme {
+            box-shadow: 0 10px 25px -3px rgb(var(--theme-500) / 0.3);
+        }
+
+        .hover\:bg-theme-600:hover { background-color: rgb(var(--theme-600)); }
+        .hover\:bg-theme-700:hover { background-color: rgb(var(--theme-700)); }
+
+        .focus\:ring-theme-500:focus { --tw-ring-color: rgb(var(--theme-500)); }
+
+        /* Text Selection / Highlight */
+        ::selection {
+            background-color: rgb(var(--theme-500));
+            color: white;
+        }
+        
+        ::-moz-selection {
+            background-color: rgb(var(--theme-500));
+            color: white;
+        }
+
+        /* SweetAlert2 Custom Theme */
+        .swal2-popup {
+            border-radius: 1.5rem !important;
+            padding: 2rem !important;
+        }
+        
+        .dark .swal2-popup {
+            background: #18181b !important;
+            color: #f4f4f5 !important;
+        }
+        
+        .dark .swal2-title {
+            color: #ffffff !important;
+        }
+        
+        .dark .swal2-html-container {
+            color: #a1a1aa !important;
+        }
+        
+        .swal2-confirm {
+            background: linear-gradient(135deg, var(--theme-gradient-from), var(--theme-gradient-to)) !important;
+            border-radius: 0.75rem !important;
+            font-weight: 600 !important;
+            padding: 0.75rem 1.5rem !important;
+        }
+        
+        .swal2-cancel {
+            border-radius: 0.75rem !important;
+            font-weight: 500 !important;
+            padding: 0.75rem 1.5rem !important;
+        }
+        
+        .dark .swal2-cancel {
+            background: #27272a !important;
+            color: #d4d4d8 !important;
         }
     </style>
 
@@ -91,6 +371,11 @@
                             50: '#fafafa',
                             100: '#f4f4f5',
                             200: '#e4e4e7',
+                            300: '#d4d4d8',
+                            400: '#a1a1aa',
+                            500: '#71717a',
+                            600: '#52525b',
+                            700: '#3f3f46',
                             800: '#27272a',
                             900: '#18181b',
                             950: '#0f0f11',
@@ -124,11 +409,16 @@
     @stack('styles')
 </head>
 
-<body class="font-jakarta bg-surface-50 dark:bg-surface-950 text-surface-900 dark:text-surface-100 transition-colors duration-300 overflow-x-hidden antialiased">
+<body 
+    x-data="appState()" 
+    x-init="init()"
+    :class="{ 'dark': darkMode }"
+    class="font-jakarta bg-surface-50 dark:bg-surface-950 text-surface-900 dark:text-surface-100 transition-colors duration-300 overflow-x-hidden antialiased"
+>
 
     {{-- Animated Background Elements --}}
     <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div class="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-primary-400/20 to-accent-violet/20 rounded-full blur-3xl animate-pulse-slow"></div>
+        <div class="absolute -top-40 -right-40 w-96 h-96 bg-theme-gradient opacity-20 rounded-full blur-3xl animate-pulse-slow"></div>
         <div class="absolute top-1/2 -left-40 w-80 h-80 bg-gradient-to-tr from-accent-cyan/15 to-accent-emerald/15 rounded-full blur-3xl animate-float"></div>
         <div class="absolute -bottom-20 right-1/3 w-72 h-72 bg-gradient-to-tl from-accent-amber/10 to-accent-rose/10 rounded-full blur-3xl animate-pulse-slow" style="animation-delay: 2s;"></div>
     </div>
@@ -155,146 +445,56 @@
         </main>
     </div>
 
-    {{-- Toast Notifications --}}
-    <div 
-        x-data="{ 
-            toasts: [],
-            add(toast) {
-                this.toasts.push({ id: Date.now(), ...toast });
-                setTimeout(() => this.remove(this.toasts[0]?.id), 4000);
-            },
-            remove(id) {
-                this.toasts = this.toasts.filter(t => t.id !== id);
-            }
-        }"
-        @toast.window="add($event.detail)"
-        class="fixed bottom-6 right-6 z-[100] space-y-3"
-    >
-        <template x-for="toast in toasts" :key="toast.id">
-            <div 
-                x-show="true"
-                x-transition:enter="transition duration-200"
-                x-transition:enter-start="opacity-0 translate-x-4"
-                x-transition:enter-end="opacity-100 translate-x-0"
-                x-transition:leave="transition duration-150"
-                x-transition:leave-start="opacity-100 translate-x-0"
-                x-transition:leave-end="opacity-0 translate-x-4"
-                :class="{
-                    'from-accent-emerald to-green-600': toast.type === 'success',
-                    'from-accent-rose to-rose-600': toast.type === 'error',
-                    'from-accent-amber to-orange-600': toast.type === 'warning',
-                    'from-primary-500 to-primary-700': toast.type === 'info'
-                }"
-                class="bg-gradient-to-r text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 min-w-[320px] backdrop-blur-sm border border-white/20"
-            >
-                <div class="flex-shrink-0 w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                    <i :class="{
-                        'check-circle': toast.type === 'success',
-                        'x-circle': toast.type === 'error',
-                        'alert-triangle': toast.type === 'warning',
-                        'info': toast.type === 'info'
-                    }" :data-lucide="toast.type === 'success' ? 'check-circle' : toast.type === 'error' ? 'x-circle' : toast.type === 'warning' ? 'alert-triangle' : 'info'" class="w-5 h-5"></i>
-                </div>
-                <div class="flex-1">
-                    <p class="font-semibold text-sm uppercase tracking-wide opacity-90" x-text="toast.title"></p>
-                    <p class="text-white/90 text-sm" x-text="toast.message"></p>
-                </div>
-                <button @click="remove(toast.id)" class="hover:bg-white/20 p-2 rounded-full transition-all duration-150">
-                    <i data-lucide="x" class="w-4 h-4"></i>
-                </button>
-            </div>
-        </template>
-    </div>
-
-    {{-- Alert/Confirm Dialog --}}
-    <div 
-        x-data="{ 
-            show: false,
-            type: 'warning',
-            title: '',
-            message: '',
-            callback: null,
-            open(data) {
-                this.type = data.type || 'warning';
-                this.title = data.title;
-                this.message = data.message;
-                this.callback = data.callback;
-                this.show = true;
-            },
-            confirm() {
-                if (this.callback) this.callback();
-                this.show = false;
-            },
-            cancel() {
-                this.show = false;
-            }
-        }"
-        @alert.window="open($event.detail)"
-        x-show="show"
-        x-cloak
-        class="fixed inset-0 z-[100] flex items-center justify-center"
-    >
-        {{-- Overlay --}}
-        <div 
-            x-show="show"
-            x-transition:enter="transition duration-150"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="transition duration-150"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            @click="cancel()"
-            class="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        ></div>
-
-        {{-- Dialog Box --}}
-        <div 
-            x-show="show"
-            x-transition:enter="transition duration-150"
-            x-transition:enter-start="opacity-0 scale-95"
-            x-transition:enter-end="opacity-100 scale-100"
-            x-transition:leave="transition duration-150"
-            x-transition:leave-start="opacity-100 scale-100"
-            x-transition:leave-end="opacity-0 scale-95"
-            class="relative bg-white dark:bg-surface-900 rounded-3xl shadow-2xl p-8 max-w-md w-full mx-4"
-        >
-            <div class="flex flex-col items-center text-center">
-                <div :class="{
-                    'bg-accent-amber/20': type === 'warning',
-                    'bg-accent-rose/20': type === 'danger',
-                    'bg-primary-100 dark:bg-primary-900/30': type === 'info'
-                }" class="w-20 h-20 rounded-full flex items-center justify-center mb-6">
-                    <i :data-lucide="type === 'warning' ? 'alert-triangle' : type === 'danger' ? 'trash-2' : 'info'" 
-                       :class="{
-                           'text-accent-amber': type === 'warning',
-                           'text-accent-rose': type === 'danger',
-                           'text-primary-600': type === 'info'
-                       }" class="w-10 h-10"></i>
-                </div>
-                <h3 class="text-xl font-bold text-surface-900 dark:text-white mb-3" x-text="title"></h3>
-                <p class="text-surface-500 dark:text-surface-400 mb-8" x-text="message"></p>
-                <div class="flex gap-4 w-full">
-                    <button @click="cancel()" class="flex-1 px-6 py-3 bg-surface-100 dark:bg-surface-800 hover:bg-surface-200 dark:hover:bg-surface-700 text-surface-700 dark:text-surface-300 rounded-xl font-medium transition-all duration-200">
-                        Batal
-                    </button>
-                    <button 
-                        @click="confirm()" 
-                        :class="{
-                            'bg-accent-amber hover:bg-amber-600': type === 'warning',
-                            'bg-accent-rose hover:bg-rose-600': type === 'danger',
-                            'bg-primary-600 hover:bg-primary-700': type === 'info'
-                        }"
-                        class="flex-1 px-6 py-3 text-white rounded-xl font-medium transition-all duration-200"
-                    >
-                        Konfirmasi
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- Initialize Lucide Icons --}}
+    {{-- Initialize Scripts --}}
     <script>
+        // App State Management
+        function appState() {
+            return {
+                sidebarOpen: window.innerWidth >= 1024, // Closed on mobile, open on desktop
+                darkMode: localStorage.getItem('darkMode') === 'true',
+                themePreset: localStorage.getItem('themePreset') || '{{ \App\Models\SiteSetting::get("current_theme", "indigo") }}',
+                showNotification: false,
+                showProfile: false,
+
+                init() {
+                    // Apply dark mode
+                    this.applyDarkMode();
+                    
+                    // Apply theme
+                    this.applyTheme();
+
+                    // Watch for dark mode changes
+                    this.$watch('darkMode', (value) => {
+                        localStorage.setItem('darkMode', value);
+                        this.applyDarkMode();
+                    });
+
+                    // Watch for theme changes
+                    this.$watch('themePreset', (value) => {
+                        localStorage.setItem('themePreset', value);
+                        this.applyTheme();
+                    });
+                },
+
+                applyDarkMode() {
+                    if (this.darkMode) {
+                        document.documentElement.classList.add('dark');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                    }
+                },
+
+                applyTheme() {
+                    document.documentElement.setAttribute('data-theme', this.themePreset);
+                },
+
+                toggleDarkMode() {
+                    this.darkMode = !this.darkMode;
+                }
+            }
+        }
+
+        // Initialize Lucide Icons
         document.addEventListener('DOMContentLoaded', function () {
             lucide.createIcons();
         });
@@ -306,19 +506,174 @@
             }, 500);
         });
 
-        // Toast helper function
-        function showToast(type, title, message) {
-            window.dispatchEvent(new CustomEvent('toast', { 
-                detail: { type, title, message } 
-            }));
+        // ============================================
+        // SweetAlert2 Helper Functions
+        // ============================================
+
+        // Toast notification
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer);
+                toast.addEventListener('mouseleave', Swal.resumeTimer);
+            },
+            customClass: {
+                popup: 'rounded-xl'
+            }
+        });
+
+        // Show toast notification
+        function showToast(type, title, message = '') {
+            const iconMap = {
+                'success': 'success',
+                'error': 'error',
+                'warning': 'warning',
+                'info': 'info'
+            };
+            
+            Toast.fire({
+                icon: iconMap[type] || 'info',
+                title: title,
+                text: message
+            });
         }
 
-        // Alert helper function
-        function showAlert(type, title, message, callback) {
-            window.dispatchEvent(new CustomEvent('alert', { 
-                detail: { type, title, message, callback } 
-            }));
+        // Show alert dialog
+        function showAlert(type, title, message, callback = null) {
+            const iconMap = {
+                'success': 'success',
+                'error': 'error',
+                'warning': 'warning',
+                'info': 'info',
+                'danger': 'error',
+                'question': 'question'
+            };
+
+            Swal.fire({
+                icon: iconMap[type] || 'info',
+                title: title,
+                text: message,
+                confirmButtonText: 'OK',
+                customClass: {
+                    confirmButton: 'swal2-confirm'
+                }
+            }).then((result) => {
+                if (result.isConfirmed && callback) {
+                    callback();
+                }
+            });
         }
+
+        // Show confirm dialog
+        function showConfirm(title, message, callback, options = {}) {
+            const isDark = document.documentElement.classList.contains('dark');
+            
+            Swal.fire({
+                title: title,
+                text: message,
+                icon: options.icon || 'warning',
+                showCancelButton: true,
+                confirmButtonText: options.confirmText || 'Ya, Lanjutkan',
+                cancelButtonText: options.cancelText || 'Batal',
+                reverseButtons: true,
+                customClass: {
+                    confirmButton: 'swal2-confirm',
+                    cancelButton: 'swal2-cancel'
+                }
+            }).then((result) => {
+                if (result.isConfirmed && callback) {
+                    callback();
+                }
+            });
+        }
+
+        // Show success message
+        function showSuccess(title, message = '', callback = null) {
+            Swal.fire({
+                icon: 'success',
+                title: title,
+                text: message,
+                confirmButtonText: 'OK',
+                customClass: {
+                    confirmButton: 'swal2-confirm'
+                }
+            }).then((result) => {
+                if (result.isConfirmed && callback) {
+                    callback();
+                }
+            });
+        }
+
+        // Show error message
+        function showError(title, message = '') {
+            Swal.fire({
+                icon: 'error',
+                title: title,
+                text: message,
+                confirmButtonText: 'OK',
+                customClass: {
+                    confirmButton: 'swal2-confirm'
+                }
+            });
+        }
+
+        // Show loading
+        function showLoading(title = 'Memproses...') {
+            Swal.fire({
+                title: title,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+        }
+
+        // Close loading
+        function closeLoading() {
+            Swal.close();
+        }
+
+        // Show delete confirmation
+        function showDeleteConfirm(itemName, callback) {
+            Swal.fire({
+                title: 'Hapus ' + itemName + '?',
+                text: 'Data yang dihapus tidak dapat dikembalikan!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#f43f5e',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed && callback) {
+                    callback();
+                }
+            });
+        }
+
+        // ============================================
+        // Flash Messages Handler
+        // ============================================
+        @if(session('success'))
+            showToast('success', '{{ session('success') }}');
+        @endif
+
+        @if(session('error'))
+            showToast('error', '{{ session('error') }}');
+        @endif
+
+        @if(session('warning'))
+            showToast('warning', '{{ session('warning') }}');
+        @endif
+
+        @if(session('info'))
+            showToast('info', '{{ session('info') }}');
+        @endif
     </script>
 
     @stack('scripts')
