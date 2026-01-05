@@ -4,7 +4,7 @@
 
 @section('content')
     {{-- Page Header --}}
-    <div class="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-theme-gradient p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8 animate-fade-in">
+    <div class="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-theme-gradient p-4 sm:p-6 lg:p-8 mb-4 sm:mb-8 animate-fade-in">
         <div class="absolute top-0 right-0 w-32 sm:w-64 h-32 sm:h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
         <div class="absolute bottom-0 left-1/4 w-16 sm:w-32 h-16 sm:h-32 bg-white/20 rounded-full blur-2xl"></div>
 
@@ -23,43 +23,48 @@
     {{-- Settings Tabs --}}
     <div x-data="{ activeTab: 'general' }" class="animate-slide-up" style="animation-delay: 0.1s;">
         {{-- Tab Navigation --}}
-        <div class="mb-6 p-1.5 sm:p-2 bg-white dark:bg-surface-900/50 rounded-2xl border border-surface-200/50 dark:border-surface-800/50 overflow-x-auto md:scrollbar-hide">
-            <div class="flex min-w-max lg:min-w-0 gap-1 sm:gap-1.5">
+        {{-- Tab Navigation --}}
+        <div class="mb-6 p-1.5 bg-white dark:bg-surface-900/50 rounded-2xl border border-surface-200/50 dark:border-surface-800/50 shadow-sm">
+            <div class="flex items-center overflow-x-auto gap-2 p-0.5 scrollbar-hide">
                 <button @click="activeTab = 'general'"
                     :class="activeTab === 'general' ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/30' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800'"
-                    class="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl font-medium transition-all duration-200 whitespace-nowrap text-sm sm:text-base">
-                    <i data-lucide="globe" class="w-4 h-4 flex-shrink-0"></i>
+                    class="flex-shrink-0 sm:flex-1 flex items-center justify-center gap-2 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl font-medium transition-all duration-200 text-sm whitespace-nowrap">
+                    <i data-lucide="globe" class="w-4 h-4"></i>
                     <span>Umum</span>
                 </button>
+                
                 <button @click="activeTab = 'seo'"
                     :class="activeTab === 'seo' ? 'bg-gradient-to-r from-accent-cyan to-accent-emerald text-white shadow-lg shadow-accent-cyan/30' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800'"
-                    class="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl font-medium transition-all duration-200 whitespace-nowrap text-sm sm:text-base">
-                    <i data-lucide="search" class="w-4 h-4 flex-shrink-0"></i>
+                    class="flex-shrink-0 sm:flex-1 flex items-center justify-center gap-2 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl font-medium transition-all duration-200 text-sm whitespace-nowrap">
+                    <i data-lucide="search" class="w-4 h-4"></i>
                     <span>SEO</span>
                 </button>
+
                 <button @click="activeTab = 'social'"
                     :class="activeTab === 'social' ? 'bg-gradient-to-r from-accent-violet to-pink-500 text-white shadow-lg shadow-accent-violet/30' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800'"
-                    class="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl font-medium transition-all duration-200 whitespace-nowrap text-sm sm:text-base">
-                    <i data-lucide="share-2" class="w-4 h-4 flex-shrink-0"></i>
-                    <span class="hidden xs:inline">Sosial</span>
-                    <span class="xs:hidden">Social</span>
+                    class="flex-shrink-0 sm:flex-1 flex items-center justify-center gap-2 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl font-medium transition-all duration-200 text-sm whitespace-nowrap">
+                    <i data-lucide="share-2" class="w-4 h-4"></i>
+                    <span>Sosial</span>
                 </button>
+
                 <button @click="activeTab = 'appearance'"
                     :class="activeTab === 'appearance' ? 'bg-gradient-to-r from-accent-amber to-accent-rose text-white shadow-lg shadow-accent-amber/30' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800'"
-                    class="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl font-medium transition-all duration-200 whitespace-nowrap text-sm sm:text-base">
-                    <i data-lucide="palette" class="w-4 h-4 flex-shrink-0"></i>
+                    class="flex-shrink-0 sm:flex-1 flex items-center justify-center gap-2 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl font-medium transition-all duration-200 text-sm whitespace-nowrap">
+                    <i data-lucide="palette" class="w-4 h-4"></i>
                     <span>Tampilan</span>
                 </button>
+
                 <button @click="activeTab = 'media'"
                     :class="activeTab === 'media' ? 'bg-gradient-to-r from-teal-500 to-accent-cyan text-white shadow-lg shadow-teal-500/30' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800'"
-                    class="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl font-medium transition-all duration-200 whitespace-nowrap text-sm sm:text-base">
-                    <i data-lucide="image" class="w-4 h-4 flex-shrink-0"></i>
+                    class="flex-shrink-0 sm:flex-1 flex items-center justify-center gap-2 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl font-medium transition-all duration-200 text-sm whitespace-nowrap">
+                    <i data-lucide="image" class="w-4 h-4"></i>
                     <span>Media</span>
                 </button>
+
                 <button @click="activeTab = 'security'"
                     :class="activeTab === 'security' ? 'bg-gradient-to-r from-surface-800 to-surface-900 text-white shadow-lg shadow-surface-800/30' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800'"
-                    class="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl font-medium transition-all duration-200 whitespace-nowrap text-sm sm:text-base">
-                    <i data-lucide="shield" class="w-4 h-4 flex-shrink-0"></i>
+                    class="flex-shrink-0 sm:flex-1 flex items-center justify-center gap-2 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl font-medium transition-all duration-200 text-sm whitespace-nowrap">
+                    <i data-lucide="shield" class="w-4 h-4"></i>
                     <span>Keamanan</span>
                 </button>
             </div>
@@ -82,7 +87,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                         {{-- Site Name --}}
                         <div class="space-y-2">
                             <label for="site_name" class="block text-sm font-medium text-surface-700 dark:text-surface-300">
@@ -169,7 +174,7 @@
                         </div>
                     </div>
 
-                    <div class="space-y-6">
+                    <div class="space-y-4 sm:space-y-6">
                         {{-- Meta Title --}}
                         <div class="space-y-2">
                             <label for="meta_title" class="block text-sm font-medium text-surface-700 dark:text-surface-300">
@@ -220,7 +225,7 @@
                         </div>
 
                         {{-- SEO Preview --}}
-                        <div class="mt-8 p-6 bg-surface-100 dark:bg-surface-800 rounded-2xl">
+                        <div class="mt-6 sm:mt-8 p-4 sm:p-6 bg-surface-100 dark:bg-surface-800 rounded-2xl">
                             <h3 class="text-sm font-medium text-surface-700 dark:text-surface-300 mb-4">Preview di Google</h3>
                             <div class="space-y-1">
                                 <p class="text-lg text-primary-600 dark:text-primary-400 font-medium truncate" x-text="$refs.meta_title?.value || 'Judul halaman Anda'">Judul halaman Anda</p>
@@ -245,7 +250,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                         {{-- Facebook --}}
                         <div class="space-y-2">
                             <label for="facebook_url" class="block text-sm font-medium text-surface-700 dark:text-surface-300">
@@ -343,17 +348,17 @@
                     </div>
 
                     {{-- Theme Preset Grid --}}
-                    <div x-data="{ selectedTheme: '{{ $rawSettings['current_theme'] ?? 'indigo' }}' }" class="space-y-6">
+                    <div x-data="{ selectedTheme: '{{ $rawSettings['current_theme'] ?? 'indigo' }}' }" class="space-y-4 sm:space-y-6">
                         <input type="hidden" name="current_theme" x-model="selectedTheme">
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             {{-- Indigo Theme --}}
                             <label @click="selectedTheme = 'indigo'" 
                                 :class="selectedTheme === 'indigo' ? 'ring-2 ring-primary-500 ring-offset-2 dark:ring-offset-surface-900' : ''"
-                                class="relative cursor-pointer group rounded-2xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 p-5 hover:shadow-lg transition-all duration-300">
+                                class="relative cursor-pointer group rounded-2xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 p-4 sm:p-5 hover:shadow-lg transition-all duration-300">
                                 <input type="radio" name="theme_preset" value="indigo" class="sr-only" x-model="selectedTheme">
                                 <div class="flex items-start gap-4">
-                                    <div class="space-y-1.5">
+                                    <div class="space-y-1.5 flex-shrink-0">
                                         <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 shadow-lg shadow-indigo-500/30"></div>
                                         <div class="flex gap-1">
                                             <span class="w-3 h-3 rounded-full bg-indigo-400"></span>
@@ -820,7 +825,7 @@
                         </div>
 
                         {{-- Security Info Card --}}
-                        <div class="mt-8 p-6 bg-gradient-to-br from-surface-900 to-surface-800 rounded-2xl">
+                        <div class="mt-6 sm:mt-8 p-4 sm:p-6 bg-gradient-to-br from-surface-900 to-surface-800 rounded-2xl">
                             <div class="flex items-center gap-3 mb-4">
                                 <div class="w-10 h-10 rounded-xl bg-accent-emerald/20 flex items-center justify-center">
                                     <i data-lucide="shield-check" class="w-5 h-5 text-accent-emerald"></i>

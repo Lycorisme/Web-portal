@@ -424,13 +424,26 @@
     </div>
 
     {{-- Main Layout Container --}}
-    <div class="relative z-10 flex min-h-screen">
+    <div class="relative z-10 min-h-screen">
+
+        {{-- Mobile Sidebar Backdrop --}}
+        <div x-show="sidebarOpen" 
+             @click="sidebarOpen = false"
+             class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             x-cloak>
+        </div>
 
         {{-- Sidebar Component --}}
         @include('partials.sidebar')
 
         {{-- Main Content Area --}}
-        <main :class="sidebarOpen ? 'lg:ml-72' : 'lg:ml-20'" class="flex-1 transition-all duration-300 min-h-screen">
+        <main :class="sidebarOpen ? 'lg:ml-72' : 'lg:ml-20'" class="transition-all duration-300 min-h-screen pt-0">
 
             {{-- Header Component --}}
             @include('partials.header')
