@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\ProfileController;
 
 Route::get('/', function () {
     return redirect()->route('dashboard');
@@ -29,8 +30,16 @@ Route::post('/activity-log/{id}/restore', [ActivityLogController::class, 'restor
 Route::delete('/activity-log/{id}/force', [ActivityLogController::class, 'forceDelete'])->name('activity-log.force-delete');
 Route::post('/activity-log/clear-old', [ActivityLogController::class, 'clearOld'])->name('activity-log.clear-old');
 
+// Profile Routes
+Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+Route::put('/profile/info', [ProfileController::class, 'updateInfo'])->name('profile.info.update');
+Route::post('/profile/photo', [ProfileController::class, 'updatePhoto'])->name('profile.photo.update');
+Route::delete('/profile/photo', [ProfileController::class, 'deletePhoto'])->name('profile.photo.delete');
+Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
+
 // Logout route (placeholder - will be implemented with auth)
 Route::post('/logout', function () {
     // Auth::logout();
     return redirect('/');
 })->name('logout');
+
