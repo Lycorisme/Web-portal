@@ -387,7 +387,7 @@
                 <div class="bg-white dark:bg-surface-900 rounded-2xl border border-surface-200 dark:border-surface-800 p-5 shadow-sm flex-1">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="font-bold text-surface-900 dark:text-white">Aktivitas</h3>
-                         <a href="#" class="p-1 hover:bg-surface-100 dark:hover:bg-surface-800 rounded transition-colors">
+                         <a href="{{ route('activity-log') }}" class="p-1 hover:bg-surface-100 dark:hover:bg-surface-800 rounded transition-colors" title="Lihat Semua">
                             <i data-lucide="history" class="w-4 h-4 text-surface-400"></i>
                          </a>
                     </div>

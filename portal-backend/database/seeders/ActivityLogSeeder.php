@@ -2,11 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\ActivityLog;
 use App\Models\User;
-use App\Models\Article;
+use Illuminate\Database\Seeder;
 
 class ActivityLogSeeder extends Seeder
 {
@@ -15,83 +13,167 @@ class ActivityLogSeeder extends Seeder
      */
     public function run(): void
     {
+        // Get or create a test user
         $user = User::first();
 
         if (!$user) {
-            $this->command->info('No user found, skipping activity log seeder.');
-            return;
+            $user = User::create([
+                'name' => 'Admin',
+                'email' => 'admin@example.com',
+                'password' => bcrypt('password'),
+            ]);
         }
 
+        // Sample activity logs
         $activities = [
             [
+                'user_id' => $user->id,
                 'action' => ActivityLog::ACTION_LOGIN,
-                'description' => 'berhasil login ke sistem',
+                'description' => 'Login ke sistem portal',
                 'level' => ActivityLog::LEVEL_INFO,
+                'ip_address' => '192.168.1.100',
+                'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'url' => 'http://localhost/login',
                 'created_at' => now()->subMinutes(5),
             ],
             [
+                'user_id' => $user->id,
                 'action' => ActivityLog::ACTION_CREATE,
-                'description' => 'menambahkan berita baru "Peringatan HUT BTIKP"',
+                'description' => 'Membuat artikel baru: "Pembangunan Infrastruktur 2026"',
+                'subject_type' => 'App\\Models\\Article',
+                'subject_id' => 1,
                 'level' => ActivityLog::LEVEL_INFO,
-                'created_at' => now()->subMinutes(30),
+                'ip_address' => '192.168.1.100',
+                'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'url' => 'http://localhost/articles/create',
+                'new_values' => ['title' => 'Pembangunan Infrastruktur 2026', 'status' => 'draft'],
+                'created_at' => now()->subMinutes(10),
             ],
             [
+                'user_id' => $user->id,
                 'action' => ActivityLog::ACTION_UPDATE,
-                'description' => 'mengubah pengaturan situs',
+                'description' => 'Mengubah artikel: "Pembangunan Infrastruktur 2026"',
+                'subject_type' => 'App\\Models\\Article',
+                'subject_id' => 1,
                 'level' => ActivityLog::LEVEL_INFO,
+                'ip_address' => '192.168.1.100',
+                'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'url' => 'http://localhost/articles/1/edit',
+                'old_values' => ['status' => 'draft'],
+                'new_values' => ['status' => 'published'],
+                'created_at' => now()->subMinutes(15),
+            ],
+            [
+                'user_id' => $user->id,
+                'action' => ActivityLog::ACTION_SETTINGS_UPDATE,
+                'description' => 'Mengubah pengaturan situs',
+                'level' => ActivityLog::LEVEL_INFO,
+                'ip_address' => '192.168.1.100',
+                'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'url' => 'http://localhost/settings',
+                'old_values' => ['site_name' => 'Portal Lama'],
+                'new_values' => ['site_name' => 'Portal Berita BTIKP'],
                 'created_at' => now()->subHours(1),
             ],
             [
+                'user_id' => null,
                 'action' => ActivityLog::ACTION_LOGIN_FAILED,
-                'description' => 'percobaan login gagal dari IP 192.168.1.45',
+                'description' => 'Percobaan login gagal dengan email: unknown@example.com',
                 'level' => ActivityLog::LEVEL_WARNING,
+                'ip_address' => '10.0.0.55',
+                'user_agent' => 'Mozilla/5.0 (Linux; Android 10)',
+                'url' => 'http://localhost/login',
                 'created_at' => now()->subHours(2),
             ],
             [
+                'user_id' => $user->id,
                 'action' => ActivityLog::ACTION_DELETE,
-                'description' => 'menghapus berita lama',
-                'level' => ActivityLog::LEVEL_WARNING,
+                'description' => 'Menghapus artikel: "Berita Test"',
+                'subject_type' => 'App\\Models\\Article',
+                'subject_id' => 5,
+                'level' => ActivityLog::LEVEL_DANGER,
+                'ip_address' => '192.168.1.100',
+                'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'url' => 'http://localhost/articles/5',
+                'old_values' => ['title' => 'Berita Test', 'status' => 'draft'],
                 'created_at' => now()->subHours(3),
             ],
             [
-                'action' => ActivityLog::ACTION_UPDATE,
-                'description' => 'memperbarui artikel "Workshop Keamanan Siber"',
-                'level' => ActivityLog::LEVEL_INFO,
-                'created_at' => now()->subHours(5),
-            ],
-            [
-                'action' => ActivityLog::ACTION_CREATE,
-                'description' => 'membuat kategori baru "Teknologi"',
-                'level' => ActivityLog::LEVEL_INFO,
-                'created_at' => now()->subHours(8),
-            ],
-            [
-                'action' => ActivityLog::ACTION_SETTINGS_UPDATE,
-                'description' => 'mengubah konfigurasi email',
-                'level' => ActivityLog::LEVEL_INFO,
-                'created_at' => now()->subHours(12),
-            ],
-            [
-                'action' => ActivityLog::ACTION_LOGIN,
-                'description' => 'berhasil login ke sistem',
-                'level' => ActivityLog::LEVEL_INFO,
-                'created_at' => now()->subDay(),
-            ],
-            [
+                'user_id' => $user->id,
                 'action' => ActivityLog::ACTION_LOGOUT,
-                'description' => 'logout dari sistem',
+                'description' => 'Logout dari sistem',
                 'level' => ActivityLog::LEVEL_INFO,
-                'created_at' => now()->subDay()->addHours(8),
+                'ip_address' => '192.168.1.100',
+                'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'url' => 'http://localhost/logout',
+                'created_at' => now()->subHours(4),
+            ],
+            [
+                'user_id' => $user->id,
+                'action' => ActivityLog::ACTION_EXPORT,
+                'description' => 'Mengekspor data artikel ke PDF',
+                'level' => ActivityLog::LEVEL_INFO,
+                'ip_address' => '192.168.1.100',
+                'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'url' => 'http://localhost/articles/export',
+                'created_at' => now()->subDays(1),
+            ],
+            [
+                'user_id' => $user->id,
+                'action' => ActivityLog::ACTION_PASSWORD_CHANGE,
+                'description' => 'Mengubah password akun',
+                'level' => ActivityLog::LEVEL_WARNING,
+                'ip_address' => '192.168.1.100',
+                'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'url' => 'http://localhost/profile/password',
+                'created_at' => now()->subDays(2),
+            ],
+            [
+                'user_id' => $user->id,
+                'action' => ActivityLog::ACTION_CREATE,
+                'description' => 'Membuat kategori baru: "Teknologi"',
+                'subject_type' => 'App\\Models\\Category',
+                'subject_id' => 1,
+                'level' => ActivityLog::LEVEL_INFO,
+                'ip_address' => '192.168.1.100',
+                'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'url' => 'http://localhost/categories/create',
+                'new_values' => ['name' => 'Teknologi', 'slug' => 'teknologi'],
+                'created_at' => now()->subDays(3),
             ],
         ];
 
-        foreach ($activities as $activity) {
-            ActivityLog::create(array_merge($activity, [
+        // Add more random activities
+        for ($i = 0; $i < 50; $i++) {
+            $actions = [
+                ActivityLog::ACTION_CREATE,
+                ActivityLog::ACTION_UPDATE,
+                ActivityLog::ACTION_VIEW,
+                ActivityLog::ACTION_LOGIN,
+                ActivityLog::ACTION_LOGOUT,
+            ];
+            
+            $levels = [
+                ActivityLog::LEVEL_INFO,
+                ActivityLog::LEVEL_INFO,
+                ActivityLog::LEVEL_INFO,
+                ActivityLog::LEVEL_WARNING,
+            ];
+
+            $activities[] = [
                 'user_id' => $user->id,
-                'ip_address' => '127.0.0.1',
+                'action' => $actions[array_rand($actions)],
+                'description' => 'Aktivitas sistem - Log #' . ($i + 1),
+                'level' => $levels[array_rand($levels)],
+                'ip_address' => '192.168.1.' . rand(1, 255),
                 'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
                 'url' => 'http://localhost/dashboard',
-            ]));
+                'created_at' => now()->subDays(rand(0, 30))->subHours(rand(0, 23))->subMinutes(rand(0, 59)),
+            ];
+        }
+
+        foreach ($activities as $activity) {
+            ActivityLog::create($activity);
         }
 
         $this->command->info('Activity logs seeded successfully!');
