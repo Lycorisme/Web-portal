@@ -443,7 +443,7 @@
         @include('partials.sidebar')
 
         {{-- Main Content Area --}}
-        <main :class="sidebarOpen ? 'lg:ml-72' : 'lg:ml-20'" class="transition-all duration-300 min-h-screen pt-0">
+        <main id="main-content" :class="sidebarOpen ? 'lg:ml-72' : 'lg:ml-20'" class="transition-all duration-300 min-h-screen pt-0">
 
             {{-- Header Component --}}
             @include('partials.header')
