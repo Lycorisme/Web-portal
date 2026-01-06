@@ -141,7 +141,7 @@
 
                         {{-- Actions (Kebab Menu) - Simplified approach --}}
                         <td class="px-4 py-3 text-center relative">
-                            <div class="relative inline-block">
+                            <div class="relative inline-block kebab-menu-container">
                                 <button 
                                     @click="openMenu(log, $event)"
                                     class="p-2 hover:bg-surface-100 dark:hover:bg-surface-700/50 rounded-lg transition-colors"
