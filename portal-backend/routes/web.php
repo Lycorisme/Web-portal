@@ -6,6 +6,7 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ArticleController;
 
 Route::get('/', function () {
     return redirect()->route('dashboard');
@@ -54,6 +55,20 @@ Route::post('/categories/{id}/restore', [CategoryController::class, 'restore'])-
 Route::delete('/categories/{id}/force', [CategoryController::class, 'forceDelete'])->name('categories.force-delete');
 Route::post('/categories/{category}/toggle-active', [CategoryController::class, 'toggleActive'])->name('categories.toggle-active');
 Route::post('/categories/update-sort', [CategoryController::class, 'updateSort'])->name('categories.update-sort');
+
+// Article Routes
+Route::get('/articles', [ArticleController::class, 'index'])->name('articles');
+Route::get('/articles/data', [ArticleController::class, 'getData'])->name('articles.data');
+Route::post('/articles', [ArticleController::class, 'store'])->name('articles.store');
+Route::get('/articles/{article}', [ArticleController::class, 'show'])->name('articles.show');
+Route::put('/articles/{article}', [ArticleController::class, 'update'])->name('articles.update');
+Route::delete('/articles/bulk', [ArticleController::class, 'bulkDestroy'])->name('articles.bulk-destroy');
+Route::post('/articles/bulk-restore', [ArticleController::class, 'bulkRestore'])->name('articles.bulk-restore');
+Route::delete('/articles/bulk-force', [ArticleController::class, 'bulkForceDelete'])->name('articles.bulk-force-delete');
+Route::delete('/articles/{article}', [ArticleController::class, 'destroy'])->name('articles.destroy');
+Route::post('/articles/{id}/restore', [ArticleController::class, 'restore'])->name('articles.restore');
+Route::delete('/articles/{id}/force', [ArticleController::class, 'forceDelete'])->name('articles.force-delete');
+Route::post('/articles/{article}/toggle-status', [ArticleController::class, 'toggleStatus'])->name('articles.toggle-status');
 
 // Logout route (placeholder - will be implemented with auth)
 Route::post('/logout', function () {

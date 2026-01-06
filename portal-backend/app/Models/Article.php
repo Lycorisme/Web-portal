@@ -146,4 +146,13 @@ class Article extends Model
     {
         return $this->read_time . ' menit baca';
     }
+
+    /**
+     * Get the route key for the model.
+     * Using ID for admin panel operations.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'id';
+    }
 }
