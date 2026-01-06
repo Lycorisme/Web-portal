@@ -63,6 +63,14 @@
                 class="ml-auto bg-accent-cyan/20 text-accent-cyan text-xs font-semibold px-2 py-0.5 rounded-full">24</span>
         </a>
 
+        <a href="{{ route('categories') }}" wire:navigate
+            class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('categories*') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
+            :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
+            :title="!sidebarOpen ? 'Kategori' : ''">
+            <i data-lucide="folder-tree" class="w-5 h-5 flex-shrink-0"></i>
+            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Kategori</span>
+        </a>
+
         <a href="#"
             class="flex items-center rounded-xl transition-all duration-200 group text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50"
             :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
@@ -70,6 +78,7 @@
             <i data-lucide="image" class="w-5 h-5 flex-shrink-0"></i>
             <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Galeri</span>
         </a>
+
 
         <a href="#"
             class="flex items-center rounded-xl transition-all duration-200 group text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50"

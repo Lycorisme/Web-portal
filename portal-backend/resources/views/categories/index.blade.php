@@ -1,10 +1,9 @@
 @extends('layouts.app')
 
-@section('title', 'Activity Log')
+@section('title', 'Kelola Kategori')
 
 @section('content')
-<div x-data="activityLogApp()" x-init="init()">
-    {{-- Page Header --}}
+<div x-data="categoryApp()" x-init="init()">
     {{-- Enhanced Page Header --}}
     <div class="relative mb-8 animate-fade-in group">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
@@ -13,21 +12,21 @@
                 <div class="relative">
                     <div class="absolute inset-0 bg-gradient-to-tr from-theme-500/20 to-theme-300/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                     <div class="relative p-3.5 bg-white dark:bg-surface-800 rounded-2xl border border-surface-200/50 dark:border-surface-700/50 shadow-lg shadow-surface-100/50 dark:shadow-surface-900/50 ring-1 ring-white/50 dark:ring-surface-700/50">
-                        <i data-lucide="history" class="w-8 h-8 text-theme-600 dark:text-theme-400"></i>
+                        <i data-lucide="folder-tree" class="w-8 h-8 text-theme-600 dark:text-theme-400"></i>
                     </div>
                 </div>
                 
                 {{-- Title & Subtitle --}}
                 <div>
                     <h1 class="text-3xl font-bold text-surface-900 dark:text-white tracking-tight mb-2">
-                        Activity Log
+                        Kelola Kategori
                     </h1>
                     <nav class="flex items-center gap-2 text-sm font-medium text-surface-500 dark:text-surface-400">
                         <a href="{{ route('dashboard') }}" class="hover:text-theme-600 transition-colors flex items-center gap-1.5">
                             <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
                         </a>
                         <i data-lucide="chevron-right" class="w-3 h-3 text-surface-300 dark:text-surface-600"></i>
-                        <span class="text-theme-600 dark:text-theme-400">Riwayat Aktivitas</span>
+                        <span class="text-theme-600 dark:text-theme-400">Kategori</span>
                     </nav>
                 </div>
             </div>
@@ -97,62 +96,60 @@
         <div class="bg-white dark:bg-surface-900/50 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-surface-200/50 dark:border-surface-800/50 overflow-hidden">
             
             {{-- Filter Section --}}
-            @include('activity-log.partials.filter')
+            @include('categories.partials.filter')
 
             {{-- Table Section --}}
-            @include('activity-log.partials.table')
+            @include('categories.partials.table')
 
             {{-- Pagination Section --}}
-            @include('activity-log.partials.pagination')
+            @include('categories.partials.pagination')
         </div>
     </div>
 
     {{-- Bulk Action Bar --}}
-    @include('activity-log.partials.bulk-action-bar')
+    @include('categories.partials.bulk-action-bar')
+
+    {{-- Action Menu --}}
+    @include('categories.partials.action-menu')
+
+    {{-- Form Modal (Create/Edit) --}}
+    @include('categories.partials.form-modal')
 
     {{-- Detail Modal --}}
-    {{-- Auto-close menu on scroll --}}
-    @include('activity-log.partials.action-menu')
-
-    @include('activity-log.partials.detail-modal')
-    @include('activity-log.partials.auto-delete-modal')
+    @include('categories.partials.detail-modal')
 </div>
 @endsection
 
 @push('scripts')
 <script>
-function activityLogApp() {
+function categoryApp() {
     return {
         // State
-        logs: [],
+        categories: [],
         loading: false,
         
-        // Kebab Menu State
-        activeMenuLog: null,
+        // Menu State
+        activeMenuCategory: null,
         activeMenuButton: null,
         menuPosition: { top: 0, left: 0, placement: 'bottom' },
         
-        selectedLog: null,
-        selectedLog: null,
+        // Modal State
+        selectedCategory: null,
         showDetailModal: false,
-        showAutoDeleteModal: false,
-        autoDeleteSettings: {
-            enabled: false,
-            retention_days: 30,
-            schedule: 'daily',
-            time: '00:00'
+        showFormModal: false,
+        formMode: 'create', // 'create' or 'edit'
+        formData: {
+            id: null,
+            name: '',
+            slug: '',
+            description: '',
+            color: '#6366f1',
+            icon: 'folder',
+            sort_order: 0,
+            is_active: true,
         },
-        isSavingSettings: false,
-
-        init() {
-            this.$watch('showDetailModal', value => {
-                if (value) {
-                    document.body.classList.add('overflow-hidden');
-                } else {
-                    document.body.classList.remove('overflow-hidden');
-                }
-            });
-        },
+        formErrors: {},
+        formLoading: false,
 
         selectedIds: [],
         selectAll: false,
@@ -161,11 +158,7 @@ function activityLogApp() {
         // Filters
         filters: {
             search: '',
-            user_id: '',
-            action: '',
-            level: '',
-            date_from: '',
-            date_to: '',
+            is_active: '',
         },
 
         // Pagination
@@ -178,22 +171,19 @@ function activityLogApp() {
             to: 0,
         },
 
-        // Kebab menu
-        openKebabId: null,
-
         init() {
-            this.fetchLogs();
+            this.fetchCategories();
             
-            // Close kebab menu when clicking outside
+            // Close menu when clicking outside
             document.addEventListener('click', (e) => {
-                if (!e.target.closest('.kebab-menu-container')) {
-                    this.openKebabId = null;
+                if (!e.target.closest('.kebab-menu-container') && !e.target.closest('[x-show="activeMenuCategory"]')) {
+                    this.activeMenuCategory = null;
                 }
             });
 
-            // Update menu position on scroll to make it "stick"
+            // Update menu position on scroll
             const updatePositionHandler = () => {
-                if (this.activeMenuLog && this.activeMenuButton) {
+                if (this.activeMenuCategory && this.activeMenuButton) {
                     this.updateMenuPosition();
                 }
             };
@@ -202,12 +192,19 @@ function activityLogApp() {
             if (scrollContainer) {
                 scrollContainer.addEventListener('scroll', updatePositionHandler);
             }
-            // Listen for window scroll and resize to keep menu attached
             window.addEventListener('scroll', updatePositionHandler, true);
             window.addEventListener('resize', updatePositionHandler);
+
+            // Watch for modal body scroll lock
+            this.$watch('showDetailModal', value => {
+                document.body.classList.toggle('overflow-hidden', value);
+            });
+            this.$watch('showFormModal', value => {
+                document.body.classList.toggle('overflow-hidden', value);
+            });
         },
 
-        async fetchLogs() {
+        async fetchCategories() {
             this.loading = true;
             this.selectedIds = [];
             this.selectAll = false;
@@ -220,20 +217,19 @@ function activityLogApp() {
                     ...this.filters,
                 });
 
-                const response = await fetch(`{{ route('activity-log.data') }}?${params}`);
+                const response = await fetch(`{{ route('categories.data') }}?${params}`);
                 const result = await response.json();
 
                 if (result.success) {
-                    this.logs = result.data;
+                    this.categories = result.data;
                     this.meta = result.meta;
-                    // Re-initialize icons after DOM update
                     this.$nextTick(() => {
                         lucide.createIcons();
                     });
                 }
             } catch (error) {
-                console.error('Error fetching logs:', error);
-                showToast('error', 'Gagal memuat data log aktivitas');
+                console.error('Error fetching categories:', error);
+                showToast('error', 'Gagal memuat data kategori');
             } finally {
                 this.loading = false;
             }
@@ -241,23 +237,21 @@ function activityLogApp() {
 
         toggleTrash() {
             this.showTrash = !this.showTrash;
-            this.activeMenuLog = null; // Close menu on toggle
+            this.activeMenuCategory = null;
             this.applyFilters();
         },
 
-        // Floating Menu Logic
-        openMenu(log, event) {
-            // Prevent event from bubbling up
+        // Menu Logic
+        openMenu(category, event) {
             event.preventDefault();
             event.stopPropagation();
 
-            // If clicking the same button, close the menu
-            if (this.activeMenuLog && this.activeMenuLog.id === log.id) {
+            if (this.activeMenuCategory && this.activeMenuCategory.id === category.id) {
                 this.closeMenu();
                 return;
             }
 
-            this.activeMenuLog = log;
+            this.activeMenuCategory = category;
             this.activeMenuButton = event.currentTarget;
             this.updateMenuPosition();
         },
@@ -266,50 +260,39 @@ function activityLogApp() {
             if (!this.activeMenuButton) return;
 
             const rect = this.activeMenuButton.getBoundingClientRect();
-            
-            // Viewport info
             const viewportHeight = window.innerHeight;
             const spaceBelow = viewportHeight - rect.bottom;
-            const menuHeightEstimate = 220; // Safe estimate for menu height
+            const menuHeightEstimate = 220;
             
-            // Decide placement (Top or Bottom)
             let placement = 'bottom';
-            // Fixed positioning: rect.bottom is relative to viewport top
-            let topPos = rect.bottom + 4; 
+            let topPos = rect.bottom + 4;
 
-            // If not enough space below, and more space above, go UP
             if (spaceBelow < menuHeightEstimate && rect.top > menuHeightEstimate) {
                 placement = 'top';
-                // Fixed positioning: rect.top is relative to viewport top
-                topPos = rect.top - 4; // Position at top of button, CSS translateY(-100%) will lift it
+                topPos = rect.top - 4;
             }
 
             this.menuPosition = {
                 top: topPos,
-                // Fixed positioning: rect.right is relative to viewport left
-                left: rect.right - 192, // Align right edge (192px = w-48)
+                left: rect.right - 192,
                 placement: placement
             };
         },
 
         closeMenu() {
-            this.activeMenuLog = null;
+            this.activeMenuCategory = null;
             this.activeMenuButton = null;
         },
 
         applyFilters() {
             this.meta.current_page = 1;
-            this.fetchLogs();
+            this.fetchCategories();
         },
 
         resetFilters() {
             this.filters = {
                 search: '',
-                user_id: '',
-                action: '',
-                level: '',
-                date_from: '',
-                date_to: '',
+                is_active: '',
             };
             this.applyFilters();
         },
@@ -317,33 +300,120 @@ function activityLogApp() {
         goToPage(page) {
             if (page >= 1 && page <= this.meta.last_page) {
                 this.meta.current_page = page;
-                this.fetchLogs();
+                this.fetchCategories();
             }
         },
 
-        toggleKebab(id) {
-            this.openKebabId = this.openKebabId === id ? null : id;
+        // Form Modal Logic
+        openCreateModal() {
+            this.formMode = 'create';
+            this.formData = {
+                id: null,
+                name: '',
+                slug: '',
+                description: '',
+                color: '#6366f1',
+                icon: 'folder',
+                sort_order: 0,
+                is_active: true,
+            };
+            this.formErrors = {};
+            this.showFormModal = true;
+            this.$nextTick(() => lucide.createIcons());
         },
 
+        openEditModal(category) {
+            this.formMode = 'edit';
+            this.formData = {
+                id: category.id,
+                name: category.name,
+                slug: category.slug,
+                description: category.description || '',
+                color: category.color || '#6366f1',
+                icon: category.icon || 'folder',
+                sort_order: category.sort_order,
+                is_active: category.is_active,
+            };
+            this.formErrors = {};
+            this.showFormModal = true;
+            this.closeMenu();
+            this.$nextTick(() => lucide.createIcons());
+        },
+
+        closeFormModal() {
+            this.showFormModal = false;
+            this.formData = {
+                id: null,
+                name: '',
+                slug: '',
+                description: '',
+                color: '#6366f1',
+                icon: 'folder',
+                sort_order: 0,
+                is_active: true,
+            };
+            this.formErrors = {};
+        },
+
+        async submitForm() {
+            this.formLoading = true;
+            this.formErrors = {};
+
+            try {
+                const url = this.formMode === 'create' 
+                    ? '{{ route("categories.store") }}'
+                    : `/categories/${this.formData.id}`;
+                
+                const method = this.formMode === 'create' ? 'POST' : 'PUT';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(this.formData),
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    this.closeFormModal();
+                    this.fetchCategories();
+                    showToast('success', result.message);
+                } else if (response.status === 422) {
+                    // Validation errors
+                    this.formErrors = result.errors || {};
+                    showToast('error', 'Mohon periksa kembali data yang diinput.');
+                } else {
+                    showToast('error', result.message || 'Terjadi kesalahan');
+                }
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                showToast('error', 'Gagal menyimpan kategori');
+            } finally {
+                this.formLoading = false;
+            }
+        },
+
+        // Detail Modal
         async viewDetail(id) {
-            this.openKebabId = null;
+            this.closeMenu();
             
             try {
                 showLoading('Memuat detail...');
-                const response = await fetch(`/activity-log/${id}`);
+                const response = await fetch(`/categories/${id}`);
                 const result = await response.json();
 
                 if (result.success) {
-                    this.selectedLog = result.data;
+                    this.selectedCategory = result.data;
                     this.showDetailModal = true;
-                    // Re-initialize icons in modal
-                    this.$nextTick(() => {
-                        lucide.createIcons();
-                    });
+                    this.$nextTick(() => lucide.createIcons());
                 }
             } catch (error) {
                 console.error('Error fetching detail:', error);
-                showToast('error', 'Gagal memuat detail log');
+                showToast('error', 'Gagal memuat detail kategori');
             } finally {
                 closeLoading();
             }
@@ -351,71 +421,20 @@ function activityLogApp() {
 
         closeDetailModal() {
             this.showDetailModal = false;
-            this.selectedLog = null;
+            this.selectedCategory = null;
         },
 
-        async openAutoDeleteModal() {
-            try {
-                showLoading('Memuat pengaturan...');
-                const response = await fetch('{{ route('activity-log.settings') }}');
-                const result = await response.json();
-
-                if (result.success) {
-                    this.autoDeleteSettings = result.data;
-                    this.showAutoDeleteModal = true;
-                } else {
-                    showToast('error', 'Gagal memuat pengaturan: ' + (result.message || 'Error Unknown'));
-                }
-            } catch (error) {
-                console.error('Error fetching settings:', error);
-                showToast('error', 'Terjadi kesalahan saat memuat pengaturan.');
-            } finally {
-                closeLoading();
-            }
-        },
-
-        closeAutoDeleteModal() {
-            this.showAutoDeleteModal = false;
-        },
-
-        async saveAutoDeleteSettings() {
-            this.isSavingSettings = true;
-            try {
-                const response = await fetch('{{ route('activity-log.settings.update') }}', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json',
-                    },
-                    body: JSON.stringify(this.autoDeleteSettings),
-                });
-                const result = await response.json();
-
-                if (result.success) {
-                    showToast('success', result.message);
-                    this.closeAutoDeleteModal();
-                } else {
-                    showToast('error', result.message || 'Gagal menyimpan pengaturan.');
-                }
-            } catch (error) {
-                console.error('Error saving settings:', error);
-                showToast('error', 'Terjadi kesalahan saat menyimpan pengaturan.');
-            } finally {
-                this.isSavingSettings = false;
-            }
-        },
-
-        async deleteLog(id) {
-            this.openKebabId = null;
+        // Delete Actions
+        async deleteCategory(id) {
+            this.closeMenu();
 
             showConfirm(
-                'Hapus Log?',
-                'Log aktivitas ini akan dihapus secara permanen.',
+                'Hapus Kategori?',
+                'Kategori ini akan dipindahkan ke tong sampah.',
                 async () => {
                     try {
                         showLoading('Menghapus...');
-                        const response = await fetch(`/activity-log/${id}`, {
+                        const response = await fetch(`/categories/${id}`, {
                             method: 'DELETE',
                             headers: {
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -425,14 +444,14 @@ function activityLogApp() {
                         const result = await response.json();
 
                         if (result.success) {
-                            this.fetchLogs();
+                            this.fetchCategories();
                             showToast('success', result.message);
                         } else {
                             showToast('error', result.message);
                         }
                     } catch (error) {
-                        console.error('Error deleting log:', error);
-                        showToast('error', 'Gagal menghapus log');
+                        console.error('Error deleting category:', error);
+                        showToast('error', 'Gagal menghapus kategori');
                     } finally {
                         closeLoading();
                     }
@@ -441,27 +460,125 @@ function activityLogApp() {
             );
         },
 
+        async restoreCategory(id) {
+            this.closeMenu();
+            showConfirm(
+                'Pulihkan Kategori?',
+                'Kategori akan dikembalikan ke daftar aktif.',
+                async () => {
+                    try {
+                        showLoading('Memulihkan...');
+                        const response = await fetch(`/categories/${id}/restore`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'Accept': 'application/json',
+                            },
+                        });
+                        const result = await response.json();
+
+                        if (result.success) {
+                            this.fetchCategories();
+                            showToast('success', result.message);
+                        } else {
+                            showToast('error', result.message);
+                        }
+                    } catch (error) {
+                        console.error('Error restoring category:', error);
+                        showToast('error', 'Gagal memulihkan kategori');
+                    } finally {
+                        closeLoading();
+                    }
+                },
+                { icon: 'info', confirmText: 'Ya, Pulihkan!' }
+            );
+        },
+
+        async forceDeleteCategory(id) {
+            this.closeMenu();
+            showConfirm(
+                'Hapus Permanen?',
+                'Data yang dihapus permanen TIDAK BISA dipulihkan kembali.',
+                async () => {
+                    try {
+                        showLoading('Menghapus Permanen...');
+                        const response = await fetch(`/categories/${id}/force`, {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'Accept': 'application/json',
+                            },
+                        });
+                        const result = await response.json();
+
+                        if (result.success) {
+                            this.fetchCategories();
+                            showToast('success', result.message);
+                        } else {
+                            showToast('error', result.message);
+                        }
+                    } catch (error) {
+                        console.error('Error force deleting category:', error);
+                        showToast('error', 'Gagal menghapus kategori');
+                    } finally {
+                        closeLoading();
+                    }
+                },
+                { icon: 'warning', confirmText: 'Hapus Permanen!', cancelText: 'Batal' }
+            );
+        },
+
+        // Toggle Active Status
+        async toggleActive(category) {
+            try {
+                const response = await fetch(`/categories/${category.id}/toggle-active`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    // Update local state
+                    const idx = this.categories.findIndex(c => c.id === category.id);
+                    if (idx !== -1) {
+                        this.categories[idx].is_active = result.is_active;
+                    }
+                    showToast('success', result.message);
+                } else {
+                    showToast('error', result.message);
+                }
+            } catch (error) {
+                console.error('Error toggling active:', error);
+                showToast('error', 'Gagal mengubah status');
+            }
+        },
+
+        // Selection
         toggleSelectAll() {
             if (this.selectAll) {
-                this.selectedIds = this.logs.map(log => log.id);
+                this.selectedIds = this.categories.map(c => c.id);
             } else {
                 this.selectedIds = [];
             }
         },
 
+        // Bulk Actions
         async bulkDelete() {
             if (this.selectedIds.length === 0) {
-                showToast('warning', 'Pilih log yang ingin dihapus');
+                showToast('warning', 'Pilih kategori yang ingin dihapus');
                 return;
             }
 
             showConfirm(
-                `Hapus ${this.selectedIds.length} Log?`,
-                'Semua log yang dipilih akan dihapus secara permanen.',
+                `Hapus ${this.selectedIds.length} Kategori?`,
+                'Semua kategori yang dipilih akan dipindahkan ke tong sampah.',
                 async () => {
                     try {
                         showLoading('Menghapus...');
-                        const response = await fetch('{{ route('activity-log.bulk-destroy') }}', {
+                        const response = await fetch('{{ route("categories.bulk-destroy") }}', {
                             method: 'DELETE',
                             headers: {
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -473,14 +590,14 @@ function activityLogApp() {
                         const result = await response.json();
 
                         if (result.success) {
-                            this.fetchLogs();
+                            this.fetchCategories();
                             showToast('success', result.message);
                         } else {
                             showToast('error', result.message);
                         }
                     } catch (error) {
                         console.error('Error bulk deleting:', error);
-                        showToast('error', 'Gagal menghapus log');
+                        showToast('error', 'Gagal menghapus kategori');
                     } finally {
                         closeLoading();
                     }
@@ -489,56 +606,78 @@ function activityLogApp() {
             );
         },
 
-        getLevelBadgeClass(level) {
-            const classes = {
-                'info': 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400',
-                'warning': 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400',
-                'danger': 'bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400',
-                'critical': 'bg-red-600 text-white',
-            };
-            return classes[level] || 'bg-surface-100 text-surface-700';
+        async bulkRestore() {
+            if (this.selectedIds.length === 0) return;
+
+            showConfirm(
+                `Pulihkan ${this.selectedIds.length} Kategori?`,
+                'Item terpilih akan dikembalikan ke daftar aktif.',
+                async () => {
+                    try {
+                        showLoading('Memulihkan...');
+                        const response = await fetch('{{ route("categories.bulk-restore") }}', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ ids: this.selectedIds }),
+                        });
+                        const result = await response.json();
+
+                        if (result.success) {
+                            this.fetchCategories();
+                            showToast('success', result.message);
+                        } else {
+                            showToast('error', result.message);
+                        }
+                    } catch (error) {
+                        console.error('Error bulk restoring:', error);
+                        showToast('error', 'Gagal memulihkan kategori');
+                    } finally {
+                        closeLoading();
+                    }
+                },
+                { icon: 'info', confirmText: 'Ya, Pulihkan Semua!' }
+            );
         },
 
-        getActionBadgeClass(action) {
-            const actionColors = {
-                'CREATE': 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400',
-                'UPDATE': 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400',
-                'DELETE': 'bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400',
-                'LOGIN': 'bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-400',
-                'LOGOUT': 'bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-400',
-                'LOGIN_FAILED': 'bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400',
-            };
-            return actionColors[action] || 'bg-surface-100 text-surface-700 dark:bg-surface-700 dark:text-surface-300';
-        },
+        async bulkForceDelete() {
+            if (this.selectedIds.length === 0) return;
 
-        formatJson(data) {
-            if (!data) return '-';
-            try {
-                return JSON.stringify(data, null, 2);
-            } catch {
-                return String(data);
-            }
-        },
+            showConfirm(
+                `Hapus Permanen ${this.selectedIds.length} Kategori?`,
+                'PERINGATAN: Data akan hilang selamanya dan tidak bisa dikembalikan!',
+                async () => {
+                    try {
+                        showLoading('Menghapus Permanen...');
+                        const response = await fetch('{{ route("categories.bulk-force-delete") }}', {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ ids: this.selectedIds }),
+                        });
+                        const result = await response.json();
 
-        getAllKeys(oldVal, newVal) {
-            const keys = new Set([
-                ...Object.keys(oldVal || {}), 
-                ...Object.keys(newVal || {})
-            ]);
-            return Array.from(keys);
-        },
-
-        formatKey(key) {
-            // "first_name" -> "First Name"
-            return key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-        },
-
-        formatValue(value) {
-            if (value === null || value === undefined || value === '') return '-';
-            if (typeof value === 'boolean') return value ? 'Ya' : 'Tidak';
-            if (Array.isArray(value)) return value.join(', ');
-            if (typeof value === 'object') return JSON.stringify(value);
-            return value;
+                        if (result.success) {
+                            this.fetchCategories();
+                            showToast('success', result.message);
+                        } else {
+                            showToast('error', result.message);
+                        }
+                    } catch (error) {
+                        console.error('Error bulk force deleting:', error);
+                        showToast('error', 'Gagal menghapus kategori');
+                    } finally {
+                        closeLoading();
+                    }
+                },
+                { icon: 'warning', confirmText: 'Ya, Hapus Permanen!' }
+            );
         },
 
         // Pagination helpers
@@ -569,148 +708,38 @@ function activityLogApp() {
             return pages;
         },
 
-        // Soft Delete & Restore Functions
-        async restoreLog(id) {
-            this.openKebabId = null;
-            showConfirm(
-                'Pulihkan Log?',
-                'Log aktivitas akan dikembalikan ke daftar aktif.',
-                async () => {
-                    try {
-                        showLoading('Memulihkan...');
-                        const response = await fetch(`/activity-log/${id}/restore`, {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                'Accept': 'application/json',
-                            },
-                        });
-                        const result = await response.json();
-
-                        if (result.success) {
-                            this.fetchLogs();
-                            showToast('success', result.message);
-                        } else {
-                            showToast('error', result.message);
-                        }
-                    } catch (error) {
-                        console.error('Error restoring log:', error);
-                        showToast('error', 'Gagal memulihkan log');
-                    } finally {
-                        closeLoading();
-                    }
-                },
-                { icon: 'info', confirmText: 'Ya, Pulihkan!' }
-            );
+        // Generate slug from name
+        generateSlug() {
+            if (this.formData.name) {
+                this.formData.slug = this.formData.name
+                    .toLowerCase()
+                    .replace(/[^a-z0-9\s-]/g, '')
+                    .replace(/\s+/g, '-')
+                    .replace(/-+/g, '-')
+                    .trim();
+            }
         },
 
-        async forceDeleteLog(id) {
-            this.openKebabId = null;
-            showConfirm(
-                'Hapus Permanen?',
-                'Data yang dihapus permanen TIDAK BISA dipulihkan kembali.',
-                async () => {
-                    try {
-                        showLoading('Menghapus Permanen...');
-                        const response = await fetch(`/activity-log/${id}/force`, {
-                            method: 'DELETE',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                'Accept': 'application/json',
-                            },
-                        });
-                        const result = await response.json();
+        // Predefined colors
+        colorOptions: [
+            '#6366f1', // Indigo
+            '#8b5cf6', // Violet
+            '#ec4899', // Pink
+            '#ef4444', // Red
+            '#f97316', // Orange
+            '#eab308', // Yellow
+            '#22c55e', // Green
+            '#14b8a6', // Teal
+            '#06b6d4', // Cyan
+            '#3b82f6', // Blue
+        ],
 
-                        if (result.success) {
-                            this.fetchLogs();
-                            showToast('success', result.message);
-                        } else {
-                            showToast('error', result.message);
-                        }
-                    } catch (error) {
-                        console.error('Error force deleting log:', error);
-                        showToast('error', 'Gagal menghapus log');
-                    } finally {
-                        closeLoading();
-                    }
-                },
-                { icon: 'warning', confirmText: 'Hapus Permanen!', cancelText: 'Batal' }
-            );
-        },
-
-        async bulkRestore() {
-            if (this.selectedIds.length === 0) return;
-
-            showConfirm(
-                `Pulihkan ${this.selectedIds.length} Log?`,
-                'Item terpilih akan dikembalikan ke daftar aktif.',
-                async () => {
-                    try {
-                        showLoading('Memulihkan...');
-                        const response = await fetch('{{ route('activity-log.bulk-restore') }}', {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                'Accept': 'application/json',
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({ ids: this.selectedIds }),
-                        });
-                        const result = await response.json();
-
-                        if (result.success) {
-                            this.fetchLogs();
-                            showToast('success', result.message);
-                        } else {
-                            showToast('error', result.message);
-                        }
-                    } catch (error) {
-                        console.error('Error bulk restoring:', error);
-                        showToast('error', 'Gagal memulihkan log');
-                    } finally {
-                        closeLoading();
-                    }
-                },
-                { icon: 'info', confirmText: 'Ya, Pulihkan Semua!' }
-            );
-        },
-
-        async bulkForceDelete() {
-            if (this.selectedIds.length === 0) return;
-
-            showConfirm(
-                `Hapus Permanen ${this.selectedIds.length} Log?`,
-                'PERINGATAN: Data akan hilang selamanya dan tidak bisa dikembalikan!',
-                async () => {
-                    try {
-                        showLoading('Menghapus Permanen...');
-                        const response = await fetch('{{ route('activity-log.bulk-force-delete') }}', {
-                            method: 'DELETE',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                'Accept': 'application/json',
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({ ids: this.selectedIds }),
-                        });
-                        const result = await response.json();
-
-                        if (result.success) {
-                            this.fetchLogs();
-                            showToast('success', result.message);
-                        } else {
-                            showToast('error', result.message);
-                        }
-                    } catch (error) {
-                        console.error('Error bulk force deleting:', error);
-                        showToast('error', 'Gagal menghapus log');
-                    } finally {
-                        closeLoading();
-                    }
-                },
-                { icon: 'warning', confirmText: 'Ya, Hapus Permanen!' }
-            );
-        }
+        // Predefined icons
+        iconOptions: [
+            'folder', 'tag', 'bookmark', 'star', 'heart', 'flag',
+            'newspaper', 'megaphone', 'bell', 'info', 'alert-circle',
+            'file-text', 'image', 'video', 'music', 'calendar',
+        ],
     }
 }
 </script>

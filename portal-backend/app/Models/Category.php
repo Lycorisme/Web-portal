@@ -52,9 +52,10 @@ class Category extends Model
 
     /**
      * Get the route key for the model.
+     * Using ID for admin panel operations.
      */
     public function getRouteKeyName(): string
     {
-        return 'slug';
+        return 'id';
     }
 }

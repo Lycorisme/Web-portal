@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
 use App\Models\User;
+use App\Models\SiteSetting;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
@@ -321,6 +322,51 @@ class ActivityLogController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal menghapus permanen log: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+    /**
+     * Get auto-delete settings.
+     */
+    public function getSettings(): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'enabled' => SiteSetting::get('activity_log_cleanup_enabled', false),
+                'retention_days' => (int) SiteSetting::get('activity_log_retention_days', 30),
+                'schedule' => SiteSetting::get('activity_log_cleanup_schedule', 'daily'),
+                'time' => SiteSetting::get('activity_log_cleanup_time', '00:00'),
+            ],
+        ]);
+    }
+
+    /**
+     * Update auto-delete settings.
+     */
+    public function updateSettings(Request $request): JsonResponse
+    {
+        $request->validate([
+            'enabled' => 'required|boolean',
+            'retention_days' => 'required|integer|min:1|max:3650',
+            'schedule' => 'required|string|in:daily,weekly,monthly',
+            'time' => 'required|date_format:H:i',
+        ]);
+
+        try {
+            SiteSetting::set('activity_log_cleanup_enabled', $request->enabled);
+            SiteSetting::set('activity_log_retention_days', $request->retention_days);
+            SiteSetting::set('activity_log_cleanup_schedule', $request->schedule);
+            SiteSetting::set('activity_log_cleanup_time', $request->time);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Pengaturan auto-delete berhasil disimpan.',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menyimpan pengaturan: ' . $e->getMessage(),
             ], 500);
         }
     }

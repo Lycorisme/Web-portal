@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\CategoryController;
 
 Route::get('/', function () {
     return redirect()->route('dashboard');
@@ -19,6 +20,8 @@ Route::put('/settings', [SettingsController::class, 'update'])->name('settings.u
 Route::put('/settings/{group}', [SettingsController::class, 'updateGroup'])->name('settings.update.group');
 
 // Activity Log Routes
+Route::get('/activity-log/settings', [ActivityLogController::class, 'getSettings'])->name('activity-log.settings');
+Route::put('/activity-log/settings', [ActivityLogController::class, 'updateSettings'])->name('activity-log.settings.update');
 Route::get('/activity-log', [ActivityLogController::class, 'index'])->name('activity-log');
 Route::get('/activity-log/data', [ActivityLogController::class, 'getData'])->name('activity-log.data');
 Route::get('/activity-log/{activityLog}', [ActivityLogController::class, 'show'])->name('activity-log.show');
@@ -37,9 +40,23 @@ Route::post('/profile/photo', [ProfileController::class, 'updatePhoto'])->name('
 Route::delete('/profile/photo', [ProfileController::class, 'deletePhoto'])->name('profile.photo.delete');
 Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
 
+// Category Routes
+Route::get('/categories', [CategoryController::class, 'index'])->name('categories');
+Route::get('/categories/data', [CategoryController::class, 'getData'])->name('categories.data');
+Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
+Route::get('/categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
+Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+Route::delete('/categories/bulk', [CategoryController::class, 'bulkDestroy'])->name('categories.bulk-destroy');
+Route::post('/categories/bulk-restore', [CategoryController::class, 'bulkRestore'])->name('categories.bulk-restore');
+Route::delete('/categories/bulk-force', [CategoryController::class, 'bulkForceDelete'])->name('categories.bulk-force-delete');
+Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+Route::post('/categories/{id}/restore', [CategoryController::class, 'restore'])->name('categories.restore');
+Route::delete('/categories/{id}/force', [CategoryController::class, 'forceDelete'])->name('categories.force-delete');
+Route::post('/categories/{category}/toggle-active', [CategoryController::class, 'toggleActive'])->name('categories.toggle-active');
+Route::post('/categories/update-sort', [CategoryController::class, 'updateSort'])->name('categories.update-sort');
+
 // Logout route (placeholder - will be implemented with auth)
 Route::post('/logout', function () {
     // Auth::logout();
     return redirect('/');
 })->name('logout');
-
