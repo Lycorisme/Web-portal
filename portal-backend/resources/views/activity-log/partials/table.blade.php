@@ -1,5 +1,5 @@
 {{-- Table Section --}}
-<div class="relative" style="overflow: visible;">
+<div class="relative pt-4" style="overflow: visible;">
     {{-- Loading Overlay --}}
     <div 
         x-show="loading"

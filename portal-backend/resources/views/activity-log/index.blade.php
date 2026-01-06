@@ -35,7 +35,7 @@
             {{-- Modern Server Time Widget --}}
             <div class="hidden lg:flex items-center gap-4 px-5 py-2.5 bg-white/50 dark:bg-surface-800/50 backdrop-blur-md border border-surface-200/60 dark:border-surface-700/60 rounded-2xl shadow-lg shadow-surface-200/10 dark:shadow-surface-900/10 hover:shadow-xl hover:scale-[1.02] hover:bg-white dark:hover:bg-surface-800 hover:border-theme-500/20 dark:hover:border-theme-500/20 transition-all duration-300 group/clock"
                  x-data="{
-                    timestamp: {{ now()->timestamp * 1000 }},
+                    serverOffset: {{ now()->timestamp * 1000 }} - Date.now(),
                     hours: '00',
                     minutes: '00',
                     seconds: '00',
@@ -44,12 +44,14 @@
                     init() {
                         this.update();
                         setInterval(() => {
-                            this.timestamp += 1000;
                             this.update();
                         }, 1000);
                     },
+                    getServerTime() {
+                        return Date.now() + this.serverOffset;
+                    },
                     update() {
-                        const date = new Date(this.timestamp);
+                        const date = new Date(this.getServerTime());
                         const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                         const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
                         

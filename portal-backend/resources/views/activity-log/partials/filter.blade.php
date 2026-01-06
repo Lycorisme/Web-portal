@@ -1,5 +1,5 @@
 {{-- Filter Section --}}
-<div class="p-4 sm:p-6 pb-10 mb-0 border-b border-surface-200/50 dark:border-surface-800/50">
+<div class="p-4 sm:p-6 pb-6 mb-6 border-b border-surface-200/50 dark:border-surface-800/50">
     {{-- Top Row: Per Page Selector & Search --}}
     {{-- Top Row: Per Page Selector & Search --}}
     <div class="flex flex-row items-center gap-4 mb-4">
