@@ -36,13 +36,16 @@
     </div>
 
     {{-- Navigation Menu --}}
-    <nav class="flex-1 p-3 space-y-1.5 overflow-y-auto overflow-x-hidden">
+    <nav id="sidebar-nav" 
+        x-on:scroll.debounce.50ms="sessionStorage.setItem('sidebarScroll', $el.scrollTop)"
+        x-init="$nextTick(() => { $el.scrollTop = sessionStorage.getItem('sidebarScroll') || 0 })"
+        class="flex-1 p-3 space-y-1.5 overflow-y-auto overflow-x-hidden">
         {{-- Menu Utama --}}
         <p x-show="sidebarOpen" x-cloak
             class="px-3 text-xs font-semibold text-surface-400 dark:text-surface-500 uppercase tracking-wider mb-3 mt-2 transition-opacity duration-300">
             Menu Utama</p>
 
-        <a href="{{ route('dashboard') }}"
+        <a href="{{ route('dashboard') }}" wire:navigate
             class="flex items-center rounded-xl transition-all duration-200 group relative overflow-hidden {{ request()->routeIs('dashboard') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
             :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
             :title="!sidebarOpen ? 'Dashboard' : ''">
@@ -85,7 +88,7 @@
             class="px-3 text-xs font-semibold text-surface-400 dark:text-surface-500 uppercase tracking-wider mb-3 transition-opacity duration-300">
             Keamanan</p>
 
-        <a href="{{ route('activity-log') }}"
+        <a href="{{ route('activity-log') }}" wire:navigate
             class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('activity-log*') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
             :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
             :title="!sidebarOpen ? 'Activity Log' : ''">
@@ -110,7 +113,7 @@
             class="px-3 text-xs font-semibold text-surface-400 dark:text-surface-500 uppercase tracking-wider mb-3 transition-opacity duration-300">
             Pengaturan</p>
 
-        <a href="{{ route('settings') }}"
+        <a href="{{ route('settings') }}" wire:navigate
             class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('settings') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
             :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
             :title="!sidebarOpen ? 'Pengaturan Situs' : ''">
@@ -118,7 +121,7 @@
             <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Pengaturan Situs</span>
         </a>
 
-        <a href="{{ route('profile') }}"
+        <a href="{{ route('profile') }}" wire:navigate
             class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('profile*') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
             :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
             :title="!sidebarOpen ? 'Profil Saya' : ''">
@@ -148,5 +151,3 @@
         </div>
     </div>
 </aside>
-
-

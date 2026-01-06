@@ -130,12 +130,12 @@
                         <p class="text-sm text-surface-500">{{ $currentUser?->email ?? 'admin@portal.id' }}</p>
                     </div>
                     <div class="p-2">
-                        <a href="{{ route('profile') }}"
+                        <a href="{{ route('profile') }}" wire:navigate
                             class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors">
                             <i data-lucide="user" class="w-4 h-4 text-surface-500"></i>
                             <span class="text-sm text-surface-700 dark:text-surface-300">Profil Saya</span>
                         </a>
-                        <a href="{{ route('settings') }}"
+                        <a href="{{ route('settings') }}" wire:navigate
                             class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors">
                             <i data-lucide="settings" class="w-4 h-4 text-surface-500"></i>
                             <span class="text-sm text-surface-700 dark:text-surface-300">Pengaturan</span>

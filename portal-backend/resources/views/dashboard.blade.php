@@ -415,7 +415,7 @@
                             </div>
                             <span class="text-xs font-medium text-surface-700 dark:text-surface-300">Galeri</span>
                         </a>
-                        <a href="{{ route('settings') }}" class="flex flex-col items-center gap-2 p-3 rounded-xl bg-surface-50 dark:bg-surface-800 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors group text-center">
+                        <a href="{{ route('settings') }}" wire:navigate class="flex flex-col items-center gap-2 p-3 rounded-xl bg-surface-50 dark:bg-surface-800 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors group text-center">
                             <div class="w-10 h-10 rounded-lg bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
                                 <i data-lucide="settings" class="w-5 h-5"></i>
                             </div>
@@ -466,7 +466,7 @@
                 <div class="bg-white dark:bg-surface-900 rounded-2xl border border-surface-200 dark:border-surface-800 p-5 shadow-sm flex-1">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="font-bold text-surface-900 dark:text-white">Aktivitas</h3>
-                         <a href="{{ route('activity-log') }}" class="p-1 hover:bg-surface-100 dark:hover:bg-surface-800 rounded transition-colors" title="Lihat Semua">
+                         <a href="{{ route('activity-log') }}" wire:navigate class="p-1 hover:bg-surface-100 dark:hover:bg-surface-800 rounded transition-colors" title="Lihat Semua">
                             <i data-lucide="history" class="w-4 h-4 text-surface-400"></i>
                          </a>
                     </div>

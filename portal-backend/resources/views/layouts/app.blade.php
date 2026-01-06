@@ -468,6 +468,7 @@
                 themePreset: localStorage.getItem('themePreset') || '{{ \App\Models\SiteSetting::get("current_theme", "indigo") }}',
                 showNotification: false,
                 showProfile: false,
+                currentPath: window.location.pathname,
 
                 init() {
                     // Apply dark mode
@@ -475,6 +476,11 @@
                     
                     // Apply theme
                     this.applyTheme();
+
+                    // Listen for Livewire navigation
+                    document.addEventListener('livewire:navigated', () => {
+                        this.currentPath = window.location.pathname;
+                    });
 
                     // Watch for dark mode changes
                     this.$watch('darkMode', (value) => {
