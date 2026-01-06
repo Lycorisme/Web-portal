@@ -31,7 +31,7 @@
                 x-transition:leave="ease-in duration-200"
                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-surface-900 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl max-h-[90vh] flex flex-col"
+                class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-surface-900 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl flex flex-col"
                 @click.stop
             >
                 {{-- Content when selectedArticle exists --}}
@@ -43,7 +43,8 @@
                             x-show="selectedArticle?.thumbnail"
                             :src="selectedArticle?.thumbnail" 
                             :alt="selectedArticle?.title" 
-                            class="w-full h-full object-cover"
+                            class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-700"
+                            @click="window.open(selectedArticle?.thumbnail, '_blank')"
                         >
                         
                         {{-- Overlay --}}
@@ -72,7 +73,7 @@
                     </div>
 
                     {{-- Content --}}
-                    <div class="p-6 space-y-5 overflow-y-auto flex-1">
+                    <div class="p-6 space-y-5">
                         {{-- Meta Info Row --}}
                         <div class="flex flex-wrap items-center gap-3">
                             {{-- Status Badge --}}

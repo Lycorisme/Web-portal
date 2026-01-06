@@ -24,6 +24,15 @@
             <span>Lihat Detail</span>
         </button>
 
+        <a 
+            x-show="activeMenuArticle && !activeMenuArticle.deleted_at"
+            :href="`{{ route('activity-log') }}?subject_type=App\\Models\\Article&subject_id=${activeMenuArticle.id}`"
+            class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-surface-700 dark:text-surface-300 hover:bg-surface-50 dark:hover:bg-surface-700/50 hover:text-theme-600 dark:hover:text-theme-400 transition-colors group"
+        >
+            <i data-lucide="history" class="w-4 h-4 text-surface-400 group-hover:text-theme-500 transition-colors"></i>
+            <span>Log Aktivitas</span>
+        </a>
+
         <button 
             x-show="activeMenuArticle && !activeMenuArticle.deleted_at"
             @click="openEditModal(activeMenuArticle)"

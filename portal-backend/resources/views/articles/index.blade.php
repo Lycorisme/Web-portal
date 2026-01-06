@@ -147,7 +147,8 @@ function articleApp() {
             slug: '',
             excerpt: '',
             content: '',
-            thumbnail: '',
+            thumbnail: null, // Changed to null for file object
+            thumbnail_url: '', // For previewing existing or new image
             category_id: '',
             read_time: null,
             status: 'draft',
@@ -323,7 +324,8 @@ function articleApp() {
                 slug: '',
                 excerpt: '',
                 content: '',
-                thumbnail: '',
+                thumbnail: null,
+                thumbnail_url: '',
                 category_id: '',
                 read_time: null,
                 status: 'draft',
@@ -345,7 +347,8 @@ function articleApp() {
                 slug: article.slug,
                 excerpt: article.excerpt || '',
                 content: article.content || '',
-                thumbnail: article.thumbnail || '',
+                thumbnail: null, // Reset file input
+                thumbnail_url: article.thumbnail || '', // Existing URL
                 category_id: article.category_id || '',
                 read_time: article.read_time,
                 status: article.status,
@@ -368,7 +371,8 @@ function articleApp() {
                 slug: '',
                 excerpt: '',
                 content: '',
-                thumbnail: '',
+                thumbnail: null,
+                thumbnail_url: '',
                 category_id: '',
                 read_time: null,
                 status: 'draft',
@@ -391,14 +395,39 @@ function articleApp() {
                 
                 const method = this.formMode === 'create' ? 'POST' : 'PUT';
 
+                const formDataStart = new FormData();
+                
+                // Append all fields
+                formDataStart.append('title', this.formData.title);
+                if (this.formData.slug) formDataStart.append('slug', this.formData.slug);
+                if (this.formData.excerpt) formDataStart.append('excerpt', this.formData.excerpt);
+                if (this.formData.content) formDataStart.append('content', this.formData.content);
+                if (this.formData.category_id) formDataStart.append('category_id', this.formData.category_id);
+                if (this.formData.read_time) formDataStart.append('read_time', this.formData.read_time);
+                formDataStart.append('status', this.formData.status);
+                if (this.formData.meta_title) formDataStart.append('meta_title', this.formData.meta_title);
+                if (this.formData.meta_description) formDataStart.append('meta_description', this.formData.meta_description);
+                if (this.formData.meta_keywords) formDataStart.append('meta_keywords', this.formData.meta_keywords);
+                if (this.formData.published_at) formDataStart.append('published_at', this.formData.published_at);
+
+                // Handle Thumbnail File
+                if (this.formData.thumbnail instanceof File) {
+                    formDataStart.append('thumbnail', this.formData.thumbnail);
+                }
+
+                // Method spoofing for PUT since FormData sends as multipart/form-data
+                if (this.formMode === 'edit') {
+                    formDataStart.append('_method', 'PUT');
+                }
+
                 const response = await fetch(url, {
-                    method: method,
+                    method: 'POST', // Always POST for FormData with binary (even for updates, using _method)
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                         'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(this.formData),
+                        // 'Content-Type': 'multipart/form-data', // Do NOT set this manually, let browser set boundary
+                     },
+                    body: formDataStart,
                 });
 
                 const result = await response.json();

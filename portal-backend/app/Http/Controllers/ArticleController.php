@@ -111,6 +111,42 @@ class ArticleController extends Controller
     }
 
     /**
+     * Display the specified article.
+     */
+    public function show(Article $article): JsonResponse
+    {
+        $article->load(['author', 'categoryRelation']);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $article->id,
+                'title' => $article->title,
+                'slug' => $article->slug,
+                'excerpt' => $article->excerpt,
+                'content' => $article->content,
+                'thumbnail' => $article->thumbnail,
+                'category_id' => $article->category_id,
+                'category_name' => $article->categoryRelation?->name,
+                'category_color' => $article->categoryRelation?->color,
+                'category_icon' => $article->categoryRelation?->icon,
+                'read_time' => $article->read_time,
+                'status' => $article->status,
+                'author_id' => $article->author_id,
+                'author_name' => $article->author?->name ?? 'Admin',
+                'author_avatar' => $article->author?->avatar ?? null,
+                'views' => $article->views,
+                'meta_title' => $article->meta_title,
+                'meta_description' => $article->meta_description,
+                'meta_keywords' => $article->meta_keywords,
+                'published_at' => $article->published_at?->format('d M Y H:i'),
+                'created_at' => $article->created_at->format('d M Y H:i'),
+                'updated_at' => $article->updated_at->format('d M Y H:i'),
+            ],
+        ]);
+    }
+
+    /**
      * Store a newly created article.
      */
     public function store(Request $request): JsonResponse
@@ -120,7 +156,7 @@ class ArticleController extends Controller
             'slug' => 'nullable|string|max:255|unique:articles,slug',
             'excerpt' => 'nullable|string|max:500',
             'content' => 'nullable|string',
-            'thumbnail' => 'nullable|string|max:500',
+            'thumbnail' => 'nullable|image|max:2048', // Max 2MB, image file
             'category_id' => 'nullable|exists:categories,id',
             'read_time' => 'nullable|integer|min:1',
             'status' => 'required|in:draft,pending,published,rejected',
@@ -131,12 +167,28 @@ class ArticleController extends Controller
         ]);
 
         try {
+            // Security Check
+            $securityIssues = $this->checkContentSecurity($request->all());
+            if (!empty($securityIssues)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Konten mengandung kata kunci berbahaya atau terlarang!',
+                    'errors' => ['content' => $securityIssues]
+                ], 422);
+            }
+
             $data = $request->only([
-                'title', 'excerpt', 'content', 'thumbnail', 'category_id', 
+                'title', 'excerpt', 'content', 'category_id', 
                 'read_time', 'status', 'meta_title', 'meta_description', 
                 'meta_keywords', 'published_at'
             ]);
             
+            // Handle Thumbnail Upload
+            if ($request->hasFile('thumbnail')) {
+                $path = $request->file('thumbnail')->store('articles/thumbnails', 'public');
+                $data['thumbnail'] = '/storage/' . $path;
+            }
+
             // Generate slug if not provided
             $data['slug'] = $request->slug ?: Str::slug($request->title);
             
@@ -151,7 +203,7 @@ class ArticleController extends Controller
             // Set author (placeholder - will be current user when auth is implemented)
             $data['author_id'] = 1;
             
-            // Set read time if not provided (estimate 200 words per minute)
+            // Set read time if not provided
             if (empty($data['read_time']) && !empty($data['content'])) {
                 $wordCount = str_word_count(strip_tags($data['content']));
                 $data['read_time'] = max(1, ceil($wordCount / 200));
@@ -187,42 +239,6 @@ class ArticleController extends Controller
     }
 
     /**
-     * Get single article detail.
-     */
-    public function show(Article $article): JsonResponse
-    {
-        $article->load(['author', 'categoryRelation']);
-        
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'id' => $article->id,
-                'title' => $article->title,
-                'slug' => $article->slug,
-                'excerpt' => $article->excerpt,
-                'content' => $article->content,
-                'thumbnail' => $article->thumbnail,
-                'category_id' => $article->category_id,
-                'category_name' => $article->categoryRelation?->name,
-                'category_color' => $article->categoryRelation?->color,
-                'category_icon' => $article->categoryRelation?->icon,
-                'read_time' => $article->read_time,
-                'status' => $article->status,
-                'author_id' => $article->author_id,
-                'author_name' => $article->author?->name ?? 'Admin',
-                'author_avatar' => $article->author?->avatar ?? null,
-                'views' => $article->views,
-                'meta_title' => $article->meta_title,
-                'meta_description' => $article->meta_description,
-                'meta_keywords' => $article->meta_keywords,
-                'published_at' => $article->published_at?->format('d M Y H:i:s'),
-                'created_at' => $article->created_at->format('d M Y H:i:s'),
-                'updated_at' => $article->updated_at->format('d M Y H:i:s'),
-            ],
-        ]);
-    }
-
-    /**
      * Update the specified article.
      */
     public function update(Request $request, Article $article): JsonResponse
@@ -232,7 +248,7 @@ class ArticleController extends Controller
             'slug' => 'nullable|string|max:255|unique:articles,slug,' . $article->id,
             'excerpt' => 'nullable|string|max:500',
             'content' => 'nullable|string',
-            'thumbnail' => 'nullable|string|max:500',
+            'thumbnail' => 'nullable', // Allow string (existing URL) or file
             'category_id' => 'nullable|exists:categories,id',
             'read_time' => 'nullable|integer|min:1',
             'status' => 'required|in:draft,pending,published,rejected',
@@ -243,12 +259,28 @@ class ArticleController extends Controller
         ]);
 
         try {
+             // Security Check
+            $securityIssues = $this->checkContentSecurity($request->all());
+            if (!empty($securityIssues)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Konten mengandung kata kunci berbahaya atau terlarang!',
+                    'errors' => ['content' => $securityIssues]
+                ], 422);
+            }
+
             $data = $request->only([
-                'title', 'excerpt', 'content', 'thumbnail', 'category_id', 
+                'title', 'excerpt', 'content', 'category_id', 
                 'read_time', 'status', 'meta_title', 'meta_description', 
                 'meta_keywords', 'published_at'
             ]);
             
+            // Handle Thumbnail Upload
+            if ($request->hasFile('thumbnail')) {
+                $path = $request->file('thumbnail')->store('articles/thumbnails', 'public');
+                $data['thumbnail'] = '/storage/' . $path;
+            }
+
             // Generate slug if not provided
             if ($request->filled('slug')) {
                 $data['slug'] = $request->slug;
@@ -256,7 +288,7 @@ class ArticleController extends Controller
                 $data['slug'] = Str::slug($request->title);
             }
 
-            // Make slug unique if it already exists (excluding current article)
+            // Make slug unique
             $originalSlug = $data['slug'];
             $counter = 1;
             while (Article::where('slug', $data['slug'])->where('id', '!=', $article->id)->exists()) {
@@ -264,13 +296,13 @@ class ArticleController extends Controller
                 $counter++;
             }
 
-            // Set read time if content changed and read_time not provided
+            // Set read time
             if (empty($data['read_time']) && !empty($data['content'])) {
                 $wordCount = str_word_count(strip_tags($data['content']));
                 $data['read_time'] = max(1, ceil($wordCount / 200));
             }
 
-            // Set published_at for newly published articles
+            // Set published_at
             if ($data['status'] === 'published' && $article->status !== 'published' && empty($data['published_at'])) {
                 $data['published_at'] = now();
             }
@@ -299,6 +331,35 @@ class ArticleController extends Controller
                 'message' => 'Gagal memperbarui berita: ' . $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * Check content for potential security issues (scripts, gambling, etc)
+     */
+    private function checkContentSecurity(array $data): array
+    {
+        $issues = [];
+        $dangerousPatterns = [
+            '/<script.*?>.*?<\/script>/is' => 'Tag Script terdeteksi',
+            '/javascript:/i' => 'Protokol Javascript terdeteksi',
+            '/onclick|onload|onmouseover|onerror/i' => 'Event Handler berbahaya terdeteksi',
+            '/gacor|slot|judol|pragmatic|zeus/i' => 'Kata kunci Judi Online terdeteksi',
+            '/<iframe.*?>.*?<\/iframe>/is' => 'Tag Iframe terdeteksi (potensi phising)',
+        ];
+
+        $fieldsToCheck = ['title', 'excerpt', 'content', 'meta_title', 'meta_description'];
+
+        foreach ($fieldsToCheck as $field) {
+            if (isset($data[$field]) && is_string($data[$field])) {
+                foreach ($dangerousPatterns as $pattern => $message) {
+                    if (preg_match($pattern, $data[$field])) {
+                        $issues[] = "$message pada field $field";
+                    }
+                }
+            }
+        }
+
+        return $issues;
     }
 
     /**

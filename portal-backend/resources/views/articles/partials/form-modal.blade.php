@@ -139,6 +139,23 @@
                         <p class="mt-1 text-xs text-surface-500" x-text="(formData.excerpt?.length || 0) + '/500 karakter'"></p>
                     </div>
 
+                    {{-- Security Error Display --}}
+                    <template x-if="formErrors.content">
+                        <div class="p-4 bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 rounded-xl animate-shake">
+                            <div class="flex items-start gap-3">
+                                <i data-lucide="alert-triangle" class="w-5 h-5 text-rose-600 dark:text-rose-400 mt-0.5"></i>
+                                <div>
+                                    <h4 class="text-sm font-bold text-rose-700 dark:text-rose-300 mb-1">Terdeteksi Konten Berbahaya!</h4>
+                                    <ul class="list-disc list-inside text-xs text-rose-600 dark:text-rose-400 space-y-1">
+                                        <template x-for="err in formErrors.content">
+                                            <li x-text="err"></li>
+                                        </template>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
                     {{-- Content --}}
                     <div>
                         <label class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
@@ -152,20 +169,57 @@
                         ></textarea>
                     </div>
 
-                    {{-- Thumbnail URL --}}
+                    {{-- Thumbnail Upload --}}
                     <div>
                         <label class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
-                            URL Gambar Thumbnail
+                            Thumbnail
                         </label>
-                        <div class="flex gap-3">
-                            <input 
-                                type="text"
-                                x-model="formData.thumbnail"
-                                placeholder="https://example.com/image.jpg"
-                                class="flex-1 px-4 py-3 bg-surface-50 dark:bg-surface-800 border-2 border-surface-200 dark:border-surface-700 rounded-xl text-sm text-surface-900 dark:text-white placeholder-surface-400 focus:ring-0 focus:border-theme-500 transition-all"
-                            >
-                            <div x-show="formData.thumbnail" class="w-16 h-12 rounded-lg overflow-hidden bg-surface-100 dark:bg-surface-800 flex-shrink-0">
-                                <img :src="formData.thumbnail" alt="Preview" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                        <div class="flex items-start gap-4">
+                            <div class="flex-1">
+                                <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-surface-300 dark:border-surface-600 rounded-xl cursor-pointer hover:bg-surface-50 dark:hover:bg-surface-800 transition-colors group">
+                                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                        <i data-lucide="upload-cloud" class="w-8 h-8 mb-3 text-surface-400 group-hover:text-theme-500 transition-colors"></i>
+                                        <p class="text-sm text-surface-500 dark:text-surface-400">
+                                            <span class="font-semibold text-theme-600 dark:text-theme-400">Klik upload</span> atau drag & drop
+                                        </p>
+                                        <p class="text-xs text-surface-400 mt-1">SVG, PNG, JPG (MAX. 2MB)</p>
+                                    </div>
+                                    <input 
+                                        type="file" 
+                                        class="hidden" 
+                                        accept="image/*"
+                                        @change="
+                                            const file = $event.target.files[0];
+                                            if (file) {
+                                                formData.thumbnail = file;
+                                                formData.thumbnail_url = URL.createObjectURL(file);
+                                            }
+                                        "
+                                    >
+                                </label>
+                                <template x-if="formErrors.thumbnail">
+                                    <p class="mt-1 text-xs text-rose-500" x-text="formErrors.thumbnail[0]"></p>
+                                </template>
+                            </div>
+
+                            {{-- Preview --}}
+                            <div x-show="formData.thumbnail_url" class="relative group">
+                                <div class="w-32 h-32 rounded-xl overflow-hidden border border-surface-200 dark:border-surface-700 bg-surface-100 dark:bg-surface-800">
+                                    <img 
+                                        :src="formData.thumbnail_url" 
+                                        alt="Thumbnail Preview" 
+                                        class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
+                                        @click="window.open(formData.thumbnail_url, '_blank')"
+                                        title="Klik untuk preview ukuran penuh"
+                                    >
+                                </div>
+                                <button 
+                                    type="button"
+                                    @click="formData.thumbnail = null; formData.thumbnail_url = '';"
+                                    class="absolute -top-2 -right-2 p-1.5 bg-rose-500 text-white rounded-full shadow-lg hover:bg-rose-600 transition-colors opacity-0 group-hover:opacity-100"
+                                >
+                                    <i data-lucide="x" class="w-3 h-3"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
