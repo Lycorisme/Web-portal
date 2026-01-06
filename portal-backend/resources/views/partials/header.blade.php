@@ -92,15 +92,25 @@
             </div>
 
             {{-- User Profile Dropdown --}}
+            @php $currentUser = Auth::user(); @endphp
             <div class="relative" x-data="{ open: false }">
                 <button @click="open = !open"
                     class="flex items-center gap-3 p-1.5 pr-4 rounded-xl bg-surface-100 dark:bg-surface-800 hover:bg-surface-200 dark:hover:bg-surface-700 transition-all duration-200">
-                    <div class="w-9 h-9 rounded-lg bg-theme-gradient flex items-center justify-center shadow-theme">
-                        <span class="text-white font-semibold text-sm">{{ strtoupper(substr(Auth::user()->name ?? 'AD', 0, 2)) }}</span>
+                    <div class="w-9 h-9 rounded-lg overflow-hidden flex items-center justify-center shadow-theme">
+                        @if($currentUser?->profile_photo)
+                            <img id="headerProfilePhoto" 
+                                 src="{{ $currentUser->profile_photo }}" 
+                                 alt="{{ $currentUser->name }}"
+                                 class="w-full h-full object-cover rounded-lg">
+                        @else
+                            <div id="headerProfileInitials" class="w-full h-full bg-theme-gradient flex items-center justify-center rounded-lg">
+                                <span class="text-white font-semibold text-sm">{{ strtoupper(substr($currentUser?->name ?? 'AD', 0, 2)) }}</span>
+                            </div>
+                        @endif
                     </div>
                     <div class="hidden sm:block text-left">
-                        <p class="text-sm font-semibold text-surface-900 dark:text-white">{{ Auth::user()->name ?? 'Admin' }}</p>
-                        <p class="text-xs text-surface-500">{{ Auth::user()->role ?? 'Administrator' }}</p>
+                        <p class="text-sm font-semibold text-surface-900 dark:text-white">{{ $currentUser?->name ?? 'Admin' }}</p>
+                        <p class="text-xs text-surface-500">{{ $currentUser?->role ?? 'Administrator' }}</p>
                     </div>
                     <i data-lucide="chevron-down" class="w-4 h-4 text-surface-400 hidden sm:block"></i>
                 </button>
@@ -116,11 +126,11 @@
                     class="absolute right-0 mt-2 w-56 bg-white dark:bg-surface-900 rounded-2xl shadow-2xl shadow-surface-900/20 border border-surface-200 dark:border-surface-800 overflow-hidden"
                     x-cloak>
                     <div class="p-4 border-b border-surface-200 dark:border-surface-800">
-                        <p class="font-semibold text-surface-900 dark:text-white">{{ Auth::user()->name ?? 'Admin' }}</p>
-                        <p class="text-sm text-surface-500">{{ Auth::user()->email ?? 'admin@portal.id' }}</p>
+                        <p class="font-semibold text-surface-900 dark:text-white">{{ $currentUser?->name ?? 'Admin' }}</p>
+                        <p class="text-sm text-surface-500">{{ $currentUser?->email ?? 'admin@portal.id' }}</p>
                     </div>
                     <div class="p-2">
-                        <a href="#"
+                        <a href="{{ route('profile') }}"
                             class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors">
                             <i data-lucide="user" class="w-4 h-4 text-surface-500"></i>
                             <span class="text-sm text-surface-700 dark:text-surface-300">Profil Saya</span>
@@ -151,3 +161,4 @@
         </div>
     </div>
 </header>
+

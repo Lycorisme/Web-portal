@@ -2,19 +2,19 @@
 function profilePage() {
     return {
         // UI State
-        editMode: false,
-        showPhotoModal: false,
         showPasswordForm: false,
         showCurrentPassword: false,
         showNewPassword: false,
         showConfirmPassword: false,
         
         // Photo Upload State
-        dragging: false,
-        selectedFile: null,
-        selectedFileName: '',
-        selectedFileSize: '',
-        previewUrl: null,
+        isUploading: false,
+        pendingPhotoFile: null,      // File yang dipilih tapi belum diupload
+        pendingPhotoPreview: null,   // URL preview lokal
+        originalPhotoSrc: null,      // URL foto original untuk reset
+        
+        // Change Detection
+        hasChanges: false,
         
         // Form Data
         formData: {
@@ -26,7 +26,7 @@ function profilePage() {
             location: '{{ $user->location ?? "" }}',
         },
         
-        // Original Form Data for Reset
+        // Original Form Data for Reset and Change Detection
         originalFormData: null,
         
         // Password Data
@@ -37,43 +37,91 @@ function profilePage() {
         },
         
         init() {
-            // Store original values for reset
+            // Store original values for reset and change detection
             this.originalFormData = { ...this.formData };
             
-            // Re-initialize Lucide icons when modals open
-            this.$watch('showPhotoModal', () => {
-                this.$nextTick(() => lucide.createIcons());
-            });
+            // Store original photo source for reset
+            const photoPreview = document.getElementById('profilePhotoPreview');
+            if (photoPreview) {
+                this.originalPhotoSrc = photoPreview.tagName === 'IMG' ? photoPreview.src : null;
+            }
+            
+            // Re-initialize Lucide icons when needed
             this.$watch('showPasswordForm', () => {
                 this.$nextTick(() => lucide.createIcons());
             });
-            this.$watch('editMode', () => {
+            this.$watch('hasChanges', () => {
+                this.$nextTick(() => lucide.createIcons());
+            });
+            this.$watch('pendingPhotoFile', () => {
                 this.$nextTick(() => lucide.createIcons());
             });
         },
         
-        // Handle file drop
-        handleDrop(event) {
-            this.dragging = false;
-            const file = event.dataTransfer.files[0];
-            if (file && file.type.startsWith('image/')) {
-                this.processFile(file);
+        // Check if form has changes compared to original
+        checkForChanges() {
+            if (!this.originalFormData) {
+                this.hasChanges = false;
+                return;
             }
+            
+            // Compare each field
+            const formChanged = 
+                this.formData.name !== this.originalFormData.name ||
+                this.formData.email !== this.originalFormData.email ||
+                this.formData.phone !== this.originalFormData.phone ||
+                this.formData.position !== this.originalFormData.position ||
+                this.formData.bio !== this.originalFormData.bio ||
+                this.formData.location !== this.originalFormData.location;
+            
+            // Check if photo has changed
+            const photoChanged = this.pendingPhotoFile !== null;
+            
+            this.hasChanges = formChanged || photoChanged;
         },
         
-        // Handle file selection
+        // Cancel changes - reset form to original values
+        cancelChanges() {
+            this.formData = { ...this.originalFormData };
+            
+            // Reset photo preview
+            if (this.pendingPhotoFile) {
+                this.pendingPhotoFile = null;
+                if (this.pendingPhotoPreview) {
+                    URL.revokeObjectURL(this.pendingPhotoPreview);
+                    this.pendingPhotoPreview = null;
+                }
+                
+                // Restore original photo
+                const photoPreview = document.getElementById('profilePhotoPreview');
+                if (photoPreview && this.originalPhotoSrc) {
+                    if (photoPreview.tagName === 'IMG') {
+                        photoPreview.src = this.originalPhotoSrc;
+                    }
+                } else if (photoPreview && !this.originalPhotoSrc) {
+                    // Restore initial placeholder
+                    location.reload();
+                    return;
+                }
+            }
+            
+            // Clear file input
+            const fileInput = document.getElementById('photoInput');
+            if (fileInput) fileInput.value = '';
+            
+            this.hasChanges = false;
+            lucide.createIcons();
+        },
+        
+        // Handle file selection - preview only, don't upload yet
         handleFileSelect(event) {
             const file = event.target.files[0];
-            if (file) {
-                this.processFile(file);
-            }
-        },
-        
-        // Process selected file
-        processFile(file) {
+            if (!file) return;
+            
             // Validate file size (max 5MB)
             if (file.size > 5 * 1024 * 1024) {
                 showError('File Terlalu Besar', 'Ukuran file maksimal adalah 5MB');
+                event.target.value = '';
                 return;
             }
             
@@ -81,47 +129,44 @@ function profilePage() {
             const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
             if (!allowedTypes.includes(file.type)) {
                 showError('Format Tidak Didukung', 'Gunakan format JPG, PNG, GIF, atau WebP');
+                event.target.value = '';
                 return;
             }
             
-            this.selectedFile = file;
-            this.selectedFileName = file.name;
-            this.selectedFileSize = this.formatFileSize(file.size);
+            // Revoke old preview URL if exists
+            if (this.pendingPhotoPreview) {
+                URL.revokeObjectURL(this.pendingPhotoPreview);
+            }
             
-            // Create preview
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                this.previewUrl = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        },
-        
-        // Format file size
-        formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        },
-        
-        // Clear preview
-        clearPreview() {
-            this.selectedFile = null;
-            this.selectedFileName = '';
-            this.selectedFileSize = '';
-            this.previewUrl = null;
-            document.getElementById('photoInput').value = '';
-        },
-        
-        // Upload photo
-        async uploadPhoto() {
-            if (!this.selectedFile) return;
+            // Store file for later upload
+            this.pendingPhotoFile = file;
             
-            showLoading('Mengupload foto...');
+            // Create local preview URL
+            this.pendingPhotoPreview = URL.createObjectURL(file);
+            
+            // Update preview on page
+            const photoPreview = document.getElementById('profilePhotoPreview');
+            if (photoPreview) {
+                if (photoPreview.tagName === 'IMG') {
+                    photoPreview.src = this.pendingPhotoPreview;
+                } else {
+                    // Replace initials div with image
+                    photoPreview.outerHTML = `<img id="profilePhotoPreview" src="${this.pendingPhotoPreview}" alt="Profile" class="w-full h-full object-cover">`;
+                }
+            }
+            
+            // Mark as changed
+            this.hasChanges = true;
+            
+            showToast('info', 'Foto dipilih', 'Klik "Simpan" untuk menyimpan perubahan');
+        },
+        
+        // Upload photo to server (called when saving)
+        async uploadPhotoToServer() {
+            if (!this.pendingPhotoFile) return true; // No photo to upload
             
             const formData = new FormData();
-            formData.append('profile_photo', this.selectedFile);
+            formData.append('profile_photo', this.pendingPhotoFile);
             formData.append('_token', document.querySelector('meta[name="csrf-token"]').content);
             
             try {
@@ -137,29 +182,32 @@ function profilePage() {
                 const data = await response.json();
                 
                 if (data.success) {
-                    // Update preview on page
-                    const photoPreview = document.getElementById('profilePhotoPreview');
-                    if (photoPreview) {
-                        if (photoPreview.tagName === 'IMG') {
-                            photoPreview.src = data.photo_url;
-                        } else {
-                            photoPreview.innerHTML = `<img src="${data.photo_url}" alt="Profile" class="w-full h-full object-cover">`;
-                        }
+                    // Update header profile photo if exists
+                    const headerPhoto = document.getElementById('headerProfilePhoto');
+                    if (headerPhoto) {
+                        headerPhoto.src = data.photo_url + '?t=' + Date.now();
                     }
                     
-                    this.showPhotoModal = false;
-                    this.clearPreview();
+                    // Update header initial if it was showing initials
+                    const headerInitials = document.getElementById('headerProfileInitials');
+                    if (headerInitials && data.photo_url) {
+                        headerInitials.outerHTML = `<img id="headerProfilePhoto" src="${data.photo_url}?t=${Date.now()}" alt="Profile" class="w-full h-full object-cover rounded-lg">`;
+                    }
                     
-                    showSuccess('Berhasil!', data.message);
+                    // Clean up
+                    if (this.pendingPhotoPreview) {
+                        URL.revokeObjectURL(this.pendingPhotoPreview);
+                    }
+                    this.pendingPhotoFile = null;
+                    this.pendingPhotoPreview = null;
                     
-                    // Refresh page after delay to show updated UI
-                    setTimeout(() => location.reload(), 1500);
+                    return true;
                 } else {
                     throw new Error(data.message || 'Gagal upload foto');
                 }
             } catch (error) {
-                console.error('Error:', error);
-                showError('Gagal!', error.message || 'Terjadi kesalahan saat upload foto');
+                console.error('Photo upload error:', error);
+                throw error;
             }
         },
         
@@ -198,11 +246,17 @@ function profilePage() {
             );
         },
         
-        // Save profile info
+        // Save profile info (and photo if changed)
         async saveProfileInfo() {
             showLoading('Menyimpan perubahan...');
             
             try {
+                // Upload photo first if there's a pending photo
+                if (this.pendingPhotoFile) {
+                    await this.uploadPhotoToServer();
+                }
+                
+                // Then update profile info
                 const response = await fetch('{{ route("profile.info.update") }}', {
                     method: 'PUT',
                     body: JSON.stringify(this.formData),
@@ -218,8 +272,13 @@ function profilePage() {
                 
                 if (data.success) {
                     this.originalFormData = { ...this.formData };
-                    this.editMode = false;
-                    showSuccess('Berhasil!', data.message);
+                    this.hasChanges = false;
+                    
+                    // Clear file input
+                    const fileInput = document.getElementById('photoInput');
+                    if (fileInput) fileInput.value = '';
+                    
+                    showSuccess('Berhasil!', 'Semua perubahan berhasil disimpan!');
                     
                     // Refresh to show updated data
                     setTimeout(() => location.reload(), 1500);
@@ -228,14 +287,8 @@ function profilePage() {
                 }
             } catch (error) {
                 console.error('Error:', error);
-                showError('Gagal!', error.message || 'Terjadi kesalahan saat menyimpan profil');
+                showError('Gagal!', error.message || 'Terjadi kesalahan saat menyimpan perubahan');
             }
-        },
-        
-        // Reset form
-        resetForm() {
-            this.formData = { ...this.originalFormData };
-            lucide.createIcons();
         },
         
         // Update password
