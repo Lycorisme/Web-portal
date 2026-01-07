@@ -115,9 +115,14 @@
                                         <span class="text-xs font-semibold text-surface-500 dark:text-surface-400 uppercase tracking-wide">User</span>
                                     </div>
                                     <div class="flex items-center gap-2">
-                                        <div class="w-8 h-8 rounded-full bg-theme-gradient flex items-center justify-center flex-shrink-0">
-                                            <span class="text-white text-xs font-bold" x-text="selectedLog.user_name?.charAt(0).toUpperCase()"></span>
-                                        </div>
+                                        <template x-if="selectedLog.user_avatar">
+                                            <img :src="selectedLog.user_avatar" :alt="selectedLog.user_name" class="w-8 h-8 rounded-full object-cover flex-shrink-0">
+                                        </template>
+                                        <template x-if="!selectedLog.user_avatar">
+                                            <div class="w-8 h-8 rounded-full bg-theme-gradient flex items-center justify-center flex-shrink-0">
+                                                <span class="text-white text-xs font-bold" x-text="selectedLog.user_name?.charAt(0).toUpperCase()"></span>
+                                            </div>
+                                        </template>
                                         <div class="min-w-0">
                                             <p class="font-semibold text-surface-900 dark:text-white text-sm truncate" x-text="selectedLog.user_name"></p>
                                         </div>

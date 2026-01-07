@@ -94,6 +94,7 @@ class ActivityLogController extends Controller
             return [
                 'id' => $log->id,
                 'user_name' => $log->user->name ?? 'System',
+                'user_avatar' => $log->user?->avatar,
                 'user_id' => $log->user_id,
                 'action' => $log->action,
                 'action_label' => $log->action_label,
@@ -145,6 +146,7 @@ class ActivityLogController extends Controller
             'data' => [
                 'id' => $activityLog->id,
                 'user_name' => $activityLog->user->name ?? 'System',
+                'user_avatar' => $activityLog->user?->avatar,
                 'user_email' => $activityLog->user->email ?? null,
                 'action' => $activityLog->action,
                 'action_label' => $activityLog->action_label,

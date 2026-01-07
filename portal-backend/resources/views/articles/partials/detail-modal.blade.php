@@ -184,7 +184,7 @@
                             <div class="pt-8 border-t border-surface-100 dark:border-surface-800">
                                 <h4 class="text-lg font-bold text-surface-900 dark:text-white mb-4">Konten</h4>
                                 <div 
-                                    class="text-base text-surface-700 dark:text-surface-300 leading-relaxed space-y-4 [&>p]:mb-4 [&>ul]:list-disc [&>ul]:pl-5 [&>ol]:list-decimal [&>ol]:pl-5 [&>h2]:text-xl [&>h2]:font-bold [&>h2]:mb-2 [&>h3]:text-lg [&>h3]:font-bold [&>h3]:mb-2" 
+                                    class="text-base text-surface-700 dark:text-surface-300 leading-relaxed space-y-4 break-words [&>p]:mb-4 [&>ul]:list-disc [&>ul]:pl-5 [&>ol]:list-decimal [&>ol]:pl-5 [&>h2]:text-xl [&>h2]:font-bold [&>h2]:mb-2 [&>h3]:text-lg [&>h3]:font-bold [&>h3]:mb-2 [&>pre]:overflow-x-auto [&>pre]:bg-surface-100 dark:[&>pre]:bg-surface-800 [&>pre]:p-4 [&>pre]:rounded-lg" 
                                     x-html="selectedArticle?.content"
                                 ></div>
                             </div>

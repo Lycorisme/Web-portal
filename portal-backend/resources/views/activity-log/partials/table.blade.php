@@ -70,9 +70,14 @@
                         {{-- User (moved first) --}}
                         <td class="px-4 py-3 whitespace-nowrap">
                             <div class="flex items-center gap-2">
-                                <div class="w-8 h-8 rounded-full bg-theme-gradient flex items-center justify-center flex-shrink-0">
-                                    <span class="text-white text-xs font-bold" x-text="log.user_name.charAt(0).toUpperCase()"></span>
-                                </div>
+                                <template x-if="log.user_avatar">
+                                    <img :src="log.user_avatar" :alt="log.user_name" class="w-8 h-8 rounded-full object-cover flex-shrink-0">
+                                </template>
+                                <template x-if="!log.user_avatar">
+                                    <div class="w-8 h-8 rounded-full bg-theme-gradient flex items-center justify-center flex-shrink-0">
+                                        <span class="text-white text-xs font-bold" x-text="log.user_name.charAt(0).toUpperCase()"></span>
+                                    </div>
+                                </template>
                                 <span 
                                     class="text-sm font-medium text-surface-900 dark:text-white" 
                                     :class="{'line-through opacity-60 text-rose-700 dark:text-rose-400': log.deleted_at}"

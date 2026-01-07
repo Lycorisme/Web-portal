@@ -143,4 +143,26 @@ class User extends Authenticatable
     {
         return $this->hasMany(ActivityLog::class);
     }
+
+    /**
+     * Get the user's avatar URL.
+     */
+    public function getAvatarAttribute()
+    {
+        if (!$this->profile_photo) {
+            return null;
+        }
+
+        if (filter_var($this->profile_photo, FILTER_VALIDATE_URL)) {
+            return $this->profile_photo;
+        }
+
+        $path = ltrim($this->profile_photo, '/');
+        
+        if (str_starts_with($path, 'storage/')) {
+            return asset($path);
+        }
+
+        return asset('storage/' . $path);
+    }
 }

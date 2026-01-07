@@ -97,9 +97,9 @@
                 <button @click="open = !open"
                     class="flex items-center gap-3 p-1.5 pr-4 rounded-xl bg-surface-100 dark:bg-surface-800 hover:bg-surface-200 dark:hover:bg-surface-700 transition-all duration-200">
                     <div class="w-9 h-9 rounded-lg overflow-hidden flex items-center justify-center shadow-theme">
-                        @if($currentUser?->profile_photo)
+                        @if($currentUser?->avatar)
                             <img id="headerProfilePhoto" 
-                                 src="{{ $currentUser->profile_photo }}" 
+                                 src="{{ $currentUser->avatar }}" 
                                  alt="{{ $currentUser->name }}"
                                  class="w-full h-full object-cover rounded-lg">
                         @else
