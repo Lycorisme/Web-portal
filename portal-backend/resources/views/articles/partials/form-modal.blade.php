@@ -1,4 +1,44 @@
 {{-- Form Modal (Create/Edit) --}}
+
+{{-- Trix Editor Custom Styles --}}
+<style>
+    /* Remove spell-check underlines inside Trix */
+    trix-editor {
+        -webkit-text-fill-color: inherit;
+    }
+    trix-editor [data-trix-mutable] {
+        text-decoration: none !important;
+    }
+    /* Code block styling */
+    trix-editor pre {
+        background-color: rgba(0, 0, 0, 0.05);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        font-family: ui-monospace, monospace;
+        font-size: 0.875rem;
+        overflow-x: auto;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+    .dark trix-editor pre {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+    /* Inline code styling */
+    trix-editor code {
+        background-color: rgba(0, 0, 0, 0.05);
+        padding: 0.125rem 0.375rem;
+        border-radius: 0.25rem;
+        font-family: ui-monospace, monospace;
+        font-size: 0.875em;
+    }
+    .dark trix-editor code {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+    /* Remove default Trix attachment styling */
+    trix-editor .attachment__caption {
+        display: none;
+    }
+</style>
 <template x-teleport="body">
     <div 
         x-show="showFormModal"
@@ -60,18 +100,51 @@
                         >
                             Batal
                         </button>
-                        <button 
-                            type="submit"
-                            form="articleForm"
-                            :disabled="formLoading || injectionDetected"
-                            class="group relative overflow-hidden px-4 py-2 sm:px-6 sm:py-2.5 bg-theme-600 hover:bg-theme-500 text-white font-bold rounded-xl shadow-lg shadow-theme-500/30 hover:shadow-theme-500/50 hover:scale-[1.02] active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2 text-xs sm:text-sm"
-                        >
-                            <div x-show="formLoading" class="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                            <span x-text="formMode === 'create' ? 'Terbitkan' : 'Simpan'"></span>
+                        
+                        {{-- Submit Button with Tooltip --}}
+                        <div class="relative group/submit">
+                            <button 
+                                type="submit"
+                                form="articleForm"
+                                :disabled="formLoading || injectionDetected || !formData.title || formData.title.length < 3"
+                                :class="{
+                                    'bg-theme-600 hover:bg-theme-500 shadow-theme-500/30 hover:shadow-theme-500/50 hover:scale-[1.02]': !formLoading && !injectionDetected && formData.title && formData.title.length >= 3,
+                                    'bg-surface-400 dark:bg-surface-600 cursor-not-allowed': formLoading || injectionDetected || !formData.title || formData.title.length < 3
+                                }"
+                                class="relative overflow-hidden px-4 py-2 sm:px-6 sm:py-2.5 text-white font-bold rounded-xl shadow-lg active:scale-95 transition-all duration-300 flex items-center justify-center gap-2 text-xs sm:text-sm"
+                            >
+                                <div x-show="formLoading" class="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                <i x-show="injectionDetected && !formLoading" data-lucide="shield-alert" class="w-3.5 h-3.5"></i>
+                                <span x-text="formMode === 'create' ? 'Terbitkan' : 'Simpan'"></span>
+                                
+                                {{-- Shine Effect (only when enabled) --}}
+                                <div x-show="!formLoading && !injectionDetected && formData.title && formData.title.length >= 3" class="absolute inset-0 -translate-x-[100%] group-hover/submit:translate-x-[100%] transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent z-10"></div>
+                            </button>
                             
-                            {{-- Shine Effect --}}
-                            <div class="absolute inset-0 -translate-x-[100%] group-hover:translate-x-[100%] transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent z-10"></div>
-                        </button>
+                            {{-- Tooltip showing why button is disabled --}}
+                            <div 
+                                x-show="(injectionDetected || !formData.title || formData.title.length < 3) && !formLoading"
+                                x-transition
+                                class="absolute right-0 top-full mt-2 z-50 hidden group-hover/submit:block"
+                            >
+                                <div class="px-3 py-2 bg-surface-800 dark:bg-surface-700 text-white text-xs rounded-lg shadow-lg whitespace-nowrap">
+                                    <template x-if="injectionDetected">
+                                        <span class="flex items-center gap-1.5">
+                                            <i data-lucide="alert-triangle" class="w-3 h-3 text-amber-400"></i>
+                                            Bersihkan konten berbahaya dulu
+                                        </span>
+                                    </template>
+                                    <template x-if="!formData.title && !injectionDetected">
+                                        <span>Judul wajib diisi</span>
+                                    </template>
+                                    <template x-if="formData.title && formData.title.length < 3 && !injectionDetected">
+                                        <span>Judul minimal 3 karakter</span>
+                                    </template>
+                                    {{-- Arrow --}}
+                                    <div class="absolute -top-1 right-4 w-2 h-2 bg-surface-800 dark:bg-surface-700 rotate-45"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -116,6 +189,40 @@
                                         ></p>
                                         <p class="text-[10px] text-surface-400 dark:text-surface-500 font-medium" x-text="item.desc"></p>
                                     </div>
+                                    
+                                    {{-- Status Indicator --}}
+                                    <div class="hidden md:flex items-center ml-auto">
+                                        {{-- Error indicator for content tab --}}
+                                        <template x-if="item.id === 'content' && (formErrors.title || formErrors.content || injectionDetected)">
+                                            <span class="w-5 h-5 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center">
+                                                <i data-lucide="alert-circle" class="w-3 h-3 text-rose-500"></i>
+                                            </span>
+                                        </template>
+                                        {{-- Success indicator for content tab --}}
+                                        <template x-if="item.id === 'content' && formData.title && formData.title.length >= 3 && !formErrors.title && !injectionDetected">
+                                            <span class="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                                                <i data-lucide="check" class="w-3 h-3 text-emerald-500"></i>
+                                            </span>
+                                        </template>
+                                        {{-- Success indicator for media tab --}}
+                                        <template x-if="item.id === 'media' && formData.thumbnail_url">
+                                            <span class="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                                                <i data-lucide="check" class="w-3 h-3 text-emerald-500"></i>
+                                            </span>
+                                        </template>
+                                        {{-- Success indicator for SEO tab --}}
+                                        <template x-if="item.id === 'seo' && (formData.meta_title || formData.meta_description)">
+                                            <span class="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                                                <i data-lucide="check" class="w-3 h-3 text-emerald-500"></i>
+                                            </span>
+                                        </template>
+                                        {{-- Success indicator for settings tab --}}
+                                        <template x-if="item.id === 'settings' && formData.status">
+                                            <span class="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                                                <i data-lucide="check" class="w-3 h-3 text-emerald-500"></i>
+                                            </span>
+                                        </template>
+                                    </div>
                                 </button>
                             </template>
                         </nav>
@@ -150,13 +257,24 @@
                                 
                                 {{-- Modern Title Input --}}
                                 <div class="group space-y-3 sm:space-y-4">
-                                    <input 
-                                        type="text"
-                                        x-model="formData.title"
-                                        @input="generateSlug()"
-                                        placeholder="Tulis Judul..."
-                                        class="w-full px-0 py-2 sm:py-4 bg-transparent border-0 border-b-2 border-surface-100 dark:border-surface-800 text-2xl sm:text-4xl font-black text-surface-900 dark:text-white placeholder-surface-300/50 focus:ring-0 focus:border-theme-500 transition-all duration-300"
-                                    >
+                                    <div class="relative">
+                                        <input 
+                                            type="text"
+                                            x-model="formData.title"
+                                            @input="generateSlug(); formErrors.title = null"
+                                            placeholder="Tulis Judul Berita..."
+                                            :class="{
+                                                'border-rose-500 focus:border-rose-500': formErrors.title,
+                                                'border-emerald-500': formData.title && formData.title.length >= 3 && !formErrors.title,
+                                                'border-surface-100 dark:border-surface-800 focus:border-theme-500': !formData.title || formData.title.length < 3
+                                            }"
+                                            class="w-full px-0 py-2 sm:py-4 bg-transparent border-0 border-b-2 text-2xl sm:text-4xl font-black text-surface-900 dark:text-white placeholder-surface-300/50 focus:ring-0 transition-all duration-300"
+                                        >
+                                        {{-- Character counter --}}
+                                        <div class="absolute right-0 bottom-3 text-[10px] text-surface-400" x-show="formData.title">
+                                            <span x-text="formData.title.length"></span>/255
+                                        </div>
+                                    </div>
                                     <div class="flex items-center gap-2 sm:gap-3 px-3 py-2 bg-surface-50 dark:bg-surface-800/50 rounded-lg group-focus-within:bg-theme-50 dark:group-focus-within:bg-theme-900/10 transition-colors duration-300 overflow-hidden">
                                         <i data-lucide="link" class="w-3 h-3 text-surface-400 group-focus-within:text-theme-500 shrink-0"></i>
                                         <span class="text-[10px] sm:text-xs text-surface-400 shrink-0">btikp.cloud/berita/</span>
@@ -168,7 +286,7 @@
                                         >
                                     </div>
                                     <template x-if="formErrors.title">
-                                        <p class="text-sm font-medium text-rose-500 flex items-center gap-2 animate-shake">
+                                        <p class="text-sm font-medium text-rose-500 flex items-center gap-2 animate-pulse">
                                             <i data-lucide="alert-circle" class="w-4 h-4"></i>
                                             <span x-text="formErrors.title[0]"></span>
                                         </p>
@@ -216,56 +334,59 @@
                                     
                                     {{-- SECURITY ALERT PANEL - Shown when threats detected --}}
                                     <template x-if="injectionDetected">
-                                        <div class="rounded-2xl border-2 border-rose-300 dark:border-rose-700 bg-gradient-to-br from-rose-50 to-orange-50 dark:from-rose-900/30 dark:to-orange-900/20 overflow-hidden shadow-lg shadow-rose-500/10">
+                                        <div class="rounded-xl sm:rounded-2xl border-2 border-rose-300 dark:border-rose-700 bg-gradient-to-br from-rose-50 to-orange-50 dark:from-rose-900/30 dark:to-orange-900/20 overflow-hidden shadow-lg shadow-rose-500/10">
                                             {{-- Alert Header --}}
-                                            <div class="bg-rose-500 dark:bg-rose-600 px-4 py-3 flex items-center justify-between">
-                                                <div class="flex items-center gap-3">
-                                                    <div class="p-2 bg-white/20 rounded-lg">
-                                                        <i data-lucide="shield-x" class="w-5 h-5 text-white"></i>
+                                            <div class="bg-rose-500 dark:bg-rose-600 px-3 py-2 sm:px-4 sm:py-3 flex items-center justify-between gap-2">
+                                                <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                                                    <div class="p-1.5 sm:p-2 bg-white/20 rounded-lg flex-shrink-0">
+                                                        <i data-lucide="shield-x" class="w-4 h-4 sm:w-5 sm:h-5 text-white"></i>
                                                     </div>
-                                                    <div>
-                                                        <h4 class="text-sm font-bold text-white">⚠️ Terdeteksi Konten Berbahaya!</h4>
-                                                        <p class="text-xs text-rose-100">Sistem mendeteksi potensi serangan injeksi atau konten terlarang</p>
+                                                    <div class="min-w-0">
+                                                        <h4 class="text-xs sm:text-sm font-bold text-white truncate">⚠️ Konten Berbahaya!</h4>
+                                                        <p class="text-[10px] sm:text-xs text-rose-100 hidden sm:block">Potensi serangan injeksi terdeteksi</p>
                                                     </div>
                                                 </div>
-                                                <span class="px-3 py-1 bg-white/20 text-white text-xs font-bold rounded-full" x-text="detectedThreats.length + ' ancaman'"></span>
+                                                <span class="px-2 py-0.5 sm:px-3 sm:py-1 bg-white/20 text-white text-[10px] sm:text-xs font-bold rounded-full flex-shrink-0" x-text="detectedThreats.length + ' ancaman'"></span>
                                             </div>
                                             
-                                            {{-- Threat List --}}
-                                            <div class="p-4 space-y-3 max-h-48 overflow-y-auto">
-                                                <template x-for="(threat, index) in detectedThreats" :key="index">
-                                                    <div class="flex items-start gap-3 p-3 rounded-xl border-l-4 transition-all hover:scale-[1.01]" :class="getSeverityBorderColor(threat.severity)">
+                                            {{-- Threat List (Collapsible on Mobile) --}}
+                                            <div class="p-2 sm:p-4 space-y-2 sm:space-y-3 max-h-32 sm:max-h-48 overflow-y-auto">
+                                                <template x-for="(threat, index) in detectedThreats.slice(0, 3)" :key="index">
+                                                    <div class="flex items-start gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg sm:rounded-xl border-l-4 transition-all" :class="getSeverityBorderColor(threat.severity)">
                                                         <div class="flex-shrink-0">
-                                                            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-[10px] font-bold" :class="getSeverityColor(threat.severity)" x-text="index + 1"></span>
+                                                            <span class="inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full text-[9px] sm:text-[10px] font-bold" :class="getSeverityColor(threat.severity)" x-text="index + 1"></span>
                                                         </div>
                                                         <div class="flex-1 min-w-0">
-                                                            <div class="flex items-center gap-2 flex-wrap">
-                                                                <span class="text-xs font-bold px-2 py-0.5 rounded-full" :class="getSeverityColor(threat.severity)" x-text="threat.category"></span>
-                                                                <code class="text-[10px] px-2 py-0.5 bg-surface-200 dark:bg-surface-700 text-rose-600 dark:text-rose-400 rounded font-mono" x-text="threat.keyword"></code>
+                                                            <div class="flex items-center gap-1 sm:gap-2 flex-wrap">
+                                                                <span class="text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full" :class="getSeverityColor(threat.severity)" x-text="threat.category"></span>
+                                                                <code class="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 bg-surface-200 dark:bg-surface-700 text-rose-600 dark:text-rose-400 rounded font-mono truncate max-w-[100px] sm:max-w-none" x-text="threat.keyword"></code>
                                                             </div>
-                                                            <p class="text-xs text-surface-600 dark:text-surface-400 mt-1" x-text="threat.description"></p>
+                                                            <p class="text-[10px] sm:text-xs text-surface-600 dark:text-surface-400 mt-0.5 sm:mt-1 line-clamp-1 sm:line-clamp-none" x-text="threat.description"></p>
                                                         </div>
                                                     </div>
+                                                </template>
+                                                <template x-if="detectedThreats.length > 3">
+                                                    <p class="text-[10px] sm:text-xs text-center text-surface-500 py-1">+ <span x-text="detectedThreats.length - 3"></span> ancaman lainnya</p>
                                                 </template>
                                             </div>
                                             
                                             {{-- Action Buttons --}}
-                                            <div class="px-4 py-3 bg-surface-100 dark:bg-surface-800/50 border-t border-rose-200 dark:border-rose-800 flex flex-col sm:flex-row gap-2">
+                                            <div class="px-2 py-2 sm:px-4 sm:py-3 bg-surface-100 dark:bg-surface-800/50 border-t border-rose-200 dark:border-rose-800 flex gap-2">
                                                 <button 
                                                     type="button"
                                                     @click="previewSanitization()"
-                                                    class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white dark:bg-surface-800 border border-surface-300 dark:border-surface-600 text-surface-700 dark:text-surface-300 rounded-xl text-sm font-semibold hover:bg-surface-50 dark:hover:bg-surface-700 transition-all"
+                                                    class="flex-1 flex items-center justify-center gap-1 sm:gap-2 px-2 py-2 sm:px-4 sm:py-2.5 bg-white dark:bg-surface-800 border border-surface-300 dark:border-surface-600 text-surface-700 dark:text-surface-300 rounded-lg sm:rounded-xl text-[10px] sm:text-sm font-semibold hover:bg-surface-50 dark:hover:bg-surface-700 transition-all"
                                                 >
-                                                    <i data-lucide="eye" class="w-4 h-4"></i>
-                                                    Preview Hasil Pembersihan
+                                                    <i data-lucide="eye" class="w-3 h-3 sm:w-4 sm:h-4"></i>
+                                                    <span class="hidden sm:inline">Preview</span>
                                                 </button>
                                                 <button 
                                                     type="button"
                                                     @click="applySanitization()"
-                                                    class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-bold shadow-md shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all"
+                                                    class="flex-1 flex items-center justify-center gap-1 sm:gap-2 px-2 py-2 sm:px-4 sm:py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg sm:rounded-xl text-[10px] sm:text-sm font-bold shadow-md shadow-emerald-500/20 transition-all"
                                                 >
-                                                    <i data-lucide="shield-check" class="w-4 h-4"></i>
-                                                    Bersihkan Semua Ancaman
+                                                    <i data-lucide="shield-check" class="w-3 h-3 sm:w-4 sm:h-4"></i>
+                                                    <span>Bersihkan</span>
                                                 </button>
                                             </div>
                                         </div>
@@ -274,7 +395,45 @@
                                     {{-- Custom Toolbar --}}
                                     <div class="relative group rounded-2xl overflow-hidden ring-1 ring-surface-200 dark:ring-surface-700 shadow-sm focus-within:shadow-lg focus-within:shadow-theme-500/10 transition-all duration-300 bg-white dark:bg-surface-800/50" :class="injectionDetected ? 'ring-2 ring-rose-400 dark:ring-rose-600' : ''">
                                         <trix-toolbar id="wysiwyg-toolbar">
-                                            <div class="flex flex-wrap gap-2 p-2 bg-surface-50 dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700">
+                                            {{-- Mobile Toolbar (Single Row) --}}
+                                            <div class="flex sm:hidden items-center justify-between p-1.5 bg-surface-50 dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700 overflow-x-auto">
+                                                <div class="flex items-center gap-0.5">
+                                                    <button type="button" class="trix-button w-7 h-7 flex items-center justify-center rounded text-surface-500 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors [&.trix-active]:bg-theme-500 [&.trix-active]:text-white" data-trix-attribute="bold" title="Bold">
+                                                        <i data-lucide="bold" class="w-3.5 h-3.5"></i>
+                                                    </button>
+                                                    <button type="button" class="trix-button w-7 h-7 flex items-center justify-center rounded text-surface-500 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors [&.trix-active]:bg-theme-500 [&.trix-active]:text-white" data-trix-attribute="italic" title="Italic">
+                                                        <i data-lucide="italic" class="w-3.5 h-3.5"></i>
+                                                    </button>
+                                                    <button type="button" class="trix-button w-7 h-7 flex items-center justify-center rounded text-surface-500 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors [&.trix-active]:bg-theme-500 [&.trix-active]:text-white" data-trix-attribute="href" data-trix-action="link" title="Link">
+                                                        <i data-lucide="link" class="w-3.5 h-3.5"></i>
+                                                    </button>
+                                                    <div class="w-px h-4 bg-surface-300 dark:bg-surface-600 mx-0.5"></div>
+                                                    <button type="button" class="trix-button w-7 h-7 flex items-center justify-center rounded text-surface-500 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors [&.trix-active]:bg-theme-500 [&.trix-active]:text-white" data-trix-attribute="heading1" title="Heading">
+                                                        <i data-lucide="heading" class="w-3.5 h-3.5"></i>
+                                                    </button>
+                                                    <button type="button" class="trix-button w-7 h-7 flex items-center justify-center rounded text-surface-500 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors [&.trix-active]:bg-theme-500 [&.trix-active]:text-white" data-trix-attribute="quote" title="Quote">
+                                                        <i data-lucide="quote" class="w-3.5 h-3.5"></i>
+                                                    </button>
+                                                    <div class="w-px h-4 bg-surface-300 dark:bg-surface-600 mx-0.5"></div>
+                                                    <button type="button" class="trix-button w-7 h-7 flex items-center justify-center rounded text-surface-500 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors [&.trix-active]:bg-theme-500 [&.trix-active]:text-white" data-trix-attribute="bullet" title="Bullets">
+                                                        <i data-lucide="list" class="w-3.5 h-3.5"></i>
+                                                    </button>
+                                                    <button type="button" class="trix-button w-7 h-7 flex items-center justify-center rounded text-surface-500 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors [&.trix-active]:bg-theme-500 [&.trix-active]:text-white" data-trix-attribute="number" title="Numbers">
+                                                        <i data-lucide="list-ordered" class="w-3.5 h-3.5"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="flex items-center gap-0.5 ml-1">
+                                                    <button type="button" class="trix-button w-7 h-7 flex items-center justify-center rounded text-surface-500 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors disabled:opacity-30" data-trix-action="undo" title="Undo">
+                                                        <i data-lucide="undo" class="w-3.5 h-3.5"></i>
+                                                    </button>
+                                                    <button type="button" class="trix-button w-7 h-7 flex items-center justify-center rounded text-surface-500 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors disabled:opacity-30" data-trix-action="redo" title="Redo">
+                                                        <i data-lucide="redo" class="w-3.5 h-3.5"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            {{-- Desktop Toolbar (Grouped) --}}
+                                            <div class="hidden sm:flex flex-wrap gap-2 p-2 bg-surface-50 dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700">
                                                 {{-- Group 1: Text Formatting --}}
                                                 <div class="flex items-center gap-1 p-1 bg-white dark:bg-surface-900 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700">
                                                     <button type="button" class="trix-button w-8 h-8 flex items-center justify-center rounded-md text-surface-500 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors [&.trix-active]:bg-theme-500 [&.trix-active]:text-white" data-trix-attribute="bold" title="Bold">
@@ -339,6 +498,10 @@
                                             input="x" 
                                             class="trix-content min-h-[300px] sm:min-h-[500px] bg-white dark:bg-surface-800/50 px-4 sm:px-6 py-4 outline-none border-none dark:text-white prose dark:prose-invert max-w-none"
                                             style="overflow-y: auto;"
+                                            spellcheck="false"
+                                            autocomplete="off"
+                                            autocorrect="off"
+                                            autocapitalize="off"
                                             x-on:trix-change="formData.content = $event.target.value; checkContentSafety($event.target.value)"
                                             x-on:trix-file-accept="$event.preventDefault()" 
                                         ></trix-editor>

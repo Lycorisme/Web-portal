@@ -225,6 +225,46 @@ function articleApp() {
             };
             return colors[severity] || colors.medium;
         },
+        
+        // Client-side form validation
+        validateForm() {
+            const errors = {};
+            
+            // Title is required
+            if (!this.formData.title || this.formData.title.trim() === '') {
+                errors.title = ['Judul berita wajib diisi'];
+            } else if (this.formData.title.length < 3) {
+                errors.title = ['Judul minimal 3 karakter'];
+            } else if (this.formData.title.length > 255) {
+                errors.title = ['Judul maksimal 255 karakter'];
+            }
+            
+            // Content is optional but check if it has dangerous content
+            if (this.injectionDetected) {
+                errors.content = ['Konten mengandung karakter berbahaya. Silakan bersihkan terlebih dahulu.'];
+            }
+            
+            // Category is optional
+            // Status is required (has default)
+            if (!this.formData.status) {
+                errors.status = ['Status wajib dipilih'];
+            }
+            
+            return errors;
+        },
+        
+        // Get validation status for a field
+        getFieldStatus(fieldName) {
+            if (this.formErrors[fieldName]) {
+                return 'error';
+            }
+            // Check if field has valid content
+            const value = this.formData[fieldName];
+            if (value && value.toString().trim().length > 0) {
+                return 'valid';
+            }
+            return 'empty';
+        },
 
         // Activity Modal State
         showActivityModal: false,
@@ -535,6 +575,37 @@ function articleApp() {
             this.formLoading = true;
             this.formErrors = {};
 
+            // Client-side validation first
+            const validationErrors = this.validateForm();
+            if (Object.keys(validationErrors).length > 0) {
+                this.formErrors = validationErrors;
+                this.formLoading = false;
+                
+                // Show specific error message
+                const errorFields = Object.keys(validationErrors);
+                const fieldNames = {
+                    title: 'Judul',
+                    content: 'Konten',
+                    category_id: 'Kategori',
+                    status: 'Status'
+                };
+                const errorFieldName = fieldNames[errorFields[0]] || errorFields[0];
+                showToast('error', `${errorFieldName} wajib diisi!`);
+                
+                // Navigate to the tab containing the first error
+                if (['title', 'content', 'excerpt'].includes(errorFields[0])) {
+                    this.activeTab = 'content';
+                } else if (['thumbnail'].includes(errorFields[0])) {
+                    this.activeTab = 'media';
+                } else if (['meta_title', 'meta_description', 'meta_keywords'].includes(errorFields[0])) {
+                    this.activeTab = 'seo';
+                } else if (['category_id', 'status'].includes(errorFields[0])) {
+                    this.activeTab = 'settings';
+                }
+                
+                return;
+            }
+
             try {
                 const url = this.formMode === 'create' 
                     ? '{{ route("articles.store") }}'
@@ -555,7 +626,6 @@ function articleApp() {
                 if (this.formData.meta_title) formDataStart.append('meta_title', this.formData.meta_title);
                 if (this.formData.meta_description) formDataStart.append('meta_description', this.formData.meta_description);
                 if (this.formData.meta_keywords) formDataStart.append('meta_keywords', this.formData.meta_keywords);
-                if (this.formData.meta_keywords) formDataStart.append('meta_keywords', this.formData.meta_keywords);
                 if (this.formData.published_at) formDataStart.append('published_at', this.formData.published_at);
                 formDataStart.append('is_pinned', this.formData.is_pinned ? 1 : 0);
                 formDataStart.append('is_headline', this.formData.is_headline ? 1 : 0);
@@ -575,7 +645,6 @@ function articleApp() {
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                         'Accept': 'application/json',
-                        // 'Content-Type': 'multipart/form-data', // Do NOT set this manually, let browser set boundary
                      },
                     body: formDataStart,
                 });
@@ -587,15 +656,24 @@ function articleApp() {
                     this.fetchArticles();
                     showToast('success', result.message);
                 } else if (response.status === 422) {
-                    // Validation errors
+                    // Validation errors from server
                     this.formErrors = result.errors || {};
-                    showToast('error', 'Mohon periksa kembali data yang diinput.');
+                    
+                    // Show detailed error message
+                    const errorKeys = Object.keys(this.formErrors);
+                    if (errorKeys.length > 0) {
+                        const firstError = this.formErrors[errorKeys[0]];
+                        const errorMessage = Array.isArray(firstError) ? firstError[0] : firstError;
+                        showToast('error', errorMessage);
+                    } else {
+                        showToast('error', 'Mohon periksa kembali data yang diinput.');
+                    }
                 } else {
                     showToast('error', result.message || 'Terjadi kesalahan');
                 }
             } catch (error) {
                 console.error('Error submitting form:', error);
-                showToast('error', 'Gagal menyimpan berita');
+                showToast('error', 'Gagal menyimpan berita. Periksa koneksi internet Anda.');
             } finally {
                 this.formLoading = false;
             }
