@@ -230,18 +230,30 @@
                         {{-- Audit Log --}}
                         <template x-if="formMode === 'edit' && auditInfo">
                             <div class="hidden md:block mt-6 pt-6 border-t border-surface-200 dark:border-surface-700/50">
-                                <div class="space-y-4">
+                                <div class="space-y-3">
+                                    {{-- Created By --}}
                                     <div class="group flex items-center gap-3 p-3 rounded-xl bg-white dark:bg-surface-800/50 border border-surface-100 dark:border-surface-800 shadow-sm">
-                                        <div class="h-8 w-8 rounded-full bg-surface-100 dark:bg-surface-700 flex items-center justify-center text-xs font-bold text-surface-600 dark:text-surface-300">
+                                        <div class="h-8 w-8 rounded-full bg-theme-100 dark:bg-theme-900/30 flex items-center justify-center text-xs font-bold text-theme-600 dark:text-theme-400">
                                             <i data-lucide="user" class="w-4 h-4"></i>
                                         </div>
-                                        <div>
-                                            <p class="text-xs text-surface-400">Created by</p>
-                                            <p class="text-xs font-semibold text-surface-900 dark:text-white" x-text="auditInfo.created_by"></p>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-[10px] text-surface-400">Dibuat oleh</p>
+                                            <p class="text-xs font-semibold text-surface-900 dark:text-white truncate" x-text="auditInfo.created_by"></p>
                                         </div>
                                     </div>
-                                    <div class="text-right">
-                                        <p class="text-[10px] text-surface-400">Last updated: <span x-text="auditInfo.updated_at ? formatDate(auditInfo.updated_at) : '-'"></span></p>
+                                    
+                                    {{-- Created At --}}
+                                    <div class="flex items-center gap-2 px-3 py-2 text-xs">
+                                        <i data-lucide="calendar" class="w-3 h-3 text-surface-400"></i>
+                                        <span class="text-surface-400">Dibuat:</span>
+                                        <span class="text-surface-600 dark:text-surface-300" x-text="auditInfo.created_at || '-'"></span>
+                                    </div>
+                                    
+                                    {{-- Updated At --}}
+                                    <div class="flex items-center gap-2 px-3 py-2 text-xs">
+                                        <i data-lucide="clock" class="w-3 h-3 text-surface-400"></i>
+                                        <span class="text-surface-400">Diperbarui:</span>
+                                        <span class="text-surface-600 dark:text-surface-300" x-text="auditInfo.updated_at || '-'"></span>
                                     </div>
                                 </div>
                             </div>

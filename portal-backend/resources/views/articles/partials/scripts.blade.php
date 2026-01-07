@@ -519,10 +519,10 @@ function articleApp() {
             };
             this.activeTab = 'content';
             this.auditInfo = {
-                created_by: article.user ? article.user.name : 'Unknown',
-                created_at: article.created_at,
-                updated_by: 'Unknown', // Ideally backend sends this
-                updated_at: article.updated_at
+                created_by: article.author_name || 'Admin',
+                created_at: article.created_at || null,
+                updated_by: article.author_name || 'Admin', // Same author for now, ideally track last editor
+                updated_at: article.updated_at || null
             };
             this.detectedThreats = [];
             this.injectionDetected = false;
