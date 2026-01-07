@@ -47,9 +47,9 @@
                     </div>
                     <div class="flex items-center gap-2 sm:gap-3">
                         <template x-if="injectionDetected">
-                            <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-50 dark:bg-rose-900/20 border border-rose-100 dark:border-rose-800 mr-2">
-                                <div class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></div>
-                                <span class="text-xs font-semibold text-rose-600 dark:text-rose-400">Unsafe Content</span>
+                            <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-500/10 dark:bg-rose-500/20 border border-rose-300 dark:border-rose-700 mr-2 animate-pulse">
+                                <i data-lucide="shield-x" class="w-4 h-4 text-rose-500"></i>
+                                <span class="text-xs font-bold text-rose-600 dark:text-rose-400" x-text="detectedThreats.length + ' Ancaman Terdeteksi'"></span>
                             </div>
                         </template>
 
@@ -194,26 +194,148 @@
                                             Editor Konten
                                         </label>
                                         
+                                        {{-- Security Status Indicator --}}
                                         <div x-show="formData.content" class="flex items-center gap-2 self-start sm:self-auto">
-                                            <template x-if="injectionDetected">
-                                                <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-50 dark:bg-rose-900/20 border border-rose-100 dark:border-rose-800">
-                                                    <div class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></div>
-                                                    <span class="text-xs font-semibold text-rose-600 dark:text-rose-400">Bahaya!</span>
-                                                    <button @click="sanitizeContent()" class="ml-1 text-xs font-bold text-rose-500 underline decoration-rose-300 hover:text-rose-700">Bersihkan</button>
+                                            {{-- Safe Indicator --}}
+                                            <template x-if="!injectionDetected && formData.content.length > 50">
+                                                <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800">
+                                                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i>
+                                                    <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Konten Aman</span>
                                                 </div>
                                             </template>
-                                            <template x-if="!injectionDetected && formData.content.length > 50">
-                                                <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800">
-                                                    <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
-                                                    <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Aman</span>
+                                            
+                                            {{-- Threat Detected Indicator --}}
+                                            <template x-if="injectionDetected">
+                                                <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 animate-pulse">
+                                                    <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-rose-500"></i>
+                                                    <span class="text-xs font-bold text-rose-600 dark:text-rose-400" x-text="detectedThreats.length + ' Ancaman'"></span>
                                                 </div>
                                             </template>
                                         </div>
                                     </div>
+                                    
+                                    {{-- SECURITY ALERT PANEL - Shown when threats detected --}}
+                                    <template x-if="injectionDetected">
+                                        <div class="rounded-2xl border-2 border-rose-300 dark:border-rose-700 bg-gradient-to-br from-rose-50 to-orange-50 dark:from-rose-900/30 dark:to-orange-900/20 overflow-hidden shadow-lg shadow-rose-500/10">
+                                            {{-- Alert Header --}}
+                                            <div class="bg-rose-500 dark:bg-rose-600 px-4 py-3 flex items-center justify-between">
+                                                <div class="flex items-center gap-3">
+                                                    <div class="p-2 bg-white/20 rounded-lg">
+                                                        <i data-lucide="shield-x" class="w-5 h-5 text-white"></i>
+                                                    </div>
+                                                    <div>
+                                                        <h4 class="text-sm font-bold text-white">⚠️ Terdeteksi Konten Berbahaya!</h4>
+                                                        <p class="text-xs text-rose-100">Sistem mendeteksi potensi serangan injeksi atau konten terlarang</p>
+                                                    </div>
+                                                </div>
+                                                <span class="px-3 py-1 bg-white/20 text-white text-xs font-bold rounded-full" x-text="detectedThreats.length + ' ancaman'"></span>
+                                            </div>
+                                            
+                                            {{-- Threat List --}}
+                                            <div class="p-4 space-y-3 max-h-48 overflow-y-auto">
+                                                <template x-for="(threat, index) in detectedThreats" :key="index">
+                                                    <div class="flex items-start gap-3 p-3 rounded-xl border-l-4 transition-all hover:scale-[1.01]" :class="getSeverityBorderColor(threat.severity)">
+                                                        <div class="flex-shrink-0">
+                                                            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-[10px] font-bold" :class="getSeverityColor(threat.severity)" x-text="index + 1"></span>
+                                                        </div>
+                                                        <div class="flex-1 min-w-0">
+                                                            <div class="flex items-center gap-2 flex-wrap">
+                                                                <span class="text-xs font-bold px-2 py-0.5 rounded-full" :class="getSeverityColor(threat.severity)" x-text="threat.category"></span>
+                                                                <code class="text-[10px] px-2 py-0.5 bg-surface-200 dark:bg-surface-700 text-rose-600 dark:text-rose-400 rounded font-mono" x-text="threat.keyword"></code>
+                                                            </div>
+                                                            <p class="text-xs text-surface-600 dark:text-surface-400 mt-1" x-text="threat.description"></p>
+                                                        </div>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                            
+                                            {{-- Action Buttons --}}
+                                            <div class="px-4 py-3 bg-surface-100 dark:bg-surface-800/50 border-t border-rose-200 dark:border-rose-800 flex flex-col sm:flex-row gap-2">
+                                                <button 
+                                                    type="button"
+                                                    @click="previewSanitization()"
+                                                    class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white dark:bg-surface-800 border border-surface-300 dark:border-surface-600 text-surface-700 dark:text-surface-300 rounded-xl text-sm font-semibold hover:bg-surface-50 dark:hover:bg-surface-700 transition-all"
+                                                >
+                                                    <i data-lucide="eye" class="w-4 h-4"></i>
+                                                    Preview Hasil Pembersihan
+                                                </button>
+                                                <button 
+                                                    type="button"
+                                                    @click="applySanitization()"
+                                                    class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-bold shadow-md shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all"
+                                                >
+                                                    <i data-lucide="shield-check" class="w-4 h-4"></i>
+                                                    Bersihkan Semua Ancaman
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </template>
 
-                                    <div class="relative group rounded-2xl overflow-hidden ring-1 ring-surface-200 dark:ring-surface-700 focus-within:ring-2 focus-within:ring-theme-500 transition-all duration-300 shadow-sm focus-within:shadow-lg focus-within:shadow-theme-500/10">
+                                    {{-- Custom Toolbar --}}
+                                    <div class="relative group rounded-2xl overflow-hidden ring-1 ring-surface-200 dark:ring-surface-700 shadow-sm focus-within:shadow-lg focus-within:shadow-theme-500/10 transition-all duration-300 bg-white dark:bg-surface-800/50" :class="injectionDetected ? 'ring-2 ring-rose-400 dark:ring-rose-600' : ''">
+                                        <trix-toolbar id="wysiwyg-toolbar">
+                                            <div class="flex flex-wrap gap-2 p-2 bg-surface-50 dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700">
+                                                {{-- Group 1: Text Formatting --}}
+                                                <div class="flex items-center gap-1 p-1 bg-white dark:bg-surface-900 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700">
+                                                    <button type="button" class="trix-button w-8 h-8 flex items-center justify-center rounded-md text-surface-500 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors [&.trix-active]:bg-theme-500 [&.trix-active]:text-white" data-trix-attribute="bold" title="Bold">
+                                                        <i data-lucide="bold" class="w-4 h-4"></i>
+                                                    </button>
+                                                    <button type="button" class="trix-button w-8 h-8 flex items-center justify-center rounded-md text-surface-500 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors [&.trix-active]:bg-theme-500 [&.trix-active]:text-white" data-trix-attribute="italic" title="Italic">
+                                                        <i data-lucide="italic" class="w-4 h-4"></i>
+                                                    </button>
+                                                    <button type="button" class="trix-button w-8 h-8 flex items-center justify-center rounded-md text-surface-500 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors [&.trix-active]:bg-theme-500 [&.trix-active]:text-white" data-trix-attribute="strike" title="Strike">
+                                                        <i data-lucide="strikethrough" class="w-4 h-4"></i>
+                                                    </button>
+                                                    <button type="button" class="trix-button w-8 h-8 flex items-center justify-center rounded-md text-surface-500 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors [&.trix-active]:bg-theme-500 [&.trix-active]:text-white" data-trix-attribute="href" data-trix-action="link" title="Link">
+                                                        <i data-lucide="link" class="w-4 h-4"></i>
+                                                    </button>
+                                                </div>
+
+                                                {{-- Group 2: Blocks --}}
+                                                <div class="flex items-center gap-1 p-1 bg-white dark:bg-surface-900 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700">
+                                                    <button type="button" class="trix-button w-8 h-8 flex items-center justify-center rounded-md text-surface-500 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors [&.trix-active]:bg-theme-500 [&.trix-active]:text-white" data-trix-attribute="heading1" title="Heading">
+                                                        <i data-lucide="heading" class="w-4 h-4"></i>
+                                                    </button>
+                                                    <button type="button" class="trix-button w-8 h-8 flex items-center justify-center rounded-md text-surface-500 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors [&.trix-active]:bg-theme-500 [&.trix-active]:text-white" data-trix-attribute="quote" title="Quote">
+                                                        <i data-lucide="quote" class="w-4 h-4"></i>
+                                                    </button>
+                                                    <button type="button" class="trix-button w-8 h-8 flex items-center justify-center rounded-md text-surface-500 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors [&.trix-active]:bg-theme-500 [&.trix-active]:text-white" data-trix-attribute="code" title="Code">
+                                                        <i data-lucide="code" class="w-4 h-4"></i>
+                                                    </button>
+                                                </div>
+
+                                                {{-- Group 3: Lists & Indentation --}}
+                                                <div class="flex items-center gap-1 p-1 bg-white dark:bg-surface-900 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700">
+                                                    <button type="button" class="trix-button w-8 h-8 flex items-center justify-center rounded-md text-surface-500 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors [&.trix-active]:bg-theme-500 [&.trix-active]:text-white" data-trix-attribute="bullet" title="Bullets">
+                                                        <i data-lucide="list" class="w-4 h-4"></i>
+                                                    </button>
+                                                    <button type="button" class="trix-button w-8 h-8 flex items-center justify-center rounded-md text-surface-500 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors [&.trix-active]:bg-theme-500 [&.trix-active]:text-white" data-trix-attribute="number" title="Numbers">
+                                                        <i data-lucide="list-ordered" class="w-4 h-4"></i>
+                                                    </button>
+                                                    <div class="w-px h-4 bg-surface-200 dark:bg-surface-700 mx-1"></div>
+                                                    <button type="button" class="trix-button w-8 h-8 flex items-center justify-center rounded-md text-surface-500 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors disabled:opacity-30" data-trix-action="decreaseNestingLevel" title="Decrease Level">
+                                                        <i data-lucide="outdent" class="w-4 h-4"></i>
+                                                    </button>
+                                                    <button type="button" class="trix-button w-8 h-8 flex items-center justify-center rounded-md text-surface-500 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors disabled:opacity-30" data-trix-action="increaseNestingLevel" title="Increase Level">
+                                                        <i data-lucide="indent" class="w-4 h-4"></i>
+                                                    </button>
+                                                </div>
+                                                
+                                                {{-- Group 4: History --}}
+                                                <div class="ml-auto flex items-center gap-1 p-1 bg-white dark:bg-surface-900 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700">
+                                                    <button type="button" class="trix-button w-8 h-8 flex items-center justify-center rounded-md text-surface-500 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors disabled:opacity-30 disabled:cursor-not-allowed" data-trix-action="undo" title="Undo">
+                                                        <i data-lucide="undo" class="w-4 h-4"></i>
+                                                    </button>
+                                                    <button type="button" class="trix-button w-8 h-8 flex items-center justify-center rounded-md text-surface-500 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors disabled:opacity-30 disabled:cursor-not-allowed" data-trix-action="redo" title="Redo">
+                                                        <i data-lucide="redo" class="w-4 h-4"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </trix-toolbar>
+
                                         <input id="x" type="hidden" name="content" x-model="formData.content">
                                         <trix-editor 
+                                            toolbar="wysiwyg-toolbar"
                                             input="x" 
                                             class="trix-content min-h-[300px] sm:min-h-[500px] bg-white dark:bg-surface-800/50 px-4 sm:px-6 py-4 outline-none border-none dark:text-white prose dark:prose-invert max-w-none"
                                             style="overflow-y: auto;"
@@ -455,6 +577,117 @@
                 
 
 
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+{{-- Auto-Sanitization Preview Modal --}}
+<template x-teleport="body">
+    <div 
+        x-show="showSanitizePreview"
+        x-cloak
+        class="fixed inset-0 z-[60] overflow-y-auto"
+        aria-labelledby="sanitize-preview-title" 
+        role="dialog" 
+        aria-modal="true"
+    >
+        {{-- Backdrop --}}
+        <div 
+            x-show="showSanitizePreview"
+            x-transition:enter="ease-out duration-300"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="ease-in duration-200"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 bg-surface-900/60 backdrop-blur-sm transition-opacity"
+            @click="closeSanitizePreview()"
+        ></div>
+
+        {{-- Modal Container --}}
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div 
+                x-show="showSanitizePreview"
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0 scale-95"
+                x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95"
+                class="relative transform overflow-hidden bg-white dark:bg-surface-900 text-left shadow-2xl transition-all w-full max-w-4xl rounded-3xl border border-white/20 ring-1 ring-black/5 dark:ring-white/10"
+                @click.stop
+            >
+                {{-- Header --}}
+                <div class="bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-4 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 bg-white/20 rounded-xl">
+                            <i data-lucide="sparkles" class="w-6 h-6 text-white"></i>
+                        </div>
+                        <div>
+                            <h3 id="sanitize-preview-title" class="text-lg font-bold text-white">Preview Auto-Sanitization</h3>
+                            <p class="text-sm text-white/80">Lihat hasil pembersihan konten sebelum diterapkan</p>
+                        </div>
+                    </div>
+                    <button 
+                        type="button"
+                        @click="closeSanitizePreview()"
+                        class="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                    >
+                        <i data-lucide="x" class="w-5 h-5 text-white"></i>
+                    </button>
+                </div>
+
+                {{-- Info Banner --}}
+                <div class="px-6 py-3 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800 flex items-center gap-3">
+                    <i data-lucide="info" class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0"></i>
+                    <p class="text-sm text-amber-700 dark:text-amber-300">
+                        Teks yang ditandai dengan <span class="bg-rose-200 dark:bg-rose-800 text-rose-600 dark:text-rose-300 px-1.5 py-0.5 rounded text-xs font-mono line-through">[REMOVED]</span> akan dihapus dari konten.
+                    </p>
+                </div>
+
+                {{-- Preview Content --}}
+                <div class="p-6 max-h-[60vh] overflow-y-auto">
+                    <div class="prose dark:prose-invert max-w-none p-4 bg-surface-50 dark:bg-surface-800 rounded-2xl border border-surface-200 dark:border-surface-700" x-html="sanitizedPreviewContent">
+                    </div>
+                </div>
+
+                {{-- Statistics --}}
+                <div class="px-6 py-4 bg-surface-50 dark:bg-surface-800/50 border-t border-surface-200 dark:border-surface-700">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <div class="flex items-center gap-4">
+                            <div class="flex items-center gap-2 px-3 py-1.5 bg-rose-100 dark:bg-rose-900/30 rounded-full">
+                                <i data-lucide="trash-2" class="w-4 h-4 text-rose-500"></i>
+                                <span class="text-sm font-semibold text-rose-600 dark:text-rose-400" x-text="detectedThreats.length + ' ancaman akan dihapus'"></span>
+                            </div>
+                            <div class="text-xs text-surface-500 dark:text-surface-400">
+                                Kategori: 
+                                <template x-for="category in [...new Set(detectedThreats.map(t => t.category))]" :key="category">
+                                    <span class="inline-block px-2 py-0.5 bg-surface-200 dark:bg-surface-700 rounded-full text-surface-600 dark:text-surface-300 mr-1" x-text="category"></span>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Footer Actions --}}
+                <div class="px-6 py-4 bg-white dark:bg-surface-900 border-t border-surface-200 dark:border-surface-700 flex flex-col sm:flex-row gap-3 justify-end">
+                    <button 
+                        type="button"
+                        @click="closeSanitizePreview()"
+                        class="px-5 py-2.5 text-sm font-semibold text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-xl transition-all"
+                    >
+                        Batal
+                    </button>
+                    <button 
+                        type="button"
+                        @click="applySanitization()"
+                        class="px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all flex items-center justify-center gap-2"
+                    >
+                        <i data-lucide="check-circle" class="w-4 h-4"></i>
+                        Terapkan Pembersihan
+                    </button>
                 </div>
             </div>
         </div>
