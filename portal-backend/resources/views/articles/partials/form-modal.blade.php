@@ -823,42 +823,46 @@
                 </div>
 
                 {{-- Preview Content --}}
-                <div class="p-6 max-h-[60vh] overflow-y-auto">
-                    <div class="prose dark:prose-invert max-w-none p-4 bg-surface-50 dark:bg-surface-800 rounded-2xl border border-surface-200 dark:border-surface-700" x-html="sanitizedPreviewContent">
+                <div class="px-3 sm:px-6 py-4 sm:py-6 max-h-[60vh] overflow-y-auto">
+                    {{-- Custom Style for Preview Wrapping --}}
+                    <style>
+                        .preview-content pre { white-space: pre-wrap !important; word-break: break-all !important; }
+                        .preview-content code { white-space: pre-wrap !important; word-break: break-all !important; }
+                        .preview-content * { word-break: break-word !important; overflow-wrap: break-word !important; }
+                    </style>
+                    <div class="preview-content prose prose-sm dark:prose-invert max-w-none p-4 bg-surface-50 dark:bg-surface-800 rounded-2xl border border-surface-200 dark:border-surface-700 w-full" x-html="sanitizedPreviewContent">
                     </div>
                 </div>
 
                 {{-- Statistics --}}
-                <div class="px-6 py-4 bg-surface-50 dark:bg-surface-800/50 border-t border-surface-200 dark:border-surface-700">
-                    <div class="flex flex-wrap items-center justify-between gap-4">
-                        <div class="flex items-center gap-4">
-                            <div class="flex items-center gap-2 px-3 py-1.5 bg-rose-100 dark:bg-rose-900/30 rounded-full">
-                                <i data-lucide="trash-2" class="w-4 h-4 text-rose-500"></i>
-                                <span class="text-sm font-semibold text-rose-600 dark:text-rose-400" x-text="detectedThreats.length + ' ancaman akan dihapus'"></span>
-                            </div>
-                            <div class="text-xs text-surface-500 dark:text-surface-400">
-                                Kategori: 
-                                <template x-for="category in [...new Set(detectedThreats.map(t => t.category))]" :key="category">
-                                    <span class="inline-block px-2 py-0.5 bg-surface-200 dark:bg-surface-700 rounded-full text-surface-600 dark:text-surface-300 mr-1" x-text="category"></span>
-                                </template>
-                            </div>
+                <div class="px-3 sm:px-6 py-3 sm:py-4 bg-surface-50 dark:bg-surface-800/50 border-t border-surface-200 dark:border-surface-700">
+                    <div class="flex flex-col gap-3">
+                        <div class="flex items-center gap-2 px-3 py-1.5 bg-rose-100 dark:bg-rose-900/30 rounded-full w-fit">
+                            <i data-lucide="trash-2" class="w-4 h-4 text-rose-500 flex-shrink-0"></i>
+                            <span class="text-sm font-semibold text-rose-600 dark:text-rose-400" x-text="detectedThreats.length + ' ancaman akan dihapus'"></span>
+                        </div>
+                        <div class="text-xs text-surface-500 dark:text-surface-400 flex flex-wrap gap-1 items-center">
+                            <span>Kategori:</span>
+                            <template x-for="category in [...new Set(detectedThreats.map(t => t.category))]" :key="category">
+                                <span class="inline-block px-2 py-0.5 bg-surface-200 dark:bg-surface-700 rounded-full text-surface-600 dark:text-surface-300" x-text="category"></span>
+                            </template>
                         </div>
                     </div>
                 </div>
 
                 {{-- Footer Actions --}}
-                <div class="px-6 py-4 bg-white dark:bg-surface-900 border-t border-surface-200 dark:border-surface-700 flex flex-col sm:flex-row gap-3 justify-end">
+                <div class="px-3 sm:px-6 py-3 sm:py-4 bg-white dark:bg-surface-900 border-t border-surface-200 dark:border-surface-700 flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 justify-end">
                     <button 
                         type="button"
                         @click="closeSanitizePreview()"
-                        class="px-5 py-2.5 text-sm font-semibold text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-xl transition-all"
+                        class="w-full sm:w-auto px-5 py-2.5 text-sm font-semibold text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-xl transition-all"
                     >
                         Batal
                     </button>
                     <button 
                         type="button"
                         @click="applySanitization()"
-                        class="px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all flex items-center justify-center gap-2"
+                        class="w-full sm:w-auto px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all flex items-center justify-center gap-2"
                     >
                         <i data-lucide="check-circle" class="w-4 h-4"></i>
                         Terapkan Pembersihan
