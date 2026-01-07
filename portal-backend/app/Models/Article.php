@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 class Article extends Model
@@ -154,5 +155,61 @@ class Article extends Model
     public function getRouteKeyName(): string
     {
         return 'id';
+    }
+
+    /**
+     * Get all comments for this article.
+     */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(ArticleComment::class);
+    }
+
+    /**
+     * Get visible comments (excluding spam/hidden).
+     */
+    public function visibleComments(): HasMany
+    {
+        return $this->hasMany(ArticleComment::class)
+            ->where('status', 'visible')
+            ->whereNull('parent_id')
+            ->with(['user', 'visibleReplies']);
+    }
+
+    /**
+     * Get all likes for this article.
+     */
+    public function likes(): HasMany
+    {
+        return $this->hasMany(ArticleLike::class);
+    }
+
+    /**
+     * Get likes count.
+     */
+    public function getLikesCountAttribute(): int
+    {
+        return $this->likes()->count();
+    }
+
+    /**
+     * Get comments count (visible only).
+     */
+    public function getCommentsCountAttribute(): int
+    {
+        return $this->comments()->where('status', 'visible')->count();
+    }
+
+    /**
+     * Get statistics summary for this article.
+     */
+    public function getStatisticsAttribute(): array
+    {
+        return [
+            'views' => $this->views ?? 0,
+            'likes' => $this->likes_count,
+            'comments' => $this->comments_count,
+            'shares' => 0, // Future feature placeholder
+        ];
     }
 }

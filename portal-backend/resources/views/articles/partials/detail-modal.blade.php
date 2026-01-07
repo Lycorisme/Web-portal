@@ -169,6 +169,121 @@
                                 </div>
                             </div>
                         </div>
+
+                        {{-- Comments Section --}}
+                        <div class="border-t border-surface-200 dark:border-surface-700 pt-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="text-sm font-semibold text-surface-900 dark:text-white flex items-center gap-2">
+                                    <i data-lucide="message-circle" class="w-4 h-4 text-emerald-500"></i>
+                                    Komentar
+                                    <span class="px-2 py-0.5 text-xs bg-surface-100 dark:bg-surface-700 rounded-full" x-text="detailComments?.length || 0"></span>
+                                </h4>
+                                <button 
+                                    @click="fetchDetailComments(selectedArticle.id)"
+                                    class="p-1.5 text-surface-400 hover:text-theme-500 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors"
+                                    title="Refresh komentar"
+                                >
+                                    <i data-lucide="refresh-cw" class="w-4 h-4" :class="detailCommentsLoading ? 'animate-spin' : ''"></i>
+                                </button>
+                            </div>
+
+                            {{-- Loading State --}}
+                            <div x-show="detailCommentsLoading" class="text-center py-4">
+                                <div class="w-6 h-6 border-2 border-theme-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                            </div>
+
+                            {{-- Comments List --}}
+                            <div x-show="!detailCommentsLoading && detailComments?.length > 0" class="space-y-3 max-h-64 overflow-y-auto">
+                                <template x-for="comment in detailComments" :key="comment.id">
+                                    <div class="comment-item">
+                                        {{-- Main Comment --}}
+                                        <div class="p-3 bg-surface-50 dark:bg-surface-800 rounded-lg border-l-4" :class="comment.is_admin_reply ? 'border-theme-500' : (comment.status === 'spam' ? 'border-amber-500' : (comment.status === 'hidden' ? 'border-surface-400' : 'border-emerald-500'))">
+                                            <div class="flex items-start gap-3">
+                                                <div class="w-8 h-8 flex-shrink-0 rounded-full bg-theme-100 dark:bg-theme-900/30 flex items-center justify-center overflow-hidden">
+                                                    <img 
+                                                        x-show="comment.user_avatar"
+                                                        :src="comment.user_avatar" 
+                                                        :alt="comment.user_name"
+                                                        class="w-full h-full object-cover"
+                                                    >
+                                                    <span 
+                                                        x-show="!comment.user_avatar"
+                                                        class="text-xs font-bold text-theme-600 dark:text-theme-400"
+                                                        x-text="comment.user_name?.charAt(0).toUpperCase()"
+                                                    ></span>
+                                                </div>
+                                                <div class="flex-1 min-w-0">
+                                                    <div class="flex items-center gap-2 flex-wrap">
+                                                        <span class="text-sm font-semibold text-surface-900 dark:text-white" x-text="comment.user_name"></span>
+                                                        <span x-show="comment.is_admin_reply" class="px-1.5 py-0.5 text-xs font-medium bg-theme-500 text-white rounded">Admin</span>
+                                                        <span x-show="comment.status === 'spam'" class="px-1.5 py-0.5 text-xs font-medium bg-amber-500 text-white rounded">Spam</span>
+                                                        <span x-show="comment.status === 'hidden'" class="px-1.5 py-0.5 text-xs font-medium bg-surface-500 text-white rounded">Tersembunyi</span>
+                                                        <span class="text-xs text-surface-400" x-text="comment.time_ago"></span>
+                                                    </div>
+                                                    <p class="text-sm text-surface-700 dark:text-surface-300 mt-1" x-text="comment.comment_text"></p>
+                                                    
+                                                    {{-- Action Buttons --}}
+                                                    <div class="flex items-center gap-3 mt-2">
+                                                        <button 
+                                                            @click="openStatisticsModal(selectedArticle.id); closeDetailModal()"
+                                                            class="text-xs text-theme-600 dark:text-theme-400 hover:underline flex items-center gap-1"
+                                                        >
+                                                            <i data-lucide="reply" class="w-3 h-3"></i>
+                                                            Balas
+                                                        </button>
+                                                        <button 
+                                                            @click="deleteComment(comment.id)"
+                                                            class="text-xs text-rose-500 hover:text-rose-600 flex items-center gap-1"
+                                                        >
+                                                            <i data-lucide="trash-2" class="w-3 h-3"></i>
+                                                            Hapus
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {{-- Replies --}}
+                                        <template x-if="comment.replies?.length > 0">
+                                            <div class="ml-6 mt-2 space-y-2">
+                                                <template x-for="reply in comment.replies" :key="reply.id">
+                                                    <div class="p-2.5 bg-surface-100 dark:bg-surface-700 rounded-lg border-l-4" :class="reply.is_admin_reply ? 'border-theme-500' : 'border-surface-300'">
+                                                        <div class="flex items-start gap-2">
+                                                            <div class="w-6 h-6 flex-shrink-0 rounded-full bg-theme-100 dark:bg-theme-900/30 flex items-center justify-center overflow-hidden">
+                                                                <img 
+                                                                    x-show="reply.user_avatar"
+                                                                    :src="reply.user_avatar" 
+                                                                    class="w-full h-full object-cover"
+                                                                >
+                                                                <span 
+                                                                    x-show="!reply.user_avatar"
+                                                                    class="text-[10px] font-bold text-theme-600 dark:text-theme-400"
+                                                                    x-text="reply.user_name?.charAt(0).toUpperCase()"
+                                                                ></span>
+                                                            </div>
+                                                            <div class="flex-1 min-w-0">
+                                                                <div class="flex items-center gap-2 flex-wrap">
+                                                                    <span class="text-xs font-semibold text-surface-900 dark:text-white" x-text="reply.user_name"></span>
+                                                                    <span x-show="reply.is_admin_reply" class="px-1 py-0.5 text-[10px] font-medium bg-theme-500 text-white rounded">Admin</span>
+                                                                    <span class="text-[10px] text-surface-400" x-text="reply.time_ago"></span>
+                                                                </div>
+                                                                <p class="text-xs text-surface-700 dark:text-surface-300 mt-0.5" x-text="reply.comment_text"></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+
+                            {{-- Empty State --}}
+                            <div x-show="!detailCommentsLoading && (!detailComments || detailComments.length === 0)" class="text-center py-6">
+                                <i data-lucide="message-circle" class="w-8 h-8 mx-auto text-surface-300 dark:text-surface-600 mb-2"></i>
+                                <p class="text-sm text-surface-500">Belum ada komentar</p>
+                            </div>
+                        </div>
                     </div>
 
                     {{-- Footer Actions --}}

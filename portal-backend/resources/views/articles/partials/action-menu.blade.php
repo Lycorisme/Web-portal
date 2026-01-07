@@ -14,7 +14,6 @@
         :class="menuPosition.placement === 'top' ? 'origin-bottom-right' : 'origin-top-right'"
         :style="`top: ${menuPosition.top}px; left: ${menuPosition.left}px; transform: ${menuPosition.placement === 'top' ? 'translateY(-100%)' : ''}`"
     >
-        {{-- Common Actions (Only for Active Items) --}}
         <button 
             x-show="activeMenuArticle && !activeMenuArticle.deleted_at"
             @click="viewDetail(activeMenuArticle.id); closeMenu()"
@@ -22,6 +21,15 @@
         >
             <i data-lucide="eye" class="w-4 h-4 text-surface-400 group-hover:text-theme-500 transition-colors"></i>
             <span>Lihat Detail</span>
+        </button>
+
+        <button 
+            x-show="activeMenuArticle && !activeMenuArticle.deleted_at"
+            @click="openStatisticsModal(activeMenuArticle.id); closeMenu()"
+            class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-surface-700 dark:text-surface-300 hover:bg-surface-50 dark:hover:bg-surface-700/50 hover:text-purple-600 dark:hover:text-purple-400 transition-colors group"
+        >
+            <i data-lucide="bar-chart-3" class="w-4 h-4 text-surface-400 group-hover:text-purple-500 transition-colors"></i>
+            <span>Statistik</span>
         </button>
 
         <a 

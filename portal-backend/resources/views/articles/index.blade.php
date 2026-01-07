@@ -33,6 +33,9 @@
 
     {{-- Detail Modal --}}
     @include('articles.partials.detail-modal')
+
+    {{-- Statistics Modal --}}
+    @include('articles.partials.statistics-modal')
 </div>
 @endsection
 

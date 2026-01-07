@@ -7,6 +7,7 @@ use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\ArticleInteractionController;
 
 Route::get('/', function () {
     return redirect()->route('dashboard');
@@ -70,8 +71,18 @@ Route::post('/articles/{id}/restore', [ArticleController::class, 'restore'])->na
 Route::delete('/articles/{id}/force', [ArticleController::class, 'forceDelete'])->name('articles.force-delete');
 Route::post('/articles/{article}/toggle-status', [ArticleController::class, 'toggleStatus'])->name('articles.toggle-status');
 
+// Article Interaction Routes (Statistics, Comments, Likes)
+Route::get('/articles/{article}/statistics', [ArticleInteractionController::class, 'getStatistics'])->name('articles.statistics');
+Route::get('/articles/{article}/comments', [ArticleInteractionController::class, 'getComments'])->name('articles.comments');
+Route::post('/comments/{comment}/reply', [ArticleInteractionController::class, 'addAdminReply'])->name('comments.reply');
+Route::patch('/comments/{comment}/status', [ArticleInteractionController::class, 'updateCommentStatus'])->name('comments.update-status');
+Route::delete('/comments/{comment}', [ArticleInteractionController::class, 'deleteComment'])->name('comments.delete');
+Route::post('/comments/{comment}/restore', [ArticleInteractionController::class, 'restoreComment'])->name('comments.restore');
+Route::delete('/comments/{comment}/force', [ArticleInteractionController::class, 'forceDeleteComment'])->name('comments.force-delete');
+
 // Logout route (placeholder - will be implemented with auth)
 Route::post('/logout', function () {
     // Auth::logout();
     return redirect('/');
 })->name('logout');
+
