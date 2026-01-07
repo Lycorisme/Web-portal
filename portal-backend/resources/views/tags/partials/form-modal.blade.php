@@ -90,6 +90,29 @@
                         </template>
                     </div>
 
+                    {{-- Is Active Toggle --}}
+                    <div>
+                        <label class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+                            Status Tag
+                        </label>
+                        <div class="flex items-center gap-3 p-3 bg-surface-50 dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700">
+                            <button 
+                                type="button" 
+                                @click="formData.is_active = !formData.is_active"
+                                class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+                                :class="formData.is_active ? 'bg-theme-500' : 'bg-surface-300 dark:bg-surface-600'"
+                            >
+                                <span 
+                                    class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                                    :class="formData.is_active ? 'translate-x-5' : 'translate-x-0'"
+                                ></span>
+                            </button>
+                            <span class="text-sm font-medium" :class="formData.is_active ? 'text-theme-600 dark:text-theme-400' : 'text-surface-500'">
+                                <span x-text="formData.is_active ? 'Aktif' : 'Nonaktif'"></span>
+                            </span>
+                        </div>
+                    </div>
+
                     {{-- Form Actions --}}
                     <div class="flex items-center gap-3 pt-4 border-t border-surface-200 dark:border-surface-700">
                         <button 

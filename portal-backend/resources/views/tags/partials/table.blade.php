@@ -34,6 +34,9 @@
                     <th class="px-4 py-3 text-center text-xs font-semibold text-surface-500 dark:text-surface-400 uppercase tracking-wider whitespace-nowrap">
                         Artikel
                     </th>
+                    <th class="px-4 py-3 text-center text-xs font-semibold text-surface-500 dark:text-surface-400 uppercase tracking-wider whitespace-nowrap">
+                        Status
+                    </th>
                     <th class="px-4 py-3 text-left text-xs font-semibold text-surface-500 dark:text-surface-400 uppercase tracking-wider whitespace-nowrap">
                         Dibuat
                     </th>
@@ -95,6 +98,22 @@
                             </span>
                         </td>
 
+                        {{-- Status --}}
+                        <td class="px-4 py-3 text-center whitespace-nowrap">
+                            <button 
+                                @click="toggleActive(tag)"
+                                :disabled="tag.deleted_at"
+                                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold transition-all"
+                                :class="tag.is_active 
+                                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-500/30' 
+                                    : 'bg-surface-100 text-surface-500 dark:bg-surface-700 dark:text-surface-400 hover:bg-surface-200 dark:hover:bg-surface-600'"
+                                :class="{'opacity-60 grayscale cursor-not-allowed': tag.deleted_at}"
+                            >
+                                <i :data-lucide="tag.is_active ? 'check-circle' : 'x-circle'" class="w-3 h-3"></i>
+                                <span x-text="tag.is_active ? 'Aktif' : 'Nonaktif'"></span>
+                            </button>
+                        </td>
+
                         {{-- Created At --}}
                         <td class="px-4 py-3 whitespace-nowrap">
                             <span class="text-sm text-surface-600 dark:text-surface-400" x-text="tag.created_at"></span>
@@ -115,10 +134,9 @@
                     </tr>
                 </template>
 
-                {{-- Empty State --}}
                 <template x-if="!loading && tags.length === 0">
                     <tr>
-                        <td colspan="6" class="px-4 py-12">
+                        <td colspan="7" class="px-4 py-12">
                             <div class="flex flex-col items-center justify-center text-center">
                                 <div class="w-16 h-16 bg-surface-100 dark:bg-surface-800 rounded-full flex items-center justify-center mb-4">
                                     <i data-lucide="tags" class="w-8 h-8 text-surface-400"></i>

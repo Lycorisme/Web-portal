@@ -111,5 +111,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/tags/{tag}', [TagController::class, 'destroy'])->name('tags.destroy');
     Route::post('/tags/{id}/restore', [TagController::class, 'restore'])->name('tags.restore');
     Route::delete('/tags/{id}/force', [TagController::class, 'forceDelete'])->name('tags.force-delete');
+    Route::post('/tags/{tag}/toggle-active', [TagController::class, 'toggleActive'])->name('tags.toggle-active');
 });
 

@@ -15,7 +15,7 @@ function tagApp() {
         showDetailModal: false,
         showFormModal: false,
         formMode: 'create',
-        formData: { id: null, name: '', slug: '' },
+        formData: { id: null, name: '', slug: '', is_active: true },
         formErrors: {},
         formLoading: false,
 
@@ -24,7 +24,7 @@ function tagApp() {
         showTrash: false,
 
         // Filters
-        filters: { search: '' },
+        filters: { search: '', is_active: '' },
 
         // Pagination
         meta: { current_page: 1, last_page: 1, per_page: 15, total: 0, from: 0, to: 0 },
@@ -142,8 +142,29 @@ function tagApp() {
 
         closeMenu() { this.activeMenuTag = null; this.activeMenuButton = null; },
         applyFilters() { this.meta.current_page = 1; this.fetchTags(); },
-        resetFilters() { this.filters = { search: '' }; this.applyFilters(); },
+        resetFilters() { this.filters = { search: '', is_active: '' }; this.applyFilters(); },
         goToPage(page) { if (page >= 1 && page <= this.meta.last_page) { this.meta.current_page = page; this.fetchTags(); } },
+
+        // Toggle Active Status
+        async toggleActive(tag) {
+            try {
+                const response = await fetch(`/tags/${tag.id}/toggle-active`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    const idx = this.tags.findIndex(t => t.id === tag.id);
+                    if (idx !== -1) { this.tags[idx].is_active = result.is_active; }
+                    this.$nextTick(() => lucide.createIcons());
+                    showToast('success', result.message);
+                } else { showToast('error', result.message); }
+            } catch (error) { console.error('Error:', error); showToast('error', 'Gagal mengubah status'); }
+        },
     }
 }
 </script>

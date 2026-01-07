@@ -3,7 +3,7 @@
 // Form Modal Logic
 openCreateModal() {
     this.formMode = 'create';
-    this.formData = { id: null, name: '', slug: '' };
+    this.formData = { id: null, name: '', slug: '', is_active: true };
     this.formErrors = {};
     this.showFormModal = true;
     this.$nextTick(() => lucide.createIcons());
@@ -12,7 +12,7 @@ openCreateModal() {
 openEditModal(tag) {
     this.formMode = 'edit';
     this.formData = {
-        id: tag.id, name: tag.name, slug: tag.slug,
+        id: tag.id, name: tag.name, slug: tag.slug, is_active: tag.is_active
     };
     this.formErrors = {};
     this.showFormModal = true;
@@ -22,7 +22,7 @@ openEditModal(tag) {
 
 closeFormModal() {
     this.showFormModal = false;
-    this.formData = { id: null, name: '', slug: '' };
+    this.formData = { id: null, name: '', slug: '', is_active: true };
     this.formErrors = {};
 },
 

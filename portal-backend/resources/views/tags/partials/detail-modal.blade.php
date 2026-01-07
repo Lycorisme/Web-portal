@@ -62,6 +62,15 @@
                                     <i data-lucide="file-text" class="w-4 h-4"></i>
                                     <span x-text="selectedTag.articles_count + ' Artikel'"></span>
                                 </span>
+                                <span 
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold"
+                                    :class="selectedTag.is_active 
+                                        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400' 
+                                        : 'bg-surface-100 text-surface-500 dark:bg-surface-700 dark:text-surface-400'"
+                                >
+                                    <i :data-lucide="selectedTag.is_active ? 'check-circle' : 'x-circle'" class="w-4 h-4"></i>
+                                    <span x-text="selectedTag.is_active ? 'Aktif' : 'Nonaktif'"></span>
+                                </span>
                             </div>
 
                             {{-- Details Grid --}}

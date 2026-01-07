@@ -44,6 +44,10 @@ class TagController extends Controller
             });
         }
 
+        if ($request->filled('is_active')) {
+            $query->where('is_active', $request->is_active === 'true' || $request->is_active === '1');
+        }
+
         // Paginate results
         $perPage = $request->get('per_page', 15);
         $tags = $query->withCount('articles')->paginate($perPage);
@@ -54,6 +58,7 @@ class TagController extends Controller
                 'id' => $tag->id,
                 'name' => $tag->name,
                 'slug' => $tag->slug,
+                'is_active' => $tag->is_active,
                 'articles_count' => $tag->articles_count,
                 'created_at' => $tag->created_at->format('d M Y H:i'),
                 'created_at_human' => $tag->created_at->diffForHumans(),
@@ -90,10 +95,12 @@ class TagController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255|unique:tags,slug',
+            'is_active' => 'boolean',
         ]);
 
         try {
-            $data = $request->only(['name']);
+            $data = $request->only(['name', 'is_active']);
+            $data['is_active'] = $request->input('is_active', true);
             
             // Generate slug if not provided
             $data['slug'] = $request->slug ?: Str::slug($request->name);
@@ -141,6 +148,7 @@ class TagController extends Controller
                 'id' => $tag->id,
                 'name' => $tag->name,
                 'slug' => $tag->slug,
+                'is_active' => $tag->is_active,
                 'articles_count' => $tag->articles()->count(),
                 'created_at' => $tag->created_at->format('d M Y H:i:s'),
                 'updated_at' => $tag->updated_at->format('d M Y H:i:s'),
@@ -156,10 +164,11 @@ class TagController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255|unique:tags,slug,' . $tag->id,
+            'is_active' => 'boolean',
         ]);
 
         try {
-            $data = $request->only(['name']);
+            $data = $request->only(['name', 'is_active']);
             
             // Generate slug if not provided
             if ($request->filled('slug')) {
@@ -405,6 +414,37 @@ class TagController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal menghapus permanen tag: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Toggle tag active status.
+     */
+    public function toggleActive(Tag $tag): JsonResponse
+    {
+        try {
+            $oldActive = $tag->is_active;
+            $tag->update(['is_active' => !$tag->is_active]);
+
+            ActivityLog::log(
+                ActivityLog::ACTION_UPDATE,
+                "Mengubah status tag {$tag->name} menjadi " . ($tag->is_active ? 'Aktif' : 'Nonaktif'),
+                $tag,
+                ['is_active' => $oldActive],
+                ['is_active' => $tag->is_active],
+                ActivityLog::LEVEL_INFO
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => $tag->is_active ? 'Tag diaktifkan.' : 'Tag dinonaktifkan.',
+                'is_active' => $tag->is_active,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengubah status: ' . $e->getMessage(),
             ], 500);
         }
     }
