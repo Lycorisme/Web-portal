@@ -141,14 +141,19 @@
 
                     {{-- Security Error Display --}}
                     <template x-if="formErrors.content">
-                        <div class="p-4 bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 rounded-xl animate-shake">
+                        <div class="p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-xl animate-shake">
                             <div class="flex items-start gap-3">
-                                <i data-lucide="alert-triangle" class="w-5 h-5 text-rose-600 dark:text-rose-400 mt-0.5"></i>
-                                <div>
-                                    <h4 class="text-sm font-bold text-rose-700 dark:text-rose-300 mb-1">Terdeteksi Konten Berbahaya!</h4>
-                                    <ul class="list-disc list-inside text-xs text-rose-600 dark:text-rose-400 space-y-1">
+                                <div class="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg shrink-0">
+                                    <i data-lucide="shield-alert" class="w-5 h-5 text-orange-600 dark:text-orange-400"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="text-sm font-bold text-orange-800 dark:text-orange-300 mb-1">Perhatian: Keamanan Konten</h4>
+                                    <p class="text-xs text-orange-700 dark:text-orange-400 mb-2 leading-relaxed">
+                                        Sistem mendeteksi adanya kode atau kata kunci yang tidak diizinkan. Mohon hapus atau perbaiki bagian berikut agar berita dapat disimpan:
+                                    </p>
+                                    <ul class="list-disc list-inside text-xs text-orange-800 dark:text-orange-300 font-medium space-y-1 bg-white/50 dark:bg-black/20 p-2 rounded-lg">
                                         <template x-for="err in formErrors.content">
-                                            <li x-text="err"></li>
+                                            <li x-text="err" class="bg-transparent"></li>
                                         </template>
                                     </ul>
                                 </div>

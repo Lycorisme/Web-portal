@@ -369,24 +369,36 @@ class ArticleController extends Controller
     /**
      * Check content for potential security issues (scripts, gambling, etc)
      */
+    /**
+     * Check content for potential security issues with friendly error messages.
+     */
     private function checkContentSecurity(array $data): array
     {
         $issues = [];
         $dangerousPatterns = [
-            '/<script.*?>.*?<\/script>/is' => 'Tag Script terdeteksi',
-            '/javascript:/i' => 'Protokol Javascript terdeteksi',
-            '/onclick|onload|onmouseover|onerror/i' => 'Event Handler berbahaya terdeteksi',
-            '/gacor|slot|judol|pragmatic|zeus/i' => 'Kata kunci Judi Online terdeteksi',
-            '/<iframe.*?>.*?<\/iframe>/is' => 'Tag Iframe terdeteksi (potensi phising)',
+            '/<script.*?>.*?<\/script>/is' => 'Kode program (<script>) yang tidak diizinkan',
+            '/javascript:/i' => 'Tautan tidak aman (protocol javascript:)',
+            '/onclick|onload|onmouseover|onerror/i' => 'Kode interaktif otomatis (Event Handler)',
+            '/gacor|slot|judol|pragmatic|zeus/i' => 'Kata kunci terindikasi Judi Online',
+            '/<iframe.*?>.*?<\/iframe>/is' => 'Elemen bingkai eksternal (iframe)',
         ];
 
-        $fieldsToCheck = ['title', 'excerpt', 'content', 'meta_title', 'meta_description'];
+        $fieldNames = [
+            'title' => 'Judul Berita',
+            'excerpt' => 'Ringkasan',
+            'content' => 'Isi Berita',
+            'meta_title' => 'Meta Title',
+            'meta_description' => 'Meta Description',
+        ];
+
+        $fieldsToCheck = array_keys($fieldNames);
 
         foreach ($fieldsToCheck as $field) {
             if (isset($data[$field]) && is_string($data[$field])) {
                 foreach ($dangerousPatterns as $pattern => $message) {
                     if (preg_match($pattern, $data[$field])) {
-                        $issues[] = "$message pada field $field";
+                        $fieldName = $fieldNames[$field];
+                        $issues[] = "Ditemukan $message pada bagian **$fieldName**.";
                     }
                 }
             }

@@ -16,7 +16,7 @@
     >
         <button 
             x-show="activeMenuArticle && !activeMenuArticle.deleted_at"
-            @click="viewDetail(activeMenuArticle.id); closeMenu()"
+            @click="viewDetail(activeMenuArticle.id)"
             class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-surface-700 dark:text-surface-300 hover:bg-surface-50 dark:hover:bg-surface-700/50 hover:text-theme-600 dark:hover:text-theme-400 transition-colors group"
         >
             <i data-lucide="eye" class="w-4 h-4 text-surface-400 group-hover:text-theme-500 transition-colors"></i>
@@ -68,9 +68,9 @@
             <button 
                 x-show="activeMenuArticle?.status !== 'draft'"
                 @click="changeStatus(activeMenuArticle, 'draft'); closeMenu()"
-                class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-surface-600 hover:bg-surface-50 dark:hover:bg-surface-700/50 transition-colors group"
+                class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-amber-600 dark:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors group"
             >
-                <i data-lucide="file-edit" class="w-4 h-4 group-hover:scale-110 transition-transform"></i>
+                <i data-lucide="archive" class="w-4 h-4 group-hover:scale-110 transition-transform"></i>
                 <span>Jadikan Draft</span>
             </button>
         </div>

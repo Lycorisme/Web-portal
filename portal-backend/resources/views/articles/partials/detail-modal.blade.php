@@ -180,69 +180,13 @@
                                 </div>
                             </div>
 
-                            {{-- Comments Preview --}}
+                            {{-- Article Content --}}
                             <div class="pt-8 border-t border-surface-100 dark:border-surface-800">
-                                <div class="flex items-center justify-between mb-5">
-                                    <div class="flex items-center gap-2">
-                                        <h4 class="text-lg font-bold text-surface-900 dark:text-white">Komentar Terakhir</h4>
-                                        <span class="px-2 py-0.5 rounded-full bg-surface-100 dark:bg-surface-800 text-xs font-bold text-surface-600 dark:text-surface-400" x-text="detailComments?.length || 0"></span>
-                                    </div>
-                                    <button 
-                                        @click="fetchDetailComments(selectedArticle.id)"
-                                        class="p-2 text-surface-400 hover:text-theme-600 hover:bg-theme-50 dark:hover:bg-theme-900/20 rounded-lg transition-all"
-                                    >
-                                        <i data-lucide="refresh-cw" class="w-4 h-4" :class="detailCommentsLoading ? 'animate-spin' : ''"></i>
-                                    </button>
-                                </div>
-
-                                <div x-show="detailCommentsLoading" class="py-8 text-center text-surface-400">
-                                    <i data-lucide="loader-2" class="w-6 h-6 mx-auto animate-spin mb-2"></i>
-                                    <p class="text-sm">Memuat komentar...</p>
-                                </div>
-
-                                <div x-show="!detailCommentsLoading && detailComments?.length > 0" class="space-y-4">
-                                     <template x-for="comment in detailComments?.slice(0, 3)" :key="comment.id">
-                                        <div class="flex gap-4">
-                                            <div class="flex-shrink-0 mt-1">
-                                                <div class="w-8 h-8 rounded-full bg-surface-100 dark:bg-surface-800 flex items-center justify-center overflow-hidden ring-2 ring-white dark:ring-surface-900">
-                                                    <img 
-                                                        x-show="comment.user_avatar"
-                                                        :src="comment.user_avatar" 
-                                                        class="w-full h-full object-cover"
-                                                    >
-                                                    <span 
-                                                        x-show="!comment.user_avatar"
-                                                        class="text-xs font-bold text-surface-500"
-                                                        x-text="comment.user_name?.charAt(0).toUpperCase()"
-                                                    ></span>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="flex-1 space-y-1">
-                                                <div class="flex items-center justify-between">
-                                                    <div class="flex items-center gap-2">
-                                                        <span class="text-sm font-semibold text-surface-900 dark:text-white" x-text="comment.user_name"></span>
-                                                        <span x-show="comment.status === 'spam'" class="px-1.5 py-0.5 text-[10px] uppercase font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded-md">Spam</span>
-                                                    </div>
-                                                    <span class="text-xs text-surface-400" x-text="comment.time_ago"></span>
-                                                </div>
-                                                <p class="text-sm text-surface-600 dark:text-surface-300 leading-relaxed" x-text="comment.comment_text"></p>
-                                            </div>
-                                        </div>
-                                     </template>
-
-                                     <button 
-                                        x-show="detailComments?.length > 3"
-                                        @click="openStatisticsModal(selectedArticle.id); closeDetailModal()"
-                                        class="w-full py-3 text-sm font-medium text-theme-600 dark:text-theme-400 hover:text-theme-700 dark:hover:text-theme-300 hover:bg-theme-50 dark:hover:bg-theme-900/20 rounded-xl transition-colors dashed border border-theme-200 dark:border-theme-800"
-                                    >
-                                        Lihat semua komentar
-                                     </button>
-                                </div>
-
-                                <div x-show="!detailCommentsLoading && (!detailComments || detailComments.length === 0)" class="text-center py-8 bg-surface-50 dark:bg-surface-800/50 rounded-xl border border-dashed border-surface-200 dark:border-surface-700">
-                                    <p class="text-sm text-surface-500 font-medium">Belum ada komentar pada artikel ini</p>
-                                </div>
+                                <h4 class="text-lg font-bold text-surface-900 dark:text-white mb-4">Konten</h4>
+                                <div 
+                                    class="text-base text-surface-700 dark:text-surface-300 leading-relaxed space-y-4 [&>p]:mb-4 [&>ul]:list-disc [&>ul]:pl-5 [&>ol]:list-decimal [&>ol]:pl-5 [&>h2]:text-xl [&>h2]:font-bold [&>h2]:mb-2 [&>h3]:text-lg [&>h3]:font-bold [&>h3]:mb-2" 
+                                    x-html="selectedArticle?.content"
+                                ></div>
                             </div>
                         </div>
                     </div>
