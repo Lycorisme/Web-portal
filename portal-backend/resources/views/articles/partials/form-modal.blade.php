@@ -93,7 +93,7 @@
                                     type="button"
                                     @click="activeTab = item.id"
                                     class="w-full flex items-center gap-0 md:gap-4 px-0 md:px-4 py-3 md:py-3.5 rounded-xl md:rounded-2xl transition-all duration-300 group relative overflow-hidden justify-center md:justify-start"
-                                    :class="activeTab === item.id ? 'bg-white dark:bg-surface-800 shadow-lg shadow-surface-200/50 dark:shadow-black/20 ring-1 ring-surface-200 dark:ring-surface-700' : 'hover:bg-transparent'"
+                                    :class="activeTab === item.id ? 'bg-transparent' : 'bg-transparent'"
                                 >
                                     <div 
                                         class="absolute left-0 top-0 bottom-0 w-1 bg-theme-500 rounded-l-full transition-all duration-300"
@@ -102,7 +102,7 @@
                                     
                                     <div 
                                         class="p-2.5 rounded-xl transition-colors duration-300 relative"
-                                        :class="activeTab === item.id ? 'bg-theme-50 dark:bg-theme-900/20 text-theme-600 dark:text-theme-400' : 'bg-transparent text-surface-400 group-hover:text-surface-600 dark:group-hover:text-surface-300'"
+                                        :class="activeTab === item.id ? 'bg-transparent text-theme-600 dark:text-theme-400' : 'bg-transparent text-surface-400 group-hover:text-surface-600 dark:group-hover:text-surface-300'"
                                     >
                                         <i :data-lucide="item.icon" class="w-5 h-5 sm:w-6 sm:h-6"></i>
                                     </div>
@@ -111,7 +111,7 @@
                                     <div class="hidden md:block text-left">
                                         <p 
                                             class="text-sm font-bold transition-colors duration-300"
-                                            :class="activeTab === item.id ? 'text-surface-900 dark:text-white' : 'text-surface-600 dark:text-surface-400'"
+                                            :class="activeTab === item.id ? 'text-theme-600 dark:text-theme-400' : 'text-surface-600 dark:text-surface-400'"
                                             x-text="item.label"
                                         ></p>
                                         <p class="text-[10px] text-surface-400 dark:text-surface-500 font-medium" x-text="item.desc"></p>
