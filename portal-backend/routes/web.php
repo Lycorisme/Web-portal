@@ -9,6 +9,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\ArticleInteractionController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\TagController;
 
 // =============================================
 // Authentication Routes (Guest Only)
@@ -97,5 +98,18 @@ Route::middleware('auth')->group(function () {
     Route::delete('/comments/{comment}', [ArticleInteractionController::class, 'deleteComment'])->name('comments.delete');
     Route::post('/comments/{comment}/restore', [ArticleInteractionController::class, 'restoreComment'])->name('comments.restore');
     Route::delete('/comments/{comment}/force', [ArticleInteractionController::class, 'forceDeleteComment'])->name('comments.force-delete');
+
+    // Tag Routes
+    Route::get('/tags', [TagController::class, 'index'])->name('tags');
+    Route::get('/tags/data', [TagController::class, 'getData'])->name('tags.data');
+    Route::post('/tags', [TagController::class, 'store'])->name('tags.store');
+    Route::get('/tags/{tag}', [TagController::class, 'show'])->name('tags.show');
+    Route::put('/tags/{tag}', [TagController::class, 'update'])->name('tags.update');
+    Route::delete('/tags/bulk', [TagController::class, 'bulkDestroy'])->name('tags.bulk-destroy');
+    Route::post('/tags/bulk-restore', [TagController::class, 'bulkRestore'])->name('tags.bulk-restore');
+    Route::delete('/tags/bulk-force', [TagController::class, 'bulkForceDelete'])->name('tags.bulk-force-delete');
+    Route::delete('/tags/{tag}', [TagController::class, 'destroy'])->name('tags.destroy');
+    Route::post('/tags/{id}/restore', [TagController::class, 'restore'])->name('tags.restore');
+    Route::delete('/tags/{id}/force', [TagController::class, 'forceDelete'])->name('tags.force-delete');
 });
 
