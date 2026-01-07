@@ -19,7 +19,7 @@
                         <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
                     </a>
                     <i data-lucide="chevron-right" class="w-3 h-3 text-surface-300 dark:text-surface-600"></i>
-                    <span class="text-theme-600 dark:text-theme-400">Berita</span>
+                    <span class="text-theme-600 dark:text-theme-400">Kelola Berita</span>
                 </nav>
             </div>
         </div>
