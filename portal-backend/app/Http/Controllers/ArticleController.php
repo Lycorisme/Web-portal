@@ -126,7 +126,7 @@ class ArticleController extends Controller
                     'id' => $log->id,
                     'description' => $log->description,
                     'event' => $log->action, // Use action as event
-                    'causer_name' => $log->user ? $log->user->name : 'System',
+                    'causer_name' => $log->user ? $log->user->name : 'System (Mencurigakan)',
                     'causer_avatar' => $log->user ? $log->user->avatar : null,
                     'properties' => [
                         'old' => $log->old_values,

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use App\Models\User;
 
 class ActivityLog extends Model
 {
@@ -164,7 +165,7 @@ class ActivityLog extends Model
         string $level = self::LEVEL_INFO
     ): self {
         return self::create([
-            'user_id' => auth()->id(),
+            'user_id' => auth()->id() ?? User::first()->id, // Fallback to first user (Admin) if session is missing
             'action' => $action,
             'description' => $description,
             'subject_type' => $subject ? get_class($subject) : null,
@@ -174,7 +175,7 @@ class ActivityLog extends Model
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
             'url' => request()->fullUrl(),
-            'level' => $level,
+            'level' => auth()->check() ? $level : self::LEVEL_WARNING, // Escalate level if guest
             'created_at' => now(),
         ]);
     }

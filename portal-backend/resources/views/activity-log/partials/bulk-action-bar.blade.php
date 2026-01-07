@@ -73,7 +73,7 @@
                             @click="bulkForceDelete()"
                             class="group flex items-center justify-center gap-2 px-3 py-2.5 bg-rose-500 text-white rounded-lg sm:rounded-xl text-sm font-semibold shadow-lg shadow-rose-500/20 hover:shadow-rose-500/40 hover:bg-rose-600 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
                         >
-                            <i data-lucide="trash-x" class="w-4 h-4 transition-transform group-hover:scale-110"></i>
+                            <i data-lucide="trash-2" class="w-4 h-4 transition-transform group-hover:scale-110"></i>
                             <span class="whitespace-nowrap">Hapus Permanen</span>
                         </button>
                     </div>
