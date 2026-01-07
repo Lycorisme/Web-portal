@@ -429,29 +429,51 @@ function articleApp() {
             };
             this.activeTab = 'content';
             this.injectionDetected = false;
+            this.detectedThreats = [];
             this.auditInfo = null;
             this.formErrors = {};
             this.showFormModal = true;
-            this.$nextTick(() => lucide.createIcons());
+            
+            // Clear Trix Editor content for new article
+            this.$nextTick(() => {
+                lucide.createIcons();
+                
+                // Reset Trix Editor to empty
+                setTimeout(() => {
+                    const trixEditor = document.querySelector('trix-editor');
+                    if (trixEditor && trixEditor.editor) {
+                        trixEditor.editor.loadHTML('');
+                    }
+                }, 100);
+            });
         },
 
         openEditModal(article) {
             this.formMode = 'edit';
+            
+            // Format published_at for datetime-local input (remove timezone info)
+            let formattedPublishedAt = null;
+            if (article.published_at) {
+                // Convert to local datetime format (YYYY-MM-DDTHH:mm)
+                const date = new Date(article.published_at);
+                formattedPublishedAt = date.toISOString().slice(0, 16);
+            }
+            
             this.formData = {
                 id: article.id,
-                title: article.title,
-                slug: article.slug,
+                title: article.title || '',
+                slug: article.slug || '',
                 excerpt: article.excerpt || '',
                 content: article.content || '',
                 thumbnail: null, // Reset file input
                 thumbnail_url: article.thumbnail || '', // Existing URL
-                category_id: article.category_id || '',
-                read_time: article.read_time,
-                status: article.status,
+                category_id: article.category_id ? String(article.category_id) : '', // Ensure string for select
+                read_time: article.read_time || null,
+                status: article.status || 'draft',
                 meta_title: article.meta_title || '',
                 meta_description: article.meta_description || '',
                 meta_keywords: article.meta_keywords || '',
-                published_at: article.published_at,
+                published_at: formattedPublishedAt,
                 is_pinned: article.is_pinned || false,
                 is_headline: article.is_headline || false,
             };
@@ -462,11 +484,26 @@ function articleApp() {
                 updated_by: 'Unknown', // Ideally backend sends this
                 updated_at: article.updated_at
             };
-            this.checkContentSafety(this.formData.content);
+            this.detectedThreats = [];
+            this.injectionDetected = false;
             this.formErrors = {};
             this.showFormModal = true;
             this.closeMenu();
-            this.$nextTick(() => lucide.createIcons());
+            
+            // Wait for modal to render, then load content into Trix Editor
+            this.$nextTick(() => {
+                lucide.createIcons();
+                
+                // Load existing content into Trix Editor
+                setTimeout(() => {
+                    const trixEditor = document.querySelector('trix-editor');
+                    if (trixEditor && trixEditor.editor && this.formData.content) {
+                        trixEditor.editor.loadHTML(this.formData.content);
+                        // Check content safety after loading
+                        this.checkContentSafety(this.formData.content);
+                    }
+                }, 100);
+            });
         },
 
         closeFormModal() {
