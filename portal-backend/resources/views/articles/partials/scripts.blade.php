@@ -30,17 +30,59 @@ function articleApp() {
             meta_title: '',
             meta_description: '',
             meta_keywords: '',
+            status: 'draft',
+            meta_title: '',
+            meta_description: '',
+            meta_keywords: '',
             published_at: null,
+            is_pinned: false,
+            is_headline: false,
         },
         formErrors: {},
         formLoading: false,
+        
+        // Form UI State
+        activeTab: 'content',
+        injectionDetected: false,
+        dangerousKeywords: ['<script', 'javascript:', 'onclick', 'onload', 'iframe', 'slot gacor', 'zeus', 'pragmatic', 'bet88', 'judol'],
+        auditInfo: null, // { created_by: '', created_at: '', updated_by: '', updated_at: '' }
 
         // Statistics Modal State
         showStatisticsModal: false,
         statisticsData: null,
         statisticsLoading: false,
         
+        statisticsLoading: false,
+        
+        checkContentSafety(content) {
+            if (!content) {
+                this.injectionDetected = false;
+                return;
+            }
+            const lowerContent = content.toLowerCase();
+            this.injectionDetected = this.dangerousKeywords.some(keyword => lowerContent.includes(keyword));
+        },
 
+        sanitizeContent() {
+             let content = this.formData.content;
+             if (!content) return;
+             
+             this.dangerousKeywords.forEach(keyword => {
+                 const regex = new RegExp(keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+                 content = content.replace(regex, '');
+             });
+             
+             this.formData.content = content;
+             
+             // Update Trix Editor
+             const element = document.querySelector('trix-editor');
+             if(element && element.editor) {
+                 element.editor.loadHTML(content);
+             }
+             
+             this.checkContentSafety(content);
+             showToast('success', 'Konten telah dibersihkan otomatis.');
+        },
 
         // Activity Modal State
         showActivityModal: false,
@@ -240,7 +282,12 @@ function articleApp() {
                 meta_description: '',
                 meta_keywords: '',
                 published_at: null,
+                is_pinned: false,
+                is_headline: false,
             };
+            this.activeTab = 'content';
+            this.injectionDetected = false;
+            this.auditInfo = null;
             this.formErrors = {};
             this.showFormModal = true;
             this.$nextTick(() => lucide.createIcons());
@@ -263,7 +310,17 @@ function articleApp() {
                 meta_description: article.meta_description || '',
                 meta_keywords: article.meta_keywords || '',
                 published_at: article.published_at,
+                is_pinned: article.is_pinned || false,
+                is_headline: article.is_headline || false,
             };
+            this.activeTab = 'content';
+            this.auditInfo = {
+                created_by: article.user ? article.user.name : 'Unknown',
+                created_at: article.created_at,
+                updated_by: 'Unknown', // Ideally backend sends this
+                updated_at: article.updated_at
+            };
+            this.checkContentSafety(this.formData.content);
             this.formErrors = {};
             this.showFormModal = true;
             this.closeMenu();
@@ -287,7 +344,11 @@ function articleApp() {
                 meta_description: '',
                 meta_keywords: '',
                 published_at: null,
+                is_pinned: false,
+                is_headline: false,
             };
+            this.activeTab = 'content';
+            this.auditInfo = null;
             this.formErrors = {};
         },
 
@@ -315,7 +376,10 @@ function articleApp() {
                 if (this.formData.meta_title) formDataStart.append('meta_title', this.formData.meta_title);
                 if (this.formData.meta_description) formDataStart.append('meta_description', this.formData.meta_description);
                 if (this.formData.meta_keywords) formDataStart.append('meta_keywords', this.formData.meta_keywords);
+                if (this.formData.meta_keywords) formDataStart.append('meta_keywords', this.formData.meta_keywords);
                 if (this.formData.published_at) formDataStart.append('published_at', this.formData.published_at);
+                formDataStart.append('is_pinned', this.formData.is_pinned ? 1 : 0);
+                formDataStart.append('is_headline', this.formData.is_headline ? 1 : 0);
 
                 // Handle Thumbnail File
                 if (this.formData.thumbnail instanceof File) {
