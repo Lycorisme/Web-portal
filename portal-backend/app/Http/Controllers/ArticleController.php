@@ -108,6 +108,39 @@ class ArticleController extends Controller
                 'next' => $articles->nextPageUrl(),
             ],
         ]);
+
+    }
+
+    /**
+     * Get activity logs for a specific article.
+     */
+    public function getActivities(Article $article): JsonResponse
+    {
+        $activities = ActivityLog::where('subject_type', Article::class)
+            ->where('subject_id', $article->id)
+            ->with(['user'])
+            ->latest()
+            ->get()
+            ->map(function ($log) {
+                return [
+                    'id' => $log->id,
+                    'description' => $log->description,
+                    'event' => $log->action, // Use action as event
+                    'causer_name' => $log->user ? $log->user->name : 'System',
+                    'causer_avatar' => $log->user ? $log->user->avatar : null,
+                    'properties' => [
+                        'old' => $log->old_values,
+                        'attributes' => $log->new_values,
+                    ],
+                    'created_at_human' => $log->created_at->diffForHumans(),
+                    'created_at' => $log->created_at->format('d M Y H:i'),
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => $activities
+        ]);
     }
 
     /**

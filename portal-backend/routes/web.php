@@ -72,6 +72,7 @@ Route::delete('/articles/{id}/force', [ArticleController::class, 'forceDelete'])
 Route::post('/articles/{article}/toggle-status', [ArticleController::class, 'toggleStatus'])->name('articles.toggle-status');
 
 // Article Interaction Routes (Statistics, Comments, Likes)
+Route::get('/articles/{article}/activities', [ArticleController::class, 'getActivities'])->name('articles.activities');
 Route::get('/articles/{article}/statistics', [ArticleInteractionController::class, 'getStatistics'])->name('articles.statistics');
 Route::get('/articles/{article}/comments', [ArticleInteractionController::class, 'getComments'])->name('articles.comments');
 Route::post('/comments/{comment}/reply', [ArticleInteractionController::class, 'addAdminReply'])->name('comments.reply');

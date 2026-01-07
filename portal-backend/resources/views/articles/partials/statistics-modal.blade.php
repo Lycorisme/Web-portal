@@ -17,301 +17,350 @@
             x-transition:leave="ease-in duration-200"
             x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0"
-            class="fixed inset-0 bg-black/60 backdrop-blur-sm"
+            class="fixed inset-0 bg-surface-900/40 backdrop-blur-md"
             @click="closeStatisticsModal()"
         ></div>
 
         {{-- Modal Container --}}
-        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+        <div class="flex min-h-full items-center justify-center p-4 sm:p-6">
             <div 
                 x-show="showStatisticsModal"
                 x-transition:enter="ease-out duration-300"
-                x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+                x-transition:enter-end="opacity-100 scale-100 translate-y-0"
                 x-transition:leave="ease-in duration-200"
-                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-surface-900 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-3xl max-h-[90vh] flex flex-col"
+                x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                x-transition:leave-end="opacity-0 scale-95 translate-y-4"
+                class="relative w-full max-w-2xl bg-white dark:bg-surface-900 rounded-2xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10 overflow-hidden max-h-[85vh] flex flex-col"
                 @click.stop
             >
                 {{-- Header --}}
-                <div class="px-6 py-4 border-b border-surface-200 dark:border-surface-700 flex items-center justify-between bg-gradient-to-r from-theme-500 to-theme-600">
-                    <div class="flex items-center gap-3">
-                        <div class="p-2 bg-white/20 rounded-xl">
-                            <i data-lucide="bar-chart-3" class="w-5 h-5 text-white"></i>
+                <div class="flex-shrink-0 px-6 py-5 border-b border-surface-100 dark:border-surface-800 flex items-center justify-between bg-white/80 dark:bg-surface-900/80 backdrop-blur-md sticky top-0 z-10">
+                    <div class="flex items-center gap-4 min-w-0">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-theme-500 to-theme-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-theme-500/20">
+                            <i data-lucide="bar-chart-3" class="w-6 h-6 text-white"></i>
                         </div>
-                        <div>
-                            <h3 class="text-lg font-bold text-white" x-text="statisticsData?.article_title || 'Statistik Artikel'"></h3>
-                            <p class="text-sm text-white/80">Detail interaksi artikel</p>
+                        <div class="min-w-0">
+                            <h3 class="text-lg font-bold text-surface-900 dark:text-white truncate leading-tight" x-text="statisticsData?.article_title || 'Statistik Artikel'"></h3>
+                            <p class="text-xs font-medium text-surface-500 mt-0.5">Analisis keterlibatan pembaca</p>
                         </div>
                     </div>
                     <button 
                         @click="closeStatisticsModal()" 
-                        class="p-2 rounded-xl bg-white/20 hover:bg-white/30 transition-colors"
+                        class="w-8 h-8 flex items-center justify-center rounded-full bg-surface-100 hover:bg-surface-200 dark:bg-surface-800 dark:hover:bg-surface-700 text-surface-500 hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-200 transition-colors"
                     >
-                        <i data-lucide="x" class="w-5 h-5 text-white"></i>
+                        <i data-lucide="x" class="w-4 h-4"></i>
                     </button>
                 </div>
 
                 {{-- Content --}}
-                <div class="flex-1 overflow-y-auto p-6 space-y-6">
-                    {{-- Loading State --}}
-                    <div x-show="statisticsLoading" class="flex items-center justify-center py-12">
-                        <div class="flex flex-col items-center gap-3">
-                            <div class="w-10 h-10 border-4 border-theme-500 border-t-transparent rounded-full animate-spin"></div>
-                            <span class="text-sm text-surface-500">Memuat statistik...</span>
-                        </div>
-                    </div>
-
-                    {{-- Statistics Cards --}}
-                    <div x-show="!statisticsLoading && statisticsData" class="space-y-6">
-                        {{-- Stats Grid --}}
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            {{-- Views --}}
-                            <div class="p-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl text-white">
-                                <div class="flex items-center gap-2 mb-2">
-                                    <i data-lucide="eye" class="w-5 h-5"></i>
-                                    <span class="text-sm font-medium opacity-90">Views</span>
-                                </div>
-                                <p class="text-2xl font-bold" x-text="statisticsData?.statistics?.views || 0"></p>
-                            </div>
-
-                            {{-- Likes --}}
-                            <div class="p-4 bg-gradient-to-br from-rose-500 to-rose-600 rounded-xl text-white">
-                                <div class="flex items-center gap-2 mb-2">
-                                    <i data-lucide="heart" class="w-5 h-5"></i>
-                                    <span class="text-sm font-medium opacity-90">Likes</span>
-                                </div>
-                                <p class="text-2xl font-bold" x-text="statisticsData?.statistics?.likes || 0"></p>
-                            </div>
-
-                            {{-- Comments --}}
-                            <div class="p-4 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl text-white">
-                                <div class="flex items-center gap-2 mb-2">
-                                    <i data-lucide="message-circle" class="w-5 h-5"></i>
-                                    <span class="text-sm font-medium opacity-90">Komentar</span>
-                                </div>
-                                <p class="text-2xl font-bold" x-text="statisticsData?.statistics?.comments || 0"></p>
-                            </div>
-
-                            {{-- Spam --}}
-                            <div class="p-4 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl text-white">
-                                <div class="flex items-center gap-2 mb-2">
-                                    <i data-lucide="shield-alert" class="w-5 h-5"></i>
-                                    <span class="text-sm font-medium opacity-90">Spam</span>
-                                </div>
-                                <p class="text-2xl font-bold" x-text="statisticsData?.statistics?.spam_comments || 0"></p>
-                            </div>
+                <div class="flex-1 overflow-y-auto custom-scrollbar">
+                    <div class="p-6">
+                        {{-- Loading State --}}
+                        <div x-show="statisticsLoading" class="flex flex-col items-center justify-center py-20">
+                            <div class="w-10 h-10 border-2 border-theme-500/30 border-t-theme-500 rounded-full animate-spin mb-4"></div>
+                            <span class="text-sm font-medium text-surface-500">Sedang memuat data statistik...</span>
                         </div>
 
-                        {{-- Recent Likes Section --}}
-                        <div class="bg-surface-50 dark:bg-surface-800 rounded-xl p-4">
-                            <h4 class="text-sm font-semibold text-surface-900 dark:text-white mb-3 flex items-center gap-2">
-                                <i data-lucide="heart" class="w-4 h-4 text-rose-500"></i>
-                                Like Terbaru
-                            </h4>
-                            <div x-show="statisticsData?.recent_likes?.length > 0" class="space-y-2">
-                                <template x-for="like in statisticsData?.recent_likes" :key="like.id">
-                                    <div class="flex items-center gap-3 p-2 bg-white dark:bg-surface-700 rounded-lg">
-                                        <div class="w-8 h-8 rounded-full bg-theme-100 dark:bg-theme-900/30 flex items-center justify-center overflow-hidden">
-                                            <img 
-                                                x-show="like.user_avatar"
-                                                :src="like.user_avatar" 
-                                                :alt="like.user_name"
-                                                class="w-full h-full object-cover"
-                                            >
-                                            <span 
-                                                x-show="!like.user_avatar"
-                                                class="text-xs font-bold text-theme-600 dark:text-theme-400"
-                                                x-text="like.user_name?.charAt(0).toUpperCase()"
-                                            ></span>
-                                        </div>
-                                        <div class="flex-1 min-w-0">
-                                            <p class="text-sm font-medium text-surface-900 dark:text-white truncate" x-text="like.user_name"></p>
-                                            <p class="text-xs text-surface-500" x-text="like.liked_ago"></p>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
-                            <div x-show="!statisticsData?.recent_likes?.length" class="text-center py-4">
-                                <i data-lucide="heart-off" class="w-8 h-8 mx-auto text-surface-300 dark:text-surface-600 mb-2"></i>
-                                <p class="text-sm text-surface-500">Belum ada like</p>
-                            </div>
-                        </div>
-
-                        {{-- Comments Section --}}
-                        <div class="bg-surface-50 dark:bg-surface-800 rounded-xl p-4">
-                            <h4 class="text-sm font-semibold text-surface-900 dark:text-white mb-3 flex items-center gap-2">
-                                <i data-lucide="message-circle" class="w-4 h-4 text-emerald-500"></i>
-                                Daftar Komentar
-                                <span class="ml-auto text-xs font-normal text-surface-500" x-text="`(${statisticsData?.comments?.length || 0} komentar)`"></span>
-                            </h4>
+                        {{-- Statistics Content --}}
+                        <div x-show="!statisticsLoading && statisticsData" class="space-y-8">
                             
-                            <div x-show="statisticsData?.comments?.length > 0" class="space-y-3 max-h-80 overflow-y-auto">
-                                <template x-for="comment in statisticsData?.comments" :key="comment.id">
-                                    <div class="comment-item">
-                                        {{-- Main Comment --}}
-                                        <div class="p-3 bg-white dark:bg-surface-700 rounded-lg border-l-4" :class="comment.is_admin_reply ? 'border-theme-500' : (comment.status === 'spam' ? 'border-amber-500' : 'border-surface-300 dark:border-surface-600')">
-                                            <div class="flex items-start gap-3">
-                                                <div class="w-8 h-8 flex-shrink-0 rounded-full bg-theme-100 dark:bg-theme-900/30 flex items-center justify-center overflow-hidden">
-                                                    <img 
-                                                        x-show="comment.user_avatar"
-                                                        :src="comment.user_avatar" 
-                                                        :alt="comment.user_name"
-                                                        class="w-full h-full object-cover"
-                                                    >
-                                                    <span 
-                                                        x-show="!comment.user_avatar"
-                                                        class="text-xs font-bold text-theme-600 dark:text-theme-400"
-                                                        x-text="comment.user_name?.charAt(0).toUpperCase()"
-                                                    ></span>
-                                                </div>
-                                                <div class="flex-1 min-w-0">
-                                                    <div class="flex items-center gap-2 flex-wrap">
-                                                        <span class="text-sm font-semibold text-surface-900 dark:text-white" x-text="comment.user_name"></span>
-                                                        <span x-show="comment.is_admin_reply" class="px-1.5 py-0.5 text-xs font-medium bg-theme-500 text-white rounded">Admin</span>
-                                                        <span x-show="comment.status === 'spam'" class="px-1.5 py-0.5 text-xs font-medium bg-amber-500 text-white rounded">Spam</span>
-                                                        <span x-show="comment.status === 'hidden'" class="px-1.5 py-0.5 text-xs font-medium bg-surface-500 text-white rounded">Tersembunyi</span>
-                                                        <span class="text-xs text-surface-400" x-text="comment.time_ago"></span>
+                            {{-- Stats Grid --}}
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                {{-- Views --}}
+                                <div class="relative p-5 bg-blue-50/50 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-800/30 group hover:-translate-y-1 transition-transform duration-300">
+                                    <div class="absolute top-4 right-4 p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
+                                        <i data-lucide="eye" class="w-4 h-4"></i>
+                                    </div>
+                                    <p class="text-3xl font-bold text-surface-900 dark:text-white mt-2" x-text="statisticsData?.statistics?.views || 0"></p>
+                                    <p class="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wide mt-1">Total Views</p>
+                                </div>
+
+                                {{-- Likes --}}
+                                <div class="relative p-5 bg-rose-50/50 dark:bg-rose-900/10 rounded-2xl border border-rose-100 dark:border-rose-800/30 group hover:-translate-y-1 transition-transform duration-300">
+                                    <div class="absolute top-4 right-4 p-2 bg-rose-100 dark:bg-rose-900/30 rounded-lg text-rose-600 dark:text-rose-400">
+                                        <i data-lucide="heart" class="w-4 h-4"></i>
+                                    </div>
+                                    <p class="text-3xl font-bold text-surface-900 dark:text-white mt-2" x-text="statisticsData?.statistics?.likes || 0"></p>
+                                    <p class="text-xs font-semibold text-rose-600 dark:text-rose-400 uppercase tracking-wide mt-1">Total Likes</p>
+                                </div>
+
+                                {{-- Comments --}}
+                                <div class="relative p-5 bg-emerald-50/50 dark:bg-emerald-900/10 rounded-2xl border border-emerald-100 dark:border-emerald-800/30 group hover:-translate-y-1 transition-transform duration-300">
+                                    <div class="absolute top-4 right-4 p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg text-emerald-600 dark:text-emerald-400">
+                                        <i data-lucide="message-circle" class="w-4 h-4"></i>
+                                    </div>
+                                    <p class="text-3xl font-bold text-surface-900 dark:text-white mt-2" x-text="statisticsData?.statistics?.comments || 0"></p>
+                                    <p class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide mt-1">Komnetar</p>
+                                </div>
+
+                                {{-- Spam --}}
+                                <div class="relative p-5 bg-amber-50/50 dark:bg-amber-900/10 rounded-2xl border border-amber-100 dark:border-amber-800/30 group hover:-translate-y-1 transition-transform duration-300">
+                                    <div class="absolute top-4 right-4 p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg text-amber-600 dark:text-amber-400">
+                                        <i data-lucide="shield-alert" class="w-4 h-4"></i>
+                                    </div>
+                                    <p class="text-3xl font-bold text-surface-900 dark:text-white mt-2" x-text="statisticsData?.statistics?.spam_comments || 0"></p>
+                                    <p class="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wide mt-1">Spam</p>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                {{-- Recent Likes --}}
+                                <div class="lg:col-span-1 space-y-4">
+                                    <h4 class="text-sm font-bold text-surface-900 dark:text-white flex items-center gap-2">
+                                        <span class="w-1.5 h-4 bg-rose-500 rounded-full"></span>
+                                        Like Terbaru
+                                    </h4>
+                                    
+                                    <div class="bg-surface-50 dark:bg-surface-800/50 rounded-2xl p-4 border border-surface-100 dark:border-surface-800">
+                                        <div x-show="statisticsData?.recent_likes?.length > 0" class="space-y-3">
+                                            <template x-for="like in statisticsData?.recent_likes?.slice(0, 5)" :key="like.id">
+                                                <div class="flex items-center gap-3">
+                                                    <div class="w-8 h-8 rounded-full bg-white dark:bg-surface-800 p-0.5 ring-1 ring-surface-200 dark:ring-surface-700">
+                                                        <div class="w-full h-full rounded-full bg-gradient-to-br from-rose-400 to-rose-500 flex items-center justify-center overflow-hidden">
+                                                            <img 
+                                                                x-show="like.user_avatar"
+                                                                :src="like.user_avatar" 
+                                                                class="w-full h-full object-cover"
+                                                            >
+                                                            <span 
+                                                                x-show="!like.user_avatar"
+                                                                class="text-[10px] font-bold text-white"
+                                                                x-text="like.user_name?.charAt(0).toUpperCase()"
+                                                            ></span>
+                                                        </div>
                                                     </div>
-                                                    <p class="text-sm text-surface-700 dark:text-surface-300 mt-1" x-text="comment.comment_text"></p>
-                                                    
-                                                    {{-- Action Buttons --}}
-                                                    <div class="flex items-center gap-2 mt-2">
-                                                        <button 
-                                                            @click="openReplyForm(comment)"
-                                                            class="text-xs text-theme-600 dark:text-theme-400 hover:underline flex items-center gap-1"
-                                                        >
-                                                            <i data-lucide="reply" class="w-3 h-3"></i>
-                                                            Balas
-                                                        </button>
-                                                        <button 
-                                                            x-show="comment.status === 'visible'"
-                                                            @click="hideComment(comment.id)"
-                                                            class="text-xs text-surface-500 hover:text-amber-600 flex items-center gap-1"
-                                                        >
-                                                            <i data-lucide="eye-off" class="w-3 h-3"></i>
-                                                            Sembunyikan
-                                                        </button>
-                                                        <button 
-                                                            x-show="comment.status === 'hidden'"
-                                                            @click="showComment(comment.id)"
-                                                            class="text-xs text-emerald-600 hover:underline flex items-center gap-1"
-                                                        >
-                                                            <i data-lucide="eye" class="w-3 h-3"></i>
-                                                            Tampilkan
-                                                        </button>
-                                                        <button 
-                                                            @click="deleteComment(comment.id)"
-                                                            class="text-xs text-rose-500 hover:text-rose-600 flex items-center gap-1"
-                                                        >
-                                                            <i data-lucide="trash-2" class="w-3 h-3"></i>
-                                                            Hapus
-                                                        </button>
+                                                    <div class="min-w-0">
+                                                        <p class="text-sm font-medium text-surface-900 dark:text-white truncate" x-text="like.user_name"></p>
+                                                        <p class="text-xs text-surface-400" x-text="like.liked_ago"></p>
                                                     </div>
                                                 </div>
+                                            </template>
+                                            <div x-show="statisticsData?.recent_likes?.length > 5" class="pt-2 text-center text-xs text-surface-500">
+                                                +<span x-text="statisticsData.recent_likes.length - 5"></span> lainnya
                                             </div>
                                         </div>
+                                        
+                                        <div x-show="!statisticsData?.recent_likes?.length" class="text-center py-8">
+                                            <div class="w-10 h-10 mx-auto bg-surface-100 dark:bg-surface-800 rounded-full flex items-center justify-center mb-2">
+                                                <i data-lucide="heart-off" class="w-5 h-5 text-surface-400"></i>
+                                            </div>
+                                            <p class="text-xs font-medium text-surface-500">Belum ada like</p>
+                                        </div>
+                                    </div>
+                                </div>
 
-                                        {{-- Replies (Nested) --}}
-                                        <template x-if="comment.replies?.length > 0">
-                                            <div class="ml-8 mt-2 space-y-2">
-                                                <template x-for="reply in comment.replies" :key="reply.id">
-                                                    <div class="p-3 bg-surface-100 dark:bg-surface-600 rounded-lg border-l-4" :class="reply.is_admin_reply ? 'border-theme-500' : 'border-surface-300 dark:border-surface-500'">
-                                                        <div class="flex items-start gap-3">
-                                                            <div class="w-6 h-6 flex-shrink-0 rounded-full bg-theme-100 dark:bg-theme-900/30 flex items-center justify-center overflow-hidden">
-                                                                <img 
-                                                                    x-show="reply.user_avatar"
-                                                                    :src="reply.user_avatar" 
-                                                                    :alt="reply.user_name"
-                                                                    class="w-full h-full object-cover"
-                                                                >
-                                                                <span 
-                                                                    x-show="!reply.user_avatar"
-                                                                    class="text-[10px] font-bold text-theme-600 dark:text-theme-400"
-                                                                    x-text="reply.user_name?.charAt(0).toUpperCase()"
-                                                                ></span>
-                                                            </div>
-                                                            <div class="flex-1 min-w-0">
-                                                                <div class="flex items-center gap-2 flex-wrap">
-                                                                    <span class="text-xs font-semibold text-surface-900 dark:text-white" x-text="reply.user_name"></span>
-                                                                    <span x-show="reply.is_admin_reply" class="px-1 py-0.5 text-[10px] font-medium bg-theme-500 text-white rounded">Admin</span>
-                                                                    <span class="text-[10px] text-surface-400" x-text="reply.time_ago"></span>
-                                                                </div>
-                                                                <p class="text-xs text-surface-700 dark:text-surface-300 mt-1" x-text="reply.comment_text"></p>
-                                                                <div class="flex items-center gap-2 mt-1">
-                                                                    <button 
-                                                                        @click="deleteComment(reply.id)"
-                                                                        class="text-[10px] text-rose-500 hover:text-rose-600 flex items-center gap-0.5"
+                                {{-- Comments Feed --}}
+                                <div class="lg:col-span-2 space-y-4">
+                                    <div class="flex items-center justify-between">
+                                        <h4 class="text-sm font-bold text-surface-900 dark:text-white flex items-center gap-2">
+                                            <span class="w-1.5 h-4 bg-emerald-500 rounded-full"></span>
+                                            Diskusi
+                                            <span class="px-2 py-0.5 rounded-full bg-surface-100 dark:bg-surface-800 text-xs text-surface-600 dark:text-surface-400" x-text="statisticsData?.comments?.length || 0"></span>
+                                        </h4>
+                                    </div>
+
+                                    <div class="bg-surface-50 dark:bg-surface-800/50 rounded-2xl border border-surface-100 dark:border-surface-800 overflow-hidden">
+                                        <div x-show="statisticsData?.comments?.length > 0" class="divide-y divide-surface-100 dark:divide-surface-800 overflow-y-auto max-h-[400px]">
+                                            <template x-for="comment in statisticsData?.comments" :key="comment.id">
+                                                <div class="p-4 hover:bg-white dark:hover:bg-surface-800/50 transition-colors">
+                                                    {{-- Comment Item --}}
+                                                    <div class="flex gap-4">
+                                                        <div class="flex-shrink-0">
+                                                            <div class="w-10 h-10 rounded-full p-0.5 bg-gradient-to-br from-surface-200 to-surface-300 dark:from-surface-700 dark:to-surface-600 object-cover ring-2 ring-white dark:ring-surface-800">
+                                                                <div class="w-full h-full rounded-full overflow-hidden flex items-center justify-center bg-surface-100 dark:bg-surface-800" :class="{ 'bg-theme-500': comment.is_admin_reply }">
+                                                                    <img 
+                                                                        x-show="comment.user_avatar"
+                                                                        :src="comment.user_avatar" 
+                                                                        class="w-full h-full object-cover"
                                                                     >
-                                                                        <i data-lucide="trash-2" class="w-2.5 h-2.5"></i>
-                                                                        Hapus
-                                                                    </button>
+                                                                    <span 
+                                                                        x-show="!comment.user_avatar"
+                                                                        class="text-xs font-bold"
+                                                                        :class="comment.is_admin_reply ? 'text-white' : 'text-surface-500 dark:text-surface-400'"
+                                                                        x-text="comment.user_name?.charAt(0).toUpperCase()"
+                                                                    ></span>
                                                                 </div>
                                                             </div>
                                                         </div>
+                                                        
+                                                        <div class="flex-1 min-w-0">
+                                                            <div class="flex items-center justify-between mb-1.5">
+                                                                <div class="flex items-center gap-2">
+                                                                    <span class="text-sm font-bold text-surface-900 dark:text-white" x-text="comment.user_name"></span>
+                                                                    <span x-show="comment.is_admin_reply" class="px-1.5 py-0.5 text-[10px] font-bold bg-theme-500 text-white rounded-md shadow-sm shadow-theme-500/20">Admin</span>
+                                                                    <span x-show="comment.status === 'spam'" class="px-1.5 py-0.5 text-[10px] font-bold bg-amber-500 text-white rounded-md">Spam</span>
+                                                                </div>
+                                                                <span class="text-xs text-surface-400 font-medium" x-text="comment.time_ago"></span>
+                                                            </div>
+                                                            
+                                                            <div class="relative">
+                                                                <p class="text-sm text-surface-600 dark:text-surface-300 leading-relaxed" 
+                                                                   :class="{ 'opacity-50 italic': comment.status === 'hidden' }"
+                                                                   x-text="comment.status === 'hidden' ? '(Komentar disembunyikan)' : comment.comment_text"></p>
+                                                            </div>
+
+                                                            {{-- Action Buttons --}}
+                                                            <div class="flex items-center gap-4 mt-3">
+                                                                <button 
+                                                                    type="button"
+                                                                    @click="openReplyForm(comment)"
+                                                                    class="text-xs font-medium text-surface-500 hover:text-theme-600 dark:hover:text-theme-400 flex items-center gap-1.5 transition-colors"
+                                                                >
+                                                                    <i data-lucide="reply" class="w-3.5 h-3.5"></i> Balas
+                                                                </button>
+                                                                
+                                                                <div class="w-px h-3 bg-surface-200 dark:bg-surface-700"></div>
+                                                                
+                                                                <button 
+                                                                    type="button"
+                                                                    x-show="comment.status === 'visible'"
+                                                                    @click="hideComment(comment.id)"
+                                                                    class="text-xs font-medium text-surface-500 hover:text-amber-600 flex items-center gap-1.5 transition-colors"
+                                                                >
+                                                                    <i data-lucide="eye-off" class="w-3.5 h-3.5"></i> Hide
+                                                                </button>
+                                                                <button 
+                                                                    type="button"
+                                                                    x-show="comment.status === 'hidden'"
+                                                                    @click="showComment(comment.id)"
+                                                                    class="text-xs font-medium text-surface-500 hover:text-emerald-600 flex items-center gap-1.5 transition-colors"
+                                                                >
+                                                                    <i data-lucide="eye" class="w-3.5 h-3.5"></i> Show
+                                                                </button>
+                                                                
+                                                                <div class="w-px h-3 bg-surface-200 dark:bg-surface-700"></div>
+
+                                                                <button 
+                                                                    type="button"
+                                                                    @click="deleteComment(comment.id)"
+                                                                    class="text-xs font-medium text-surface-500 hover:text-rose-600 flex items-center gap-1.5 transition-colors"
+                                                                >
+                                                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Hapus
+                                                                </button>
+                                                            </div>
+
+                                                            {{-- Replies --}}
+                                                            <template x-if="comment.replies?.length > 0">
+                                                                <div class="mt-4 space-y-3 pl-4 border-l-2 border-surface-100 dark:border-surface-800">
+                                                                    <template x-for="reply in comment.replies" :key="reply.id">
+                                                                        <div class="flex gap-3 relative">
+                                                                            {{-- Connector Curve --}}
+                                                                            <div class="absolute -left-[18px] top-3 w-3 h-px bg-surface-200 dark:bg-surface-700"></div>
+                                                                            
+                                                                            <div class="w-8 h-8 rounded-full bg-surface-100 dark:bg-surface-800 flex-shrink-0 flex items-center justify-center ring-1 ring-surface-200 dark:ring-surface-700"
+                                                                                 :class="{ 'bg-theme-100 dark:bg-theme-900/20': reply.is_admin_reply }">
+                                                                                <img 
+                                                                                    x-show="reply.user_avatar"
+                                                                                    :src="reply.user_avatar" 
+                                                                                    class="w-full h-full object-cover rounded-full"
+                                                                                >
+                                                                                <span 
+                                                                                    x-show="!reply.user_avatar"
+                                                                                    class="text-[10px] font-bold"
+                                                                                    :class="reply.is_admin_reply ? 'text-theme-600 dark:text-theme-400' : 'text-surface-500'"
+                                                                                    x-text="reply.user_name?.charAt(0).toUpperCase()"
+                                                                                ></span>
+                                                                            </div>
+                                                                            
+                                                                            <div class="flex-1">
+                                                                                <div class="bg-surface-50 dark:bg-surface-900 p-3 rounded-lg rounded-tl-none border border-surface-100 dark:border-surface-800">
+                                                                                    <div class="flex items-center justify-between mb-1">
+                                                                                        <div class="flex items-center gap-2">
+                                                                                            <span class="text-xs font-bold text-surface-900 dark:text-white" x-text="reply.user_name"></span>
+                                                                                            <span x-show="reply.is_admin_reply" class="px-1 py-0.5 text-[8px] font-bold bg-theme-100 dark:bg-theme-900/30 text-theme-600 dark:text-theme-400 rounded">Admin</span>
+                                                                                        </div>
+                                                                                        <span class="text-[10px] text-surface-400" x-text="reply.time_ago"></span>
+                                                                                    </div>
+                                                                                    <p class="text-xs text-surface-600 dark:text-surface-300" x-text="reply.comment_text"></p>
+                                                                                </div>
+                                                                                <button 
+                                                                                    @click="deleteComment(reply.id)"
+                                                                                    class="mt-1 text-[10px] font-medium text-surface-400 hover:text-rose-500 flex items-center gap-1 ml-auto"
+                                                                                >
+                                                                                    <i data-lucide="trash-2" class="w-2.5 h-2.5"></i> Hapus Balasan
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    </template>
+                                                                </div>
+                                                            </template>
+                                                        </div>
                                                     </div>
-                                                </template>
+                                                </div>
+                                            </template>
+                                        </div>
+                                        
+                                        <div x-show="!statisticsData?.comments?.length" class="text-center py-12">
+                                             <div class="w-12 h-12 mx-auto bg-surface-100 dark:bg-surface-800/50 rounded-2xl flex items-center justify-center mb-3 rotate-3">
+                                                <i data-lucide="message-square" class="w-6 h-6 text-surface-400"></i>
                                             </div>
-                                        </template>
+                                            <p class="text-sm font-medium text-surface-900 dark:text-white">Belum ada komentar</p>
+                                            <p class="text-xs text-surface-500 mt-1">Jadilah yang pertama berkomentar!</p>
+                                        </div>
                                     </div>
-                                </template>
-                            </div>
-                            
-                            <div x-show="!statisticsData?.comments?.length" class="text-center py-6">
-                                <i data-lucide="message-circle" class="w-10 h-10 mx-auto text-surface-300 dark:text-surface-600 mb-2"></i>
-                                <p class="text-sm text-surface-500">Belum ada komentar</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {{-- Reply Form (Floating) --}}
+                {{-- Reply Form Section --}}
                 <div 
                     x-show="replyingTo" 
-                    x-transition
-                    class="px-6 py-4 bg-surface-100 dark:bg-surface-800 border-t border-surface-200 dark:border-surface-700"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="translate-y-full opacity-0"
+                    x-transition:enter-end="translate-y-0 opacity-100"
+                    x-transition:leave="transition ease-in duration-150"
+                    x-transition:leave-start="translate-y-0 opacity-100"
+                    x-transition:leave-end="translate-y-full opacity-0"
+                    class="flex-shrink-0 border-t border-surface-100 dark:border-surface-800 bg-white dark:bg-surface-900 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20"
                 >
-                    <div class="flex items-start gap-3">
-                        <div class="flex-1">
-                            <label class="block text-xs font-medium text-surface-500 mb-1">
-                                Balas ke: <span class="text-theme-600 dark:text-theme-400" x-text="replyingTo?.user_name"></span>
-                            </label>
+                    <div class="px-6 py-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2 text-sm">
+                                <span class="flex items-center gap-1.5 text-theme-600 dark:text-theme-400 font-medium bg-theme-50 dark:bg-theme-900/20 px-2 py-1 rounded-md">
+                                    <i data-lucide="corner-down-right" class="w-3.5 h-3.5"></i>
+                                    Membalas
+                                </span>
+                                <span class="font-bold text-surface-900 dark:text-white" x-text="replyingTo?.user_name"></span>
+                            </div>
+                            <button @click="cancelReply()" class="text-xs font-medium text-surface-400 hover:text-surface-600 flex items-center gap-1 hover:bg-surface-100 dark:hover:bg-surface-800 px-2 py-1 rounded transition-colors">
+                                <i data-lucide="x" class="w-3.5 h-3.5"></i> Batal
+                            </button>
+                        </div>
+                        
+                        <div class="relative">
                             <textarea 
                                 x-model="replyText"
                                 x-ref="replyTextarea"
                                 rows="2"
-                                class="w-full px-3 py-2 text-sm bg-white dark:bg-surface-700 border border-surface-200 dark:border-surface-600 rounded-lg focus:ring-2 focus:ring-theme-500 focus:border-transparent resize-none"
-                                placeholder="Tulis balasan resmi admin..."
+                                class="w-full pl-4 pr-12 py-3 text-sm bg-surface-50 dark:bg-surface-800 border-none rounded-xl focus:ring-2 focus:ring-theme-500 placeholder-surface-400 resize-none transition-all"
+                                placeholder="Tulis balasan Anda..."
                             ></textarea>
+                            
+                            <button 
+                                @click="submitReply()"
+                                :disabled="!replyText.trim() || replyLoading"
+                                class="absolute right-2 bottom-2 p-2 rounded-lg bg-theme-600 hover:bg-theme-700 text-white disabled:opacity-50 disabled:bg-surface-200 dark:disabled:bg-surface-700 disabled:text-surface-400 transition-all shadow-sm"
+                            >
+                                <span x-show="replyLoading" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                                <i x-show="!replyLoading" data-lucide="send" class="w-4 h-4"></i>
+                            </button>
                         </div>
-                    </div>
-                    <div class="flex items-center gap-2 mt-2">
-                        <button 
-                            @click="cancelReply()"
-                            class="px-3 py-1.5 text-xs text-surface-600 dark:text-surface-400 hover:bg-surface-200 dark:hover:bg-surface-700 rounded-lg transition-colors"
-                        >
-                            Batal
-                        </button>
-                        <button 
-                            @click="submitReply()"
-                            :disabled="!replyText.trim() || replyLoading"
-                            class="px-4 py-1.5 text-xs bg-theme-gradient text-white font-medium rounded-lg hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
-                        >
-                            <i data-lucide="send" class="w-3 h-3" x-show="!replyLoading"></i>
-                            <span class="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" x-show="replyLoading"></span>
-                            <span x-text="replyLoading ? 'Mengirim...' : 'Kirim Balasan'"></span>
-                        </button>
                     </div>
                 </div>
 
-                {{-- Footer --}}
-                <div class="px-6 py-4 bg-surface-50 dark:bg-surface-800/50 border-t border-surface-200 dark:border-surface-700 flex items-center justify-end">
+                {{-- Simple Footer (only if not replying) --}}
+                <div 
+                    x-show="!replyingTo" 
+                    class="flex-shrink-0 px-6 py-4 bg-surface-50/50 dark:bg-surface-900/50 backdrop-blur border-t border-surface-100 dark:border-surface-800"
+                >
                     <button 
                         @click="closeStatisticsModal()"
-                        class="px-4 py-2.5 bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-700 text-surface-700 dark:text-surface-300 font-medium rounded-xl hover:bg-surface-50 dark:hover:bg-surface-700 transition-colors"
+                        class="w-full px-4 py-2.5 text-sm font-semibold text-surface-600 dark:text-surface-300 bg-white dark:bg-surface-800 hover:bg-surface-50 dark:hover:bg-surface-700 border border-surface-200 dark:border-surface-700 rounded-xl transition-colors shadow-sm"
                     >
-                        Tutup
+                        Tutup Statistik
                     </button>
                 </div>
             </div>

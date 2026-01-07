@@ -36,6 +36,9 @@
 
     {{-- Statistics Modal --}}
     @include('articles.partials.statistics-modal')
+
+    {{-- Activity Modal --}}
+    @include('articles.partials.activity-modal')
 </div>
 @endsection
 

@@ -40,6 +40,14 @@ function articleApp() {
         statisticsData: null,
         statisticsLoading: false,
         
+
+
+        // Activity Modal State
+        showActivityModal: false,
+        activityLogs: [],
+        activityLogLoading: false,
+        activityLogArticleTitle: '',
+        
         // Comment Reply State
         replyingTo: null,
         replyText: '',
@@ -107,6 +115,9 @@ function articleApp() {
                     this.replyingTo = null;
                     this.replyText = '';
                 }
+            });
+            this.$watch('showActivityModal', value => {
+                document.body.classList.toggle('overflow-hidden', value);
             });
         },
 
@@ -724,11 +735,42 @@ function articleApp() {
             }
         },
 
+
         closeStatisticsModal() {
             this.showStatisticsModal = false;
             this.statisticsData = null;
             this.replyingTo = null;
             this.replyText = '';
+        },
+
+        // Activity Modal Methods
+        async openActivityModal(articleId, articleTitle) {
+            this.showActivityModal = true;
+            this.activityLogLoading = true;
+            this.activityLogs = [];
+            this.activityLogArticleTitle = articleTitle;
+
+            try {
+                const response = await fetch(`/articles/${articleId}/activities`);
+                const result = await response.json();
+
+                if (result.success) {
+                    this.activityLogs = result.data;
+                    this.$nextTick(() => lucide.createIcons());
+                } else {
+                    showToast('error', result.message || 'Gagal memuat log aktivitas');
+                }
+            } catch (error) {
+                console.error('Error fetching activity log:', error);
+                showToast('error', 'Gagal memuat log aktivitas');
+            } finally {
+                this.activityLogLoading = false;
+            }
+        },
+
+        closeActivityModal() {
+            this.showActivityModal = false;
+            this.activityLogs = [];
         },
 
         // Comment Reply Methods
