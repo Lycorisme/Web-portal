@@ -31,9 +31,9 @@
                 :style="'animation-delay: ' + (index * 50) + 'ms'"
             >
                 {{-- Image Container --}}
-                <div class="relative aspect-[4/3] overflow-hidden bg-surface-100 dark:bg-surface-700 cursor-pointer" @click="item.is_group ? openAlbumModal(item) : openPreview(item)">
+                <div class="relative aspect-[4/3] overflow-hidden bg-surface-100 dark:bg-surface-700 cursor-pointer">
                     {{-- Checkbox --}}
-                    <div class="absolute top-3 left-3 z-[15]">
+                    <div class="absolute top-3 left-3 z-[40]">
                         <div 
                             class="w-6 h-6 rounded-lg border-2 border-white/50 backdrop-blur-sm cursor-pointer transition-all duration-300 flex items-center justify-center shadow-lg"
                             :class="selectedIds.includes(item.id) 
@@ -47,7 +47,7 @@
 
                     {{-- Group/Album Badge (shows count) --}}
                     <template x-if="item.is_group && item.group_count > 1">
-                        <div class="absolute top-3 right-3 z-10">
+                        <div class="absolute top-3 right-3 z-[40]">
                             <span class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-theme-500 text-white shadow-lg backdrop-blur-sm">
                                 <i data-lucide="images" class="w-3.5 h-3.5"></i>
                                 <span x-text="item.group_count"></span>
@@ -57,7 +57,7 @@
 
                     {{-- Media Type Badge (only for non-grouped or single items) --}}
                     <template x-if="!item.is_group || item.group_count === 1">
-                        <div class="absolute top-3 right-3 z-10">
+                        <div class="absolute top-3 right-3 z-[40]">
                             <span 
                                 class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold backdrop-blur-sm transition-transform duration-300 group-hover:scale-105"
                                 :class="item.media_type === 'video' 
@@ -72,7 +72,7 @@
 
                     {{-- Featured Badge --}}
                     <template x-if="item.is_featured">
-                        <div class="absolute top-12 right-3 z-10">
+                        <div class="absolute top-12 right-3 z-[40]">
                             <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold bg-amber-500/90 text-white backdrop-blur-sm">
                                 <i data-lucide="star" class="w-3 h-3"></i>
                                 Featured
@@ -80,25 +80,26 @@
                         </div>
                     </template>
 
-                    {{-- Grouped Preview (4 thumbnails grid) --}}
-                    <template x-if="item.is_group && item.group_count > 1 && item.preview_thumbnails && item.preview_thumbnails.length > 1">
-                        <div class="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-0.5">
-                            <template x-for="(thumb, i) in item.preview_thumbnails.slice(0, 4)" :key="i">
-                                <div class="relative overflow-hidden bg-surface-200 dark:bg-surface-600">
+                    {{-- Grouped Stack Preview --}}
+                    <template x-if="item.is_group && item.group_count > 1">
+                        <div class="absolute inset-0">
+                            {{-- Back Card --}}
+                            <div class="absolute inset-4 -rotate-6 bg-surface-50 dark:bg-surface-700 rounded-lg shadow-sm border border-surface-200 dark:border-surface-600 z-0 transform translate-x-2 translate-y-1"></div>
+                            {{-- Middle Card --}}
+                            <div class="absolute inset-4 -rotate-3 bg-surface-100 dark:bg-surface-700 rounded-lg shadow-md border border-surface-200 dark:border-surface-600 z-10 transform translate-x-1 translate-y-0.5"></div>
+                            {{-- Front Card (Main Image) --}}
+                            <div class="absolute inset-0 z-20">
+                                <template x-if="item.thumbnail_url || item.image_url">
                                     <img 
-                                        :src="thumb" 
+                                        :src="item.thumbnail_url || item.image_url" 
                                         :alt="item.title"
-                                        class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                                        class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 shadow-xl"
                                         loading="lazy"
                                     >
-                                    {{-- Overlay for 4th image if more than 4 --}}
-                                    <template x-if="i === 3 && item.group_count > 4">
-                                        <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
-                                            <span class="text-white font-bold text-lg">+<span x-text="item.group_count - 4"></span></span>
-                                        </div>
-                                    </template>
-                                </div>
-                            </template>
+                                </template>
+                            </div>
+                            {{-- Stack Effect Gradient Overlay (Optional) --}}
+                            <div class="absolute inset-0 z-30 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         </div>
                     </template>
 
@@ -133,21 +134,11 @@
                         </button>
                     </template>
 
-                    {{-- Album Open Hint (for grouped items) --}}
-                    <template x-if="item.is_group && item.group_count > 1">
-                        <div class="absolute inset-0 flex items-center justify-center bg-black/0 hover:bg-black/30 transition-all duration-300 z-[5]">
-                            <div class="opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-                                <div class="flex items-center gap-2 px-4 py-2 bg-white/90 rounded-xl shadow-lg">
-                                    <i data-lucide="folder-open" class="w-5 h-5 text-theme-600"></i>
-                                    <span class="text-sm font-semibold text-surface-900">Buka Album</span>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
+
 
                     {{-- Action Menu Trigger (Visible on hover or active) --}}
                     <div 
-                        class="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/60 via-black/30 to-transparent transition-all duration-300 z-[10]"
+                        class="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/60 via-black/30 to-transparent transition-all duration-300 z-[40]"
                         :class="(activeMenuItem && activeMenuItem.id === item.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'"
                     >
                         <div class="flex items-center justify-center gap-2">

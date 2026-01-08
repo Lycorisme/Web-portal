@@ -22,10 +22,13 @@ openCreateModal() {
     this.$nextTick(() => lucide.createIcons());
 },
 
-openEditModal(item) {
-    this.formMode = 'edit';
+async openEditModal(item) {
+    // Check if it is a group edit
+    const isGroup = item.is_group && item.group_count > 1;
+    this.formMode = isGroup ? 'edit_group' : 'edit';
+    
     this.formData = {
-        id: item.id,
+        id: item.id, // Representative ID
         title: item.title,
         description: item.description || '',
         media_type: item.media_type,
@@ -36,12 +39,43 @@ openEditModal(item) {
         is_featured: item.is_featured,
         is_published: item.is_published,
     };
+    
     this.imageFiles = [];
-    // For edit mode, show existing image as single preview
-    this.imagePreviews = item.image_url ? [{ url: item.image_url, isExisting: true }] : [];
+    this.imagePreviews = [];
     this.formErrors = {};
     this.showFormModal = true;
     this.closeMenu();
+
+    if (isGroup && item.group_item_ids) {
+        // Fetch all items in the group
+        try {
+            const params = new URLSearchParams();
+            item.group_item_ids.forEach(id => params.append('ids[]', id));
+            
+            const response = await fetch(`{{ route('galleries.album-items') }}?${params}`);
+            const result = await response.json();
+            
+            if (result.success) {
+                this.imagePreviews = result.data.map(img => ({
+                    id: img.id,
+                    url: img.image_url,
+                    isExisting: true,
+                    title: img.title
+                }));
+            }
+        } catch (error) {
+            console.error('Error loading group items:', error);
+            showToast('error', 'Gagal memuat detail album');
+        }
+    } else {
+        // Single item
+        this.imagePreviews = item.image_url ? [{ 
+            id: item.id, 
+            url: item.image_url, 
+            isExisting: true 
+        }] : [];
+    }
+
     this.$nextTick(() => lucide.createIcons());
 },
 
@@ -141,15 +175,42 @@ handleSingleImageUpload(event) {
     }
 },
 
-removeImageAt(index) {
+async removeImageAt(index) {
     // Check if it's an existing image (edit mode)
     const preview = this.imagePreviews[index];
-    if (preview && preview.isExisting) {
-        this.imagePreviews.splice(index, 1);
+    if (preview && preview.isExisting && preview.id) {
+        // Delete existing image via API
+        showConfirm(
+            'Hapus foto ini?', 
+            'Foto akan dihapus permanen dari album/galeri.',
+            async () => {
+                try {
+                    const response = await fetch(`/galleries/${preview.id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json',
+                        },
+                    });
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.imagePreviews.splice(index, 1);
+                        showToast('success', 'Foto dihapus');
+                        // Optionally refresh grid in background
+                        this.fetchGalleries(); 
+                    } else {
+                        showToast('error', result.message);
+                    }
+                } catch (error) {
+                    showToast('error', 'Gagal menghapus foto');
+                }
+            }
+        );
         return;
     }
     
-    // Find the corresponding file index
+    // Find the corresponding file index for new uploads
     let fileIndex = 0;
     for (let i = 0; i < index; i++) {
         if (!this.imagePreviews[i].isExisting) {
@@ -174,7 +235,7 @@ async submitForm() {
         let url, formDataObj;
         
         if (this.formMode === 'create' && this.formData.media_type === 'image' && this.imageFiles.length > 1) {
-            // Bulk upload for multiple images
+            // Bulk upload for multiple images (Create OR Edit Group Adding)
             url = '{{ route("galleries.bulk-store") }}';
             formDataObj = new FormData();
             formDataObj.append('title', this.formData.title);
@@ -190,8 +251,8 @@ async submitForm() {
                 formDataObj.append(`images[${index}]`, file);
             });
         } else {
-            // Single image upload (create with 1 image or edit mode)
-            url = this.formMode === 'create' ? '{{ route("galleries.store") }}' : `/galleries/${this.formData.id}`;
+            // Single image upload or Update Existing
+            url = (this.formMode === 'create') ? '{{ route("galleries.store") }}' : `/galleries/${this.formData.id}`;
             
             formDataObj = new FormData();
             formDataObj.append('title', this.formData.title);
@@ -204,13 +265,21 @@ async submitForm() {
             formDataObj.append('is_featured', this.formData.is_featured ? '1' : '0');
             formDataObj.append('is_published', this.formData.is_published ? '1' : '0');
             
-            if (this.imageFiles.length > 0) {
-                formDataObj.append('image', this.imageFiles[0]);
-            }
-            
-            // For update, we need to use POST with _method override
-            if (this.formMode === 'edit') {
-                formDataObj.append('_method', 'PUT');
+            // If edit_group and we have files, switch to bulk storage for adding
+            if (this.formMode === 'edit_group' && this.imageFiles.length > 0) {
+                 url = '{{ route("galleries.bulk-store") }}';
+                 this.imageFiles.forEach((file, index) => {
+                    formDataObj.append(`images[${index}]`, file);
+                });
+            } else {
+                if (this.imageFiles.length > 0) {
+                    formDataObj.append('image', this.imageFiles[0]);
+                }
+                
+                // For update, we need to use POST with _method override
+                if (this.formMode === 'edit' || this.formMode === 'edit_group') {
+                    formDataObj.append('_method', 'PUT');
+                }
             }
         }
 

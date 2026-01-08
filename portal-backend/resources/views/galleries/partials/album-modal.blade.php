@@ -20,17 +20,32 @@
             class="fixed inset-0 bg-black/95 backdrop-blur-md"
         ></div>
 
-        {{-- Close Button --}}
-        <button 
-            @click="closeAlbumModal()"
-            x-show="showAlbumModal"
-            x-transition:enter="transition ease-out duration-300 delay-200"
-            x-transition:enter-start="opacity-0 translate-y-4"
-            x-transition:enter-end="opacity-100 translate-y-0"
-            class="fixed top-4 right-4 p-3 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all duration-300 z-30"
-        >
-            <i data-lucide="x" class="w-6 h-6"></i>
-        </button>
+        {{-- Close & Info Buttons --}}
+        <div class="fixed top-4 right-4 z-30 flex items-center gap-2">
+            {{-- Info Button --}}
+            <button 
+                @click="toggleInfoModal()"
+                x-show="showAlbumModal"
+                x-transition:enter="transition ease-out duration-300 delay-200"
+                x-transition:enter-start="opacity-0 translate-y-4"
+                x-transition:enter-end="opacity-100 translate-y-0"
+                class="p-3 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all duration-300"
+                :class="{ 'bg-white/20 text-white': showInfoModal }"
+            >
+                <i data-lucide="info" class="w-6 h-6"></i>
+            </button>
+            {{-- Close Button --}}
+            <button 
+                @click="closeAlbumModal()"
+                x-show="showAlbumModal"
+                x-transition:enter="transition ease-out duration-300 delay-200"
+                x-transition:enter-start="opacity-0 translate-y-4"
+                x-transition:enter-end="opacity-100 translate-y-0"
+                class="p-3 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all duration-300"
+            >
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
 
         {{-- Album Header Info --}}
         <div 
@@ -128,37 +143,54 @@
             x-transition:enter="transition ease-out duration-500 delay-300"
             x-transition:enter-start="opacity-0 translate-y-8"
             x-transition:enter-end="opacity-100 translate-y-0"
-            class="fixed bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-black/80 via-black/50 to-transparent pb-4 pt-8"
+            class="fixed bottom-0 left-0 right-0 z-50 bg-surface-900/60 backdrop-blur-xl border-t border-white/10 pb-6 pt-6"
         >
-            <div class="flex items-center justify-center gap-2 px-4 overflow-x-auto scrollbar-hide">
-                <template x-for="(item, index) in albumItems" :key="item.id">
-                    <button 
-                        @click="goToAlbumItem(index)"
-                        class="relative flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden transition-all duration-300"
-                        :class="albumCurrentIndex === index 
-                            ? 'ring-2 ring-theme-500 ring-offset-2 ring-offset-black scale-110 z-10' 
-                            : 'opacity-60 hover:opacity-100'"
-                    >
-                        <img 
-                            :src="item.thumbnail_url || item.image_url" 
-                            :alt="item.title"
-                            class="w-full h-full object-cover"
+            <div class="max-w-7xl mx-auto px-4">
+                {{-- Thumbnails --}}
+                <div class="flex items-center justify-center gap-3 overflow-x-auto scrollbar-hide py-2 px-4 mask-linear mb-2">
+                    <template x-for="(item, index) in albumItems" :key="item.id">
+                        <button 
+                            @click="goToAlbumItem(index)"
+                            class="relative flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden transition-all duration-300 group"
+                            :class="albumCurrentIndex === index 
+                                ? 'ring-2 ring-theme-500 ring-offset-2 ring-offset-black/50 scale-110 z-10 opacity-100 shadow-lg shadow-theme-500/20' 
+                                : 'opacity-40 hover:opacity-100 hover:scale-105 grayscale hover:grayscale-0'"
                         >
-                        {{-- Current indicator --}}
-                        <div 
-                            x-show="albumCurrentIndex === index"
-                            class="absolute inset-0 bg-theme-500/20"
-                        ></div>
-                    </button>
-                </template>
+                            <img 
+                                :src="item.thumbnail_url || item.image_url" 
+                                :alt="item.title"
+                                class="w-full h-full object-cover"
+                            >
+                            {{-- Active Indicator --}}
+                            <div 
+                                x-show="albumCurrentIndex === index"
+                                class="absolute inset-0 bg-theme-500/10"
+                            ></div>
+                        </button>
+                    </template>
+                </div>
+                
+                {{-- Counter & Navigation Hint --}}
+                <div class="flex items-center justify-center gap-4 text-xs font-medium text-white/50">
+                    <span class="hidden sm:flex items-center gap-1">
+                        <i data-lucide="arrow-left" class="w-3 h-3"></i> Prev
+                    </span>
+                    <span class="px-3 py-1 bg-white/10 rounded-full text-white/90">
+                        <span x-text="albumCurrentIndex + 1"></span> / <span x-text="albumItems.length"></span>
+                    </span>
+                    <span class="hidden sm:flex items-center gap-1">
+                        Next <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                    </span>
+                </div>
             </div>
-            
-            {{-- Counter --}}
-            <div class="text-center mt-3">
-                <span class="px-4 py-1.5 bg-black/40 backdrop-blur-sm rounded-full text-white/90 text-sm font-medium">
-                    <span x-text="albumCurrentIndex + 1"></span> / <span x-text="albumItems.length"></span>
-                </span>
-            </div>
+        </div>
+        {{-- Info Modal (Reused with Data Mapping) --}}
+        <div x-data="{ 
+            get previewItem() { return this.currentAlbumItem; },
+            get previewCurrentIndex() { return this.albumCurrentIndex; },
+            get galleries() { return this.albumItems; }
+        }">
+            @include('galleries.partials.info-modal')
         </div>
     </div>
 </template>

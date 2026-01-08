@@ -15,6 +15,7 @@ function galleryApp() {
         showDetailModal: false,
         showFormModal: false,
         showPreviewModal: false,
+        showInfoModal: false,
         previewItem: null,
         previewCurrentIndex: 0,
         previewDirection: 'next',
@@ -352,42 +353,173 @@ function galleryApp() {
             };
         },
 
-        // Preview
-        openPreview(item) {
-            this.previewItem = item;
-            this.previewCurrentIndex = this.galleries.findIndex(g => g.id === item.id);
+        // Global Slideshow Logic
+        previewList: [],
+
+        initPreviewList() {
+            // Deep copy galleries to previewList
+            this.previewList = JSON.parse(JSON.stringify(this.galleries));
+        },
+
+        async expandGroupAtIndex(index) {
+            const item = this.previewList[index];
+            if (!item.is_group || item.group_count <= 1) return;
+
+            // Fetch items
+            try {
+                const params = new URLSearchParams();
+                if(item.group_item_ids) {
+                    item.group_item_ids.forEach(id => params.append('ids[]', id));
+                }
+                
+                // Using existing album-items endpoint
+                const response = await fetch(`{{ route('galleries.album-items') }}?${params}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    // Replace group placeholder with actual items
+                    // We remove 1 element at 'index' and add 'result.data' items
+                    this.previewList.splice(index, 1, ...result.data);
+                }
+            } catch (error) {
+                console.error('Error expanding group:', error);
+            }
+        },
+
+        // Modified Open Preview
+        async openPreview(item) {
+            this.initPreviewList();
+            
+            // Find index in the new list
+            let index = this.previewList.findIndex(g => g.id === item.id);
+            if (index === -1) return;
+
+            // If it's a group, expand it immediately
+            if (item.is_group && item.group_count > 1) {
+                await this.expandGroupAtIndex(index);
+                // After expansion, the index 'index' now points to the first child
+                // So we stick to 'index'
+            }
+
+            this.previewCurrentIndex = index;
+            this.previewItem = this.previewList[this.previewCurrentIndex];
             this.previewDirection = 'next';
             this.showPreviewModal = true;
             this.$nextTick(() => lucide.createIcons());
         },
 
+        // Override openAlbumModal to use Global Preview
+        openAlbumModal(item) {
+            this.openPreview(item);
+        },
+
+        // Modified Navigation
+        async prevPreview() {
+            this.previewDirection = 'prev';
+            
+            let newIndex = this.previewCurrentIndex - 1;
+            
+            if (newIndex < 0) {
+                 newIndex = this.previewList.length - 1;
+            }
+
+            // Check if ANY item in the direction is a group? 
+            // Simplified: Just update index. If we land on a group placeholder, expand it.
+            // But if we wrap around to end, and end is a group, we need to handle it.
+            
+            let targetItem = this.previewList[newIndex];
+
+            if (targetItem.is_group && targetItem.group_count > 1 && !targetItem.image_url) { 
+                // Assumption: placeholders might lack full image_url or have unique flag
+                // Actually we reuse the item structure. is_group=true is the flag.
+                // Expanded items should NOT have is_group=true or group_count > 1 (unless nested, unlikely)
+                // The API returns simple items.
+                
+                await this.expandGroupAtIndex(newIndex);
+                // After expansion, newIndex points to the *first* item of that group.
+                // But we are going PREV. So we want the LAST item of that group.
+                // The group was replaced by N items. 
+                // newIndex is the start. 
+                // We need to find how many items were added? 
+                // It's tricky to know exact count without reliable return.
+                // But wait, expandGroupAtIndex logic modifies the array.
+                // We can just rely on the fact that expanded items are now at [newIndex...newIndex+N]
+                // If we were going PREV into a group, logically we want the LAST item of that group.
+                // But simplified: just land on the first item of the group is acceptable, or user can tap prev again.
+                // Let's stick to simple: Land on first item of expanded group.
+                targetItem = this.previewList[newIndex];
+            }
+
+            this.previewCurrentIndex = newIndex;
+            this.previewItem = targetItem;
+            this.$nextTick(() => lucide.createIcons());
+        },
+
+        async nextPreview() {
+            this.previewDirection = 'next';
+            
+            let newIndex = this.previewCurrentIndex + 1;
+            if (newIndex >= this.previewList.length) {
+                newIndex = 0;
+            }
+
+            let targetItem = this.previewList[newIndex];
+            
+            if (targetItem && targetItem.is_group && targetItem.group_count > 1) {
+                await this.expandGroupAtIndex(newIndex);
+                // After expansion, newIndex is the first item of the group. Perfect for NEXT direction.
+                targetItem = this.previewList[newIndex];
+            }
+
+            this.previewCurrentIndex = newIndex;
+            this.previewItem = targetItem;
+            this.$nextTick(() => lucide.createIcons());
+        },
+
+        goToPreview(index) {
+            if (index > this.previewCurrentIndex) {
+                this.previewDirection = 'next';
+            } else if (index < this.previewCurrentIndex) {
+                this.previewDirection = 'prev';
+            }
+            this.previewCurrentIndex = index;
+            this.previewItem = this.previewList[this.previewCurrentIndex];
+            this.$nextTick(() => lucide.createIcons());
+        },
+
         closePreview() {
             this.showPreviewModal = false;
+            this.showInfoModal = false;
             setTimeout(() => {
                 this.previewItem = null;
+                // Reset previewList to avoid memory bloat if needed, or keep it
+                // this.previewList = []; 
             }, 300);
         },
 
-        prevPreview() {
-            this.previewDirection = 'prev';
-            if (this.previewCurrentIndex > 0) {
-                this.previewCurrentIndex--;
-            } else {
-                this.previewCurrentIndex = this.galleries.length - 1;
-            }
-            this.previewItem = this.galleries[this.previewCurrentIndex];
-            this.$nextTick(() => lucide.createIcons());
+        toggleInfoModal() {
+            this.showInfoModal = !this.showInfoModal;
         },
 
-        nextPreview() {
-            this.previewDirection = 'next';
-            if (this.previewCurrentIndex < this.galleries.length - 1) {
-                this.previewCurrentIndex++;
-            } else {
-                this.previewCurrentIndex = 0;
-            }
-            this.previewItem = this.galleries[this.previewCurrentIndex];
-            this.$nextTick(() => lucide.createIcons());
+        formatDateIndo(dateStr) {
+            if (!dateStr) return '-';
+            const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            
+            const parts = dateStr.match(/(\d{2})\s(\w+)\s(\d{4})\s(\d{2}):(\d{2})/);
+            if (!parts) return dateStr;
+            
+            const date = new Date(`${parts[2]} ${parts[1]}, ${parts[3]} ${parts[4]}:${parts[5]}`);
+            if (isNaN(date)) return dateStr;
+            
+            const dayName = days[date.getDay()];
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = months[date.getMonth()];
+            const year = date.getFullYear();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            
+            return `${dayName}, ${day} ${month} ${year} ${hours}.${minutes}`;
         },
 
         getYoutubeId(url) {
@@ -395,6 +527,7 @@ function galleryApp() {
             const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/);
             return match ? match[1] : null;
         },
+
 
         // Toggle Status
         async togglePublished(item) {

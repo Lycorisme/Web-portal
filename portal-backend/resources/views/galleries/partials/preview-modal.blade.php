@@ -6,6 +6,7 @@
         class="fixed inset-0 z-[60]"
         @keydown.left.window="prevPreview()"
         @keydown.right.window="nextPreview()"
+        @keydown.escape.window="showInfoModal ? showInfoModal = false : closePreview()"
         @touchstart="onTouchStart($event)"
         @touchend="onTouchEnd($event)"
     >
@@ -21,17 +22,95 @@
             class="fixed inset-0 bg-black/95 backdrop-blur-md"
         ></div>
 
-        {{-- Close Button --}}
-        <button 
-            @click="closePreview()"
+        {{-- Top Header Bar (Gradient Overlay + Info) --}}
+        <div 
+            class="fixed top-0 inset-x-0 h-24 bg-gradient-to-b from-black/80 to-transparent z-20 pointer-events-none transition-opacity duration-300"
             x-show="showPreviewModal"
-            x-transition:enter="transition ease-out duration-300 delay-200"
-            x-transition:enter-start="opacity-0 translate-y-4"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+        ></div>
+
+        {{-- Top Left Info (Modern & Clean) --}}
+        <div 
+            x-show="showPreviewModal && previewItem"
+            x-transition:enter="transition ease-out duration-300 delay-100"
+            x-transition:enter-start="opacity-0 -translate-y-2"
             x-transition:enter-end="opacity-100 translate-y-0"
-            class="fixed top-4 right-4 p-3 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all duration-300 z-20"
+            class="fixed top-6 left-6 z-30 max-w-[60%] sm:max-w-2xl flex flex-col gap-0.5 pointer-events-none leading-tight"
         >
-            <i data-lucide="x" class="w-6 h-6"></i>
-        </button>
+            {{-- Counter & Category Badge --}}
+            <div class="flex items-center gap-3 mb-1">
+                {{-- Media Type --}}
+                <span 
+                    class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase border"
+                    :class="previewItem?.media_type === 'video' 
+                        ? 'bg-red-500/10 text-red-400 border-red-500/20' 
+                        : 'bg-white/10 text-white/80 border-white/10'"
+                >
+                    <i :data-lucide="previewItem?.media_type === 'video' ? 'video' : 'image'" class="w-3 h-3"></i>
+                    <span x-text="previewItem?.media_type === 'video' ? 'VIDEO' : 'IMG'"></span>
+                </span>
+
+                {{-- Counter --}}
+                <span class="text-white/50 text-xs font-medium tracking-wide font-mono">
+                    <span x-text="(previewCurrentIndex + 1).toString().padStart(2, '0')" class="text-white"></span>
+                    <span class="mx-0.5">/</span>
+                    <span x-text="galleries.length.toString().padStart(2, '0')"></span>
+                </span>
+            </div>
+
+            {{-- Title --}}
+            <h3 
+                class="text-white font-bold text-lg sm:text-2xl drop-shadow-md line-clamp-1"
+                x-text="previewItem?.title || 'Untitled'"
+            ></h3>
+            
+            {{-- Album / Context --}}
+            <div class="flex items-center gap-2 text-white/60 text-xs sm:text-sm font-medium">
+                <template x-if="previewItem?.album">
+                    <div class="flex items-center gap-1.5">
+                        <i data-lucide="layers" class="w-3.5 h-3.5 opacity-70"></i>
+                        <span x-text="previewItem.album" class="truncate max-w-[200px]"></span>
+                    </div>
+                </template>
+                
+                {{-- Date if available (Optional) --}}
+                <template x-if="previewItem?.date">
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-1 h-1 rounded-full bg-white/30"></span>
+                        <span x-text="previewItem.date"></span>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        {{-- Top Controls --}}
+        <div class="fixed top-4 right-4 z-30 flex items-center gap-2">
+            {{-- Info Button --}}
+            <button 
+                @click="toggleInfoModal()"
+                x-show="showPreviewModal"
+                x-transition:enter="transition ease-out duration-300 delay-200"
+                x-transition:enter-start="opacity-0 translate-y-4"
+                x-transition:enter-end="opacity-100 translate-y-0"
+                class="p-3 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all duration-300"
+                :class="{ 'bg-white/20 text-white': showInfoModal }"
+            >
+                <i data-lucide="info" class="w-6 h-6"></i>
+            </button>
+            {{-- Close Button --}}
+            <button 
+                @click="closePreview()"
+                x-show="showPreviewModal"
+                x-transition:enter="transition ease-out duration-300 delay-200"
+                x-transition:enter-start="opacity-0 translate-y-4"
+                x-transition:enter-end="opacity-100 translate-y-0"
+                class="p-3 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all duration-300"
+            >
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
 
         {{-- Navigation Controls Container --}}
         <div class="fixed inset-x-0 bottom-0 z-30 p-4 sm:p-0 sm:inset-0 sm:pointer-events-none flex flex-col sm:flex-row items-center justify-between pointer-events-none">
@@ -73,7 +152,7 @@
         </div>
 
         {{-- Content Container --}}
-        <div class="fixed inset-0 flex items-center justify-center p-4 sm:p-12 z-10 pointer-events-none pb-24 sm:pb-12">
+        <div class="fixed inset-0 flex items-center justify-center p-4 sm:p-12 z-10 pointer-events-none pb-32 sm:pb-40">
             <div 
                 x-show="showPreviewModal && previewItem"
                 class="max-w-6xl w-full pointer-events-auto relative overflow-hidden"
@@ -90,7 +169,7 @@
                                 <img 
                                     :src="previewItem.image_url" 
                                     :alt="previewItem.title"
-                                    class="max-w-full max-h-[75vh] mx-auto object-contain rounded-2xl shadow-2xl bg-black/50"
+                                    class="max-w-full max-h-[60vh] mx-auto object-contain rounded-2xl shadow-2xl bg-black/50"
                                     @click.stop
                                 >
                             </div>
@@ -120,29 +199,17 @@
                                 </template>
                             </div>
                         </template>
-
-                        {{-- Caption --}}
-                        <div 
-                            class="mt-6 text-center text-white"
-                        >
-                            <h3 
-                                class="text-xl font-bold mb-1" 
-                                x-text="previewItem.title"
-                                x-transition:enter="transition ease-out duration-500 delay-100"
-                                x-transition:enter-start="opacity-0 translate-y-2"
-                                x-transition:enter-end="opacity-100 translate-y-0"
-                            ></h3>
-                            <p class="text-sm text-white/60" x-text="previewItem.album || ''"></p>
-                            <template x-if="previewItem.description">
-                                <p class="text-sm text-white/50 mt-2 max-w-2xl mx-auto" x-text="previewItem.description"></p>
-                            </template>
-                            <p class="text-xs text-white/40 mt-4">
-                                <span x-text="(previewCurrentIndex + 1)"></span> / <span x-text="galleries.length"></span>
-                            </p>
-                        </div>
                     </div>
                 </template>
             </div>
         </div>
+
+
+
+        {{-- Thumbnail Strip (Bottom) - Separated to partial --}}
+        @include('galleries.partials.thumbnail-strip')
+
+        {{-- Info Modal (Separate File) --}}
+        @include('galleries.partials.info-modal')
     </div>
 </template>

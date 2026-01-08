@@ -44,7 +44,7 @@
                             <h3 class="text-lg sm:text-xl font-bold text-surface-900 dark:text-white tracking-tight leading-tight" x-text="formMode === 'create' ? 'Tambah Galeri Baru' : 'Edit Galeri'"></h3>
                             <p class="hidden sm:block text-sm text-surface-500 dark:text-surface-400 font-medium">
                                 <span x-show="formMode === 'create'">Upload foto atau video kegiatan (maks 20 gambar)</span>
-                                <span x-show="formMode === 'edit'">Edit informasi galeri</span>
+                                <span x-show="formMode === 'edit' || formMode === 'edit_group'">Edit informasi galeri</span>
                             </p>
                         </div>
                     </div>
@@ -146,7 +146,7 @@
                                             <i data-lucide="image-plus" class="w-6 h-6"></i>
                                         </div>
                                         <h4 class="text-base font-bold text-surface-900 dark:text-white">
-                                            <span x-show="formMode === 'create'">Upload Gambar (Multiple)</span>
+                                            <span x-show="formMode === 'create' || formMode === 'edit_group'">Upload Gambar (Multiple)</span>
                                             <span x-show="formMode === 'edit'">Ganti Gambar</span>
                                         </h4>
                                         <p class="text-xs text-surface-500">PNG, JPG, WEBP (Maks 10MB per file, maks 20 gambar)</p>
@@ -192,7 +192,7 @@
                                         type="file" 
                                         class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                         accept="image/*"
-                                        :multiple="formMode === 'create'"
+                                        :multiple="formMode === 'create' || formMode === 'edit_group'"
                                         @change="formMode === 'edit' ? handleSingleImageUpload($event) : handleMultipleImageUpload($event)"
                                     >
                                     
@@ -204,7 +204,7 @@
                                         <p class="text-sm font-semibold text-surface-700 dark:text-surface-300">
                                             <span class="text-theme-600 dark:text-theme-400">Klik Upload</span> atau Drag & Drop
                                         </p>
-                                        <p x-show="formMode === 'create'" class="text-xs text-surface-400 mt-1">Pilih beberapa gambar sekaligus</p>
+                                        <p x-show="formMode === 'create' || formMode === 'edit_group'" class="text-xs text-surface-400 mt-1">Pilih beberapa gambar sekaligus</p>
                                     </div>
 
                                     {{-- Preview Grid --}}
@@ -228,8 +228,8 @@
                                                 </div>
                                             </template>
                                             
-                                            {{-- Add More Button (create mode only) --}}
-                                            <div x-show="formMode === 'create' && imagePreviews.length < 20" class="relative aspect-square rounded-xl border-2 border-dashed border-surface-300 dark:border-surface-600 flex items-center justify-center hover:border-theme-400 hover:bg-surface-50 dark:hover:bg-surface-700 transition-all cursor-pointer group/add">
+                                            {{-- Add More Button (create/edit_group mode) --}}
+                                            <div x-show="(formMode === 'create' || formMode === 'edit_group') && imagePreviews.length < 20" class="relative aspect-square rounded-xl border-2 border-dashed border-surface-300 dark:border-surface-600 flex items-center justify-center hover:border-theme-400 hover:bg-surface-50 dark:hover:bg-surface-700 transition-all cursor-pointer group/add">
                                                 <input 
                                                     type="file" 
                                                     class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
