@@ -121,6 +121,350 @@ class GalleryController extends Controller
     }
 
     /**
+     * Get list of unique albums for autocomplete.
+     */
+    public function getAlbums(Request $request): JsonResponse
+    {
+        $search = $request->get('search', '');
+        
+        $query = Gallery::distinct()
+            ->whereNotNull('album')
+            ->where('album', '!=', '');
+        
+        if ($search) {
+            $query->where('album', 'like', "%{$search}%");
+        }
+        
+        $albums = $query->orderBy('album')->pluck('album');
+        
+        return response()->json([
+            'success' => true,
+            'data' => $albums,
+        ]);
+    }
+
+    /**
+     * Get grouped gallery data (albums grouped together).
+     */
+    public function getGroupedData(Request $request): JsonResponse
+    {
+        $status = $request->status;
+        
+        // Build base query
+        $baseQuery = Gallery::with('uploader');
+        
+        if ($status === 'trash') {
+            $baseQuery->onlyTrashed();
+        }
+
+        // Apply filters
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $baseQuery->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('album', 'like', "%{$search}%")
+                  ->orWhere('location', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('media_type')) {
+            $baseQuery->where('media_type', $request->media_type);
+        }
+
+        if ($request->filled('album')) {
+            $baseQuery->where('album', $request->album);
+        }
+
+        if ($request->filled('is_published')) {
+            $baseQuery->where('is_published', $request->is_published === 'true' || $request->is_published === '1');
+        }
+
+        if ($request->filled('is_featured')) {
+            $baseQuery->where('is_featured', $request->is_featured === 'true' || $request->is_featured === '1');
+        }
+
+        // Get all matching galleries
+        $allGalleries = $baseQuery->orderBy('created_at', 'desc')->get();
+
+        // Group by album + description + location (for images only)
+        $grouped = [];
+        $ungrouped = [];
+
+        foreach ($allGalleries as $gallery) {
+            // Videos and items without album are not grouped
+            if ($gallery->media_type === 'video' || empty($gallery->album)) {
+                $ungrouped[] = $gallery;
+                continue;
+            }
+
+            // Create group key from album + description + location
+            $groupKey = md5(($gallery->album ?? '') . '|' . ($gallery->description ?? '') . '|' . ($gallery->location ?? ''));
+            
+            if (!isset($grouped[$groupKey])) {
+                $grouped[$groupKey] = [
+                    'representative' => $gallery,
+                    'items' => [],
+                    'album' => $gallery->album,
+                    'description' => $gallery->description,
+                    'location' => $gallery->location,
+                ];
+            }
+            
+            $grouped[$groupKey]['items'][] = $gallery;
+        }
+
+        // Convert to array format
+        $result = [];
+
+        // Add grouped items
+        foreach ($grouped as $groupKey => $group) {
+            $representative = $group['representative'];
+            $count = count($group['items']);
+            
+            // Get all item IDs in this group
+            $itemIds = collect($group['items'])->pluck('id')->toArray();
+            
+            // Get thumbnails for group preview (up to 4)
+            $previewThumbnails = collect($group['items'])
+                ->take(4)
+                ->map(fn($g) => $g->thumbnail_url ?? $g->image_url)
+                ->toArray();
+
+            $result[] = [
+                'id' => $representative->id,
+                'group_key' => $groupKey,
+                'is_group' => $count > 1,
+                'group_count' => $count,
+                'group_item_ids' => $itemIds,
+                'preview_thumbnails' => $previewThumbnails,
+                'title' => $this->getBaseTitle($representative->title),
+                'description' => $representative->description,
+                'image_path' => $representative->image_path,
+                'thumbnail_path' => $representative->thumbnail_path,
+                'image_url' => $representative->image_url,
+                'thumbnail_url' => $representative->thumbnail_url,
+                'media_type' => $representative->media_type,
+                'video_url' => $representative->video_url,
+                'album' => $representative->album,
+                'event_date' => $representative->event_date?->format('d M Y'),
+                'event_date_raw' => $representative->event_date?->format('Y-m-d'),
+                'location' => $representative->location,
+                'is_featured' => $representative->is_featured,
+                'is_published' => $representative->is_published,
+                'sort_order' => $representative->sort_order,
+                'uploader' => $representative->uploader ? [
+                    'id' => $representative->uploader->id,
+                    'name' => $representative->uploader->name,
+                ] : null,
+                'created_at' => $representative->created_at->format('d M Y H:i'),
+                'created_at_human' => $representative->created_at->diffForHumans(),
+                'deleted_at' => $representative->deleted_at,
+            ];
+        }
+
+        // Add ungrouped items
+        foreach ($ungrouped as $gallery) {
+            $result[] = [
+                'id' => $gallery->id,
+                'group_key' => null,
+                'is_group' => false,
+                'group_count' => 1,
+                'group_item_ids' => [$gallery->id],
+                'preview_thumbnails' => [$gallery->thumbnail_url ?? $gallery->image_url],
+                'title' => $gallery->title,
+                'description' => $gallery->description,
+                'image_path' => $gallery->image_path,
+                'thumbnail_path' => $gallery->thumbnail_path,
+                'image_url' => $gallery->image_url,
+                'thumbnail_url' => $gallery->thumbnail_url,
+                'media_type' => $gallery->media_type,
+                'video_url' => $gallery->video_url,
+                'album' => $gallery->album,
+                'event_date' => $gallery->event_date?->format('d M Y'),
+                'event_date_raw' => $gallery->event_date?->format('Y-m-d'),
+                'location' => $gallery->location,
+                'is_featured' => $gallery->is_featured,
+                'is_published' => $gallery->is_published,
+                'sort_order' => $gallery->sort_order,
+                'uploader' => $gallery->uploader ? [
+                    'id' => $gallery->uploader->id,
+                    'name' => $gallery->uploader->name,
+                ] : null,
+                'created_at' => $gallery->created_at->format('d M Y H:i'),
+                'created_at_human' => $gallery->created_at->diffForHumans(),
+                'deleted_at' => $gallery->deleted_at,
+            ];
+        }
+
+        // Sort by created_at desc
+        usort($result, fn($a, $b) => strtotime($b['created_at']) - strtotime($a['created_at']));
+
+        // Manual pagination
+        $perPage = $request->get('per_page', 15);
+        $currentPage = $request->get('page', 1);
+        $total = count($result);
+        $lastPage = ceil($total / $perPage);
+        
+        $paginatedData = array_slice($result, ($currentPage - 1) * $perPage, $perPage);
+
+        return response()->json([
+            'success' => true,
+            'data' => $paginatedData,
+            'meta' => [
+                'current_page' => (int) $currentPage,
+                'last_page' => (int) $lastPage,
+                'per_page' => (int) $perPage,
+                'total' => $total,
+                'from' => ($currentPage - 1) * $perPage + 1,
+                'to' => min($currentPage * $perPage, $total),
+            ],
+        ]);
+    }
+
+    /**
+     * Get all items in an album group.
+     */
+    public function getAlbumItems(Request $request): JsonResponse
+    {
+        $ids = $request->get('ids', []);
+        
+        if (empty($ids)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No IDs provided',
+            ], 400);
+        }
+
+        $galleries = Gallery::withTrashed()
+            ->whereIn('id', $ids)
+            ->orderBy('created_at', 'asc')
+            ->get()
+            ->map(function ($gallery) {
+                return [
+                    'id' => $gallery->id,
+                    'title' => $gallery->title,
+                    'description' => $gallery->description,
+                    'image_path' => $gallery->image_path,
+                    'thumbnail_path' => $gallery->thumbnail_path,
+                    'image_url' => $gallery->image_url,
+                    'thumbnail_url' => $gallery->thumbnail_url,
+                    'media_type' => $gallery->media_type,
+                    'video_url' => $gallery->video_url,
+                    'album' => $gallery->album,
+                    'event_date' => $gallery->event_date?->format('d M Y'),
+                    'event_date_raw' => $gallery->event_date?->format('Y-m-d'),
+                    'location' => $gallery->location,
+                    'is_featured' => $gallery->is_featured,
+                    'is_published' => $gallery->is_published,
+                    'created_at' => $gallery->created_at->format('d M Y H:i'),
+                    'deleted_at' => $gallery->deleted_at,
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => $galleries,
+        ]);
+    }
+
+    /**
+     * Extract base title without numbering suffix like (1/5), (2/5), etc.
+     */
+    private function getBaseTitle(string $title): string
+    {
+        // Remove patterns like "(1/5)", " (2/10)", etc.
+        return trim(preg_replace('/\s*\(\d+\/\d+\)\s*$/', '', $title));
+    }
+
+    /**
+     * Store multiple gallery items (bulk upload).
+     */
+    public function bulkStore(Request $request): JsonResponse
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'images' => 'required|array|min:1|max:20',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:10240',
+            'album' => 'nullable|string|max:255',
+            'event_date' => 'nullable|date',
+            'location' => 'nullable|string|max:255',
+            'is_featured' => 'boolean',
+            'is_published' => 'boolean',
+        ]);
+
+        try {
+            $createdCount = 0;
+            $baseData = [
+                'title' => $request->title,
+                'description' => $request->description,
+                'media_type' => 'image',
+                'album' => $request->album,
+                'event_date' => $request->event_date,
+                'location' => $request->location,
+                'is_featured' => $request->boolean('is_featured', false),
+                'is_published' => $request->boolean('is_published', true),
+                'uploaded_by' => Auth::id(),
+            ];
+
+            $images = $request->file('images');
+            $totalImages = count($images);
+
+            foreach ($images as $index => $image) {
+                $data = $baseData;
+                
+                // Add numbering to title if multiple images
+                if ($totalImages > 1) {
+                    $data['title'] = $baseData['title'] . ' (' . ($index + 1) . '/' . $totalImages . ')';
+                }
+
+                $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+                
+                // Store original image
+                $path = $image->storeAs('galleries', $filename, 'public');
+                $data['image_path'] = $path;
+
+                // Create thumbnail
+                $thumbnailFilename = 'thumb_' . $filename;
+                $thumbnailPath = 'galleries/thumbnails/' . $thumbnailFilename;
+                
+                Storage::disk('public')->makeDirectory('galleries/thumbnails');
+                
+                $originalPath = Storage::disk('public')->path($path);
+                $thumbFullPath = Storage::disk('public')->path($thumbnailPath);
+                
+                $this->createThumbnail($originalPath, $thumbFullPath, 400, 300);
+                
+                $data['thumbnail_path'] = $thumbnailPath;
+
+                $gallery = Gallery::create($data);
+                $createdCount++;
+
+                ActivityLog::log(
+                    ActivityLog::ACTION_CREATE,
+                    "Menambahkan item galeri (bulk): {$gallery->title}",
+                    $gallery,
+                    null,
+                    $gallery->toArray(),
+                    ActivityLog::LEVEL_INFO
+                );
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => "{$createdCount} item galeri berhasil ditambahkan.",
+                'count' => $createdCount,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menambahkan item galeri: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
      * Store a newly created gallery item.
      */
     public function store(Request $request): JsonResponse

@@ -19,7 +19,7 @@
 
     {{-- Grid View with smooth transitions --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-        <template x-for="(item, index) in galleries" :key="item.id">
+        <template x-for="(item, index) in galleries" :key="item.group_key || item.id">
             <div 
                 class="gallery-card group relative bg-white dark:bg-surface-800 rounded-2xl border overflow-hidden transition-all duration-500 ease-out hover:shadow-xl hover:shadow-theme-500/10 hover:-translate-y-1"
                 :class="item.deleted_at 
@@ -31,102 +31,151 @@
                 :style="'animation-delay: ' + (index * 50) + 'ms'"
             >
                 {{-- Image Container --}}
-                <div class="relative aspect-[4/3] overflow-hidden bg-surface-100 dark:bg-surface-700">
-                {{-- Checkbox --}}
-                <div class="absolute top-3 left-3 z-[15]">
-                    <div 
-                        class="w-6 h-6 rounded-lg border-2 border-white/50 backdrop-blur-sm cursor-pointer transition-all duration-300 flex items-center justify-center shadow-lg"
-                        :class="selectedIds.includes(item.id) 
-                            ? 'bg-theme-500 border-theme-500 scale-100 opacity-100' 
-                            : 'bg-black/20 hover:bg-black/40 scale-90 opacity-0 group-hover:opacity-100 group-hover:scale-100'"
-                        @click.stop="toggleSelection(item.id)"
-                    >
-                        <i x-show="selectedIds.includes(item.id)" data-lucide="check" class="w-4 h-4 text-white"></i>
-                    </div>
-                </div>
-
-                {{-- Media Type Badge --}}
-                <div class="absolute top-3 right-3 z-10">
-                    <span 
-                        class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold backdrop-blur-sm transition-transform duration-300 group-hover:scale-105"
-                        :class="item.media_type === 'video' 
-                            ? 'bg-rose-500/90 text-white' 
-                            : 'bg-white/90 dark:bg-surface-800/90 text-surface-700 dark:text-surface-300'"
-                    >
-                        <i :data-lucide="item.media_type === 'video' ? 'play' : 'image'" class="w-3 h-3"></i>
-                        <span x-text="item.media_type === 'video' ? 'Video' : 'Gambar'"></span>
-                    </span>
-                </div>
-
-                {{-- Featured Badge --}}
-                <template x-if="item.is_featured">
-                    <div class="absolute top-12 right-3 z-10">
-                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold bg-amber-500/90 text-white backdrop-blur-sm">
-                            <i data-lucide="star" class="w-3 h-3"></i>
-                            Featured
-                        </span>
-                    </div>
-                </template>
-
-                {{-- Image/Thumbnail --}}
-                <template x-if="item.thumbnail_url || item.image_url">
-                    <img 
-                        :src="item.thumbnail_url || item.image_url" 
-                        :alt="item.title"
-                        class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-                        loading="lazy"
-                    >
-                </template>
-                <template x-if="!item.thumbnail_url && !item.image_url">
-                    <div class="w-full h-full flex items-center justify-center">
-                        <i data-lucide="image-off" class="w-12 h-12 text-surface-400"></i>
-                    </div>
-                </template>
-
-                {{-- Video Play Button Overlay - Clickable to open video --}}
-                <template x-if="item.media_type === 'video'">
-                    <button 
-                        @click.stop="openPreview(item)"
-                        class="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-all duration-300 group/play cursor-pointer z-[5]"
-                    >
-                        <div class="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center shadow-lg transform transition-all duration-300 group-hover/play:scale-110 group-hover/play:bg-white">
-                            <i data-lucide="play" class="w-6 h-6 text-rose-600 ml-1 transition-transform duration-300 group-hover/play:scale-110"></i>
+                <div class="relative aspect-[4/3] overflow-hidden bg-surface-100 dark:bg-surface-700 cursor-pointer" @click="item.is_group ? openAlbumModal(item) : openPreview(item)">
+                    {{-- Checkbox --}}
+                    <div class="absolute top-3 left-3 z-[15]">
+                        <div 
+                            class="w-6 h-6 rounded-lg border-2 border-white/50 backdrop-blur-sm cursor-pointer transition-all duration-300 flex items-center justify-center shadow-lg"
+                            :class="selectedIds.includes(item.id) 
+                                ? 'bg-theme-500 border-theme-500 scale-100 opacity-100' 
+                                : 'bg-black/20 hover:bg-black/40 scale-90 opacity-0 group-hover:opacity-100 group-hover:scale-100'"
+                            @click.stop="toggleSelection(item.id)"
+                        >
+                            <i x-show="selectedIds.includes(item.id)" data-lucide="check" class="w-4 h-4 text-white"></i>
                         </div>
-                    </button>
-                </template>
+                    </div>
 
-                {{-- Action Menu Trigger (Visible on hover or active) --}}
-                <div 
-                    class="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/60 via-black/30 to-transparent transition-all duration-300 z-[10]"
-                    :class="(activeMenuItem && activeMenuItem.id === item.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'"
-                >
-                    <div class="flex items-center justify-center gap-2">
+                    {{-- Group/Album Badge (shows count) --}}
+                    <template x-if="item.is_group && item.group_count > 1">
+                        <div class="absolute top-3 right-3 z-10">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-theme-500 text-white shadow-lg backdrop-blur-sm">
+                                <i data-lucide="images" class="w-3.5 h-3.5"></i>
+                                <span x-text="item.group_count"></span>
+                            </span>
+                        </div>
+                    </template>
+
+                    {{-- Media Type Badge (only for non-grouped or single items) --}}
+                    <template x-if="!item.is_group || item.group_count === 1">
+                        <div class="absolute top-3 right-3 z-10">
+                            <span 
+                                class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold backdrop-blur-sm transition-transform duration-300 group-hover:scale-105"
+                                :class="item.media_type === 'video' 
+                                    ? 'bg-rose-500/90 text-white' 
+                                    : 'bg-white/90 dark:bg-surface-800/90 text-surface-700 dark:text-surface-300'"
+                            >
+                                <i :data-lucide="item.media_type === 'video' ? 'play' : 'image'" class="w-3 h-3"></i>
+                                <span x-text="item.media_type === 'video' ? 'Video' : 'Gambar'"></span>
+                            </span>
+                        </div>
+                    </template>
+
+                    {{-- Featured Badge --}}
+                    <template x-if="item.is_featured">
+                        <div class="absolute top-12 right-3 z-10">
+                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold bg-amber-500/90 text-white backdrop-blur-sm">
+                                <i data-lucide="star" class="w-3 h-3"></i>
+                                Featured
+                            </span>
+                        </div>
+                    </template>
+
+                    {{-- Grouped Preview (4 thumbnails grid) --}}
+                    <template x-if="item.is_group && item.group_count > 1 && item.preview_thumbnails && item.preview_thumbnails.length > 1">
+                        <div class="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-0.5">
+                            <template x-for="(thumb, i) in item.preview_thumbnails.slice(0, 4)" :key="i">
+                                <div class="relative overflow-hidden bg-surface-200 dark:bg-surface-600">
+                                    <img 
+                                        :src="thumb" 
+                                        :alt="item.title"
+                                        class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                                        loading="lazy"
+                                    >
+                                    {{-- Overlay for 4th image if more than 4 --}}
+                                    <template x-if="i === 3 && item.group_count > 4">
+                                        <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                            <span class="text-white font-bold text-lg">+<span x-text="item.group_count - 4"></span></span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    {{-- Single Image/Thumbnail --}}
+                    <template x-if="!item.is_group || item.group_count === 1 || !item.preview_thumbnails || item.preview_thumbnails.length <= 1">
+                        <div class="absolute inset-0">
+                            <template x-if="item.thumbnail_url || item.image_url">
+                                <img 
+                                    :src="item.thumbnail_url || item.image_url" 
+                                    :alt="item.title"
+                                    class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                                    loading="lazy"
+                                >
+                            </template>
+                            <template x-if="!item.thumbnail_url && !item.image_url">
+                                <div class="w-full h-full flex items-center justify-center">
+                                    <i data-lucide="image-off" class="w-12 h-12 text-surface-400"></i>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    {{-- Video Play Button Overlay --}}
+                    <template x-if="item.media_type === 'video'">
                         <button 
                             @click.stop="openPreview(item)"
-                            class="p-2 bg-white/90 rounded-lg hover:bg-white transition-all duration-200 transform hover:scale-110"
-                            title="Preview"
+                            class="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-all duration-300 group/play cursor-pointer z-[5]"
                         >
-                            <i data-lucide="eye" class="w-4 h-4 text-surface-700"></i>
+                            <div class="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center shadow-lg transform transition-all duration-300 group-hover/play:scale-110 group-hover/play:bg-white">
+                                <i data-lucide="play" class="w-6 h-6 text-rose-600 ml-1 transition-transform duration-300 group-hover/play:scale-110"></i>
+                            </div>
                         </button>
-                        <button 
-                            @click.stop="openEditModal(item)"
-                            x-show="!item.deleted_at"
-                            class="p-2 bg-white/90 rounded-lg hover:bg-white transition-all duration-200 transform hover:scale-110"
-                            title="Edit"
-                        >
-                            <i data-lucide="pencil" class="w-4 h-4 text-surface-700"></i>
-                        </button>
-                        <button 
-                            @click.stop="openMenu(item, $event)"
-                            class="p-2 rounded-lg transition-all duration-200 transform hover:scale-110"
-                            :class="(activeMenuItem && activeMenuItem.id === item.id) ? 'bg-theme-500 text-white' : 'bg-white/90 hover:bg-white text-surface-700'"
-                            title="Opsi Lainnya"
-                        >
-                            <i data-lucide="more-vertical" class="w-4 h-4"></i>
-                        </button>
-                    </div>
-                </div>
+                    </template>
 
+                    {{-- Album Open Hint (for grouped items) --}}
+                    <template x-if="item.is_group && item.group_count > 1">
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/0 hover:bg-black/30 transition-all duration-300 z-[5]">
+                            <div class="opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                                <div class="flex items-center gap-2 px-4 py-2 bg-white/90 rounded-xl shadow-lg">
+                                    <i data-lucide="folder-open" class="w-5 h-5 text-theme-600"></i>
+                                    <span class="text-sm font-semibold text-surface-900">Buka Album</span>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    {{-- Action Menu Trigger (Visible on hover or active) --}}
+                    <div 
+                        class="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/60 via-black/30 to-transparent transition-all duration-300 z-[10]"
+                        :class="(activeMenuItem && activeMenuItem.id === item.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'"
+                    >
+                        <div class="flex items-center justify-center gap-2">
+                            <button 
+                                @click.stop="item.is_group ? openAlbumModal(item) : openPreview(item)"
+                                class="p-2 bg-white/90 rounded-lg hover:bg-white transition-all duration-200 transform hover:scale-110"
+                                :title="item.is_group ? 'Lihat Album' : 'Preview'"
+                            >
+                                <i :data-lucide="item.is_group ? 'images' : 'eye'" class="w-4 h-4 text-surface-700"></i>
+                            </button>
+                            <button 
+                                @click.stop="openEditModal(item)"
+                                x-show="!item.deleted_at"
+                                class="p-2 bg-white/90 rounded-lg hover:bg-white transition-all duration-200 transform hover:scale-110"
+                                title="Edit"
+                            >
+                                <i data-lucide="pencil" class="w-4 h-4 text-surface-700"></i>
+                            </button>
+                            <button 
+                                @click.stop="openMenu(item, $event)"
+                                class="p-2 rounded-lg transition-all duration-200 transform hover:scale-110"
+                                :class="(activeMenuItem && activeMenuItem.id === item.id) ? 'bg-theme-500 text-white' : 'bg-white/90 hover:bg-white text-surface-700'"
+                                title="Opsi Lainnya"
+                            >
+                                <i data-lucide="more-vertical" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
 
                     {{-- Deleted Overlay --}}
                     <template x-if="item.deleted_at">
@@ -174,6 +223,14 @@
                             <i :data-lucide="item.is_published ? 'check-circle' : 'circle-dashed'" class="w-3 h-3"></i>
                             <span x-text="item.is_published ? 'Published' : 'Draft'"></span>
                         </span>
+
+                        {{-- Group indicator badge --}}
+                        <template x-if="item.is_group && item.group_count > 1">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-theme-100 text-theme-700 dark:bg-theme-500/20 dark:text-theme-400">
+                                <i data-lucide="layers" class="w-3 h-3"></i>
+                                <span x-text="item.group_count + ' foto'"></span>
+                            </span>
+                        </template>
                     </div>
                 </div>
             </div>

@@ -117,7 +117,11 @@ Route::middleware('auth')->group(function () {
     // Gallery Routes
     Route::get('/galleries', [GalleryController::class, 'index'])->name('galleries');
     Route::get('/galleries/data', [GalleryController::class, 'getData'])->name('galleries.data');
+    Route::get('/galleries/grouped', [GalleryController::class, 'getGroupedData'])->name('galleries.grouped');
+    Route::get('/galleries/albums', [GalleryController::class, 'getAlbums'])->name('galleries.albums');
+    Route::get('/galleries/album-items', [GalleryController::class, 'getAlbumItems'])->name('galleries.album-items');
     Route::post('/galleries', [GalleryController::class, 'store'])->name('galleries.store');
+    Route::post('/galleries/bulk-store', [GalleryController::class, 'bulkStore'])->name('galleries.bulk-store');
     Route::get('/galleries/{gallery}', [GalleryController::class, 'show'])->name('galleries.show');
     Route::put('/galleries/{gallery}', [GalleryController::class, 'update'])->name('galleries.update');
     Route::delete('/galleries/bulk', [GalleryController::class, 'bulkDestroy'])->name('galleries.bulk-destroy');

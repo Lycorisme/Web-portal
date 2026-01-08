@@ -125,6 +125,23 @@
                 <span>Terapkan</span>
             </button>
 
+            {{-- View Mode Toggle Button --}}
+            <button 
+                @click="toggleViewMode()"
+                class="flex items-center justify-center p-2.5 rounded-xl font-medium text-sm transition-all border shadow-sm"
+                :class="viewMode === 'grouped'
+                    ? 'bg-gradient-to-r from-theme-500 to-theme-600 text-white border-theme-600 shadow-theme-500/25 hover:shadow-theme-500/40' 
+                    : 'bg-white dark:bg-surface-800 text-surface-600 dark:text-surface-300 border-surface-200 dark:border-surface-700 hover:bg-surface-50 dark:hover:bg-surface-700'"
+                :title="viewMode === 'grouped' ? 'Tampilan Terkelompok (Klik untuk Individual)' : 'Tampilan Individual (Klik untuk Terkelompok)'"
+            >
+                <span x-show="viewMode === 'grouped'">
+                    <i data-lucide="layers" class="w-4 h-4"></i>
+                </span>
+                <span x-show="viewMode === 'individual'" style="display: none">
+                    <i data-lucide="grid-3x3" class="w-4 h-4"></i>
+                </span>
+            </button>
+
             {{-- Trash Toggle Button --}}
             <button 
                 @click="toggleTrash()"

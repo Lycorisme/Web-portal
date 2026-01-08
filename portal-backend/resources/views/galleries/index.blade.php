@@ -36,6 +36,9 @@
 
     {{-- Image Preview Modal --}}
     @include('galleries.partials.preview-modal')
+
+    {{-- Album Modal (for grouped images) --}}
+    @include('galleries.partials.album-modal')
 </div>
 @endsection
 
