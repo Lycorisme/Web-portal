@@ -3,7 +3,7 @@
     x-transition:enter="transition ease-out duration-300 delay-100"
     x-transition:enter-start="opacity-0 -translate-y-2"
     x-transition:enter-end="opacity-100 translate-y-0"
-    class="fixed top-6 left-6 z-30 max-w-[60%] sm:max-w-2xl flex flex-col gap-0.5 pointer-events-none leading-tight"
+    class="fixed top-6 left-6 z-[70] max-w-[60%] sm:max-w-2xl flex flex-col gap-0.5 pointer-events-none leading-tight"
 >
     {{-- Counter & Category Badge --}}
     <div class="flex items-center gap-3 mb-1">

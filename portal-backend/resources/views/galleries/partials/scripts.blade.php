@@ -469,11 +469,18 @@ function galleryApp() {
         closePreview() {
             this.showPreviewModal = false;
             this.showInfoModal = false;
+            this.videoShouldAutoplay = false; // Reset autoplay state
             setTimeout(() => {
                 this.previewItem = null;
                 // Reset previewList to avoid memory bloat if needed, or keep it
                 // this.previewList = []; 
             }, 300);
+        },
+
+        // Open preview with video autoplay (triggered from action menu "Putar Video")
+        openPreviewWithAutoplay(item) {
+            this.videoShouldAutoplay = true;
+            this.openPreview(item);
         },
 
         toggleInfoModal() {

@@ -24,6 +24,7 @@
             <span>Lihat Detail</span>
         </button>
 
+        {{-- Preview button (no autoplay for videos) --}}
         <button 
             x-show="activeMenuItem && !activeMenuItem.deleted_at"
             @click="openPreview(activeMenuItem); closeMenu()"
@@ -31,6 +32,16 @@
         >
             <i data-lucide="maximize" class="w-4 h-4 text-surface-400 group-hover:text-theme-500 transition-colors"></i>
             <span>Preview</span>
+        </button>
+
+        {{-- Play Video button (triggers autoplay) --}}
+        <button 
+            x-show="activeMenuItem && !activeMenuItem.deleted_at && activeMenuItem.media_type === 'video'"
+            @click="openPreviewWithAutoplay(activeMenuItem); closeMenu()"
+            class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-surface-700 dark:text-surface-300 hover:bg-surface-50 dark:hover:bg-surface-700/50 hover:text-rose-600 dark:hover:text-rose-400 transition-colors group"
+        >
+            <i data-lucide="play" class="w-4 h-4 text-surface-400 group-hover:text-rose-500 transition-colors"></i>
+            <span>Putar Video</span>
         </button>
 
         <button 

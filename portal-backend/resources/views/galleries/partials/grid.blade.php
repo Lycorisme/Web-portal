@@ -126,7 +126,7 @@
                     <template x-if="item.media_type === 'video'">
                         <div class="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-all duration-300 pointer-events-none z-[5]">
                             <button 
-                                @click.stop="openPreview(item)"
+                                @click.stop="openPreviewWithAutoplay(item)"
                                 class="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center shadow-lg transform transition-all duration-300 hover:scale-110 hover:bg-white pointer-events-auto group/play"
                             >
                                 <i data-lucide="play" class="w-6 h-6 text-rose-600 ml-1 transition-transform duration-300 group-hover/play:scale-110"></i>
