@@ -167,6 +167,42 @@ function galleryApp() {
         resetFilters() { this.filters = { search: '', media_type: '', album: '', is_published: '', is_featured: '' }; this.applyFilters(); },
         goToPage(page) { if (page >= 1 && page <= this.meta.last_page) { this.meta.current_page = page; this.fetchGalleries(); } },
 
+        // Touch Swipe State
+        touchStartX: 0,
+        touchEndX: 0,
+
+        onTouchStart(e) {
+            this.touchStartX = e.changedTouches[0].screenX;
+        },
+
+        onTouchEnd(e) {
+            this.touchEndX = e.changedTouches[0].screenX;
+            this.handleSwipeGesture();
+        },
+
+        handleSwipeGesture() {
+            if (this.touchEndX < this.touchStartX - 50) {
+                // Swipe Left -> Next
+                this.nextPreview();
+            }
+            if (this.touchEndX > this.touchStartX + 50) {
+                // Swipe Right -> Prev
+                this.prevPreview();
+            }
+        },
+
+        get previewTransition() {
+            const isNext = this.previewDirection === 'next';
+            return {
+                ['x-transition:enter']: 'transition ease-[cubic-bezier(0.33,1,0.68,1)] duration-500',
+                ['x-transition:enter-start']: isNext ? 'opacity-100 translate-x-full' : 'opacity-100 -translate-x-full',
+                ['x-transition:enter-end']: 'opacity-100 translate-x-0',
+                ['x-transition:leave']: 'transition ease-[cubic-bezier(0.33,1,0.68,1)] duration-500 absolute top-0 left-0 w-full z-0',
+                ['x-transition:leave-start']: 'opacity-100 translate-x-0',
+                ['x-transition:leave-end']: isNext ? 'opacity-100 -translate-x-full' : 'opacity-100 translate-x-full',
+            };
+        },
+
         // Preview
         openPreview(item) {
             this.previewItem = item;
@@ -190,12 +226,8 @@ function galleryApp() {
             } else {
                 this.previewCurrentIndex = this.galleries.length - 1;
             }
-            // Trigger reactivity by setting previewItem after direction is set
-            this.previewItem = null; 
-            this.$nextTick(() => {
-                this.previewItem = this.galleries[this.previewCurrentIndex];
-                this.$nextTick(() => lucide.createIcons());
-            });
+            this.previewItem = this.galleries[this.previewCurrentIndex];
+            this.$nextTick(() => lucide.createIcons());
         },
 
         nextPreview() {
@@ -205,12 +237,8 @@ function galleryApp() {
             } else {
                 this.previewCurrentIndex = 0;
             }
-             // Trigger reactivity by setting previewItem after direction is set
-            this.previewItem = null;
-            this.$nextTick(() => {
-                this.previewItem = this.galleries[this.previewCurrentIndex];
-                this.$nextTick(() => lucide.createIcons());
-            });
+            this.previewItem = this.galleries[this.previewCurrentIndex];
+            this.$nextTick(() => lucide.createIcons());
         },
 
         getYoutubeId(url) {

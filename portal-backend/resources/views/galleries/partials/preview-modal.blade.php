@@ -4,9 +4,10 @@
         x-show="showPreviewModal"
         x-cloak
         class="fixed inset-0 z-[60]"
-        @keydown.escape.window="closePreview()"
         @keydown.left.window="prevPreview()"
         @keydown.right.window="nextPreview()"
+        @touchstart="onTouchStart($event)"
+        @touchend="onTouchEnd($event)"
     >
         {{-- Backdrop with smooth transition --}}
         <div 
@@ -18,7 +19,6 @@
             x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0"
             class="fixed inset-0 bg-black/95 backdrop-blur-md"
-            @click="closePreview()"
         ></div>
 
         {{-- Close Button --}}
@@ -76,16 +76,13 @@
         <div class="fixed inset-0 flex items-center justify-center p-4 sm:p-12 z-10 pointer-events-none pb-24 sm:pb-12">
             <div 
                 x-show="showPreviewModal && previewItem"
-                class="max-w-6xl w-full pointer-events-auto relative"
+                class="max-w-6xl w-full pointer-events-auto relative overflow-hidden"
             >
                 <template x-if="previewItem">
                     <div 
                         x-key="previewItem.id"
                         class="relative w-full"
-                        x-transition:enter="transition ease-out duration-500"
-                        x-transition:enter-start="opacity-0 scale-95"
-                        :x-transition:enter-start="previewDirection === 'next' ? 'opacity-0 translate-x-12' : (previewDirection === 'prev' ? 'opacity-0 -translate-x-12' : 'opacity-0 scale-95')"
-                        x-transition:enter-end="opacity-100 translate-x-0 scale-100"
+                        x-bind="previewTransition"
                     >
                         {{-- Image Preview --}}
                         <template x-if="previewItem.media_type === 'image'">
