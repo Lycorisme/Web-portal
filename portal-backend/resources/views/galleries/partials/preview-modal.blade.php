@@ -120,7 +120,7 @@
             <div 
                 x-show="showPreviewModal && previewItem"
                 class="w-full h-full pointer-events-auto relative flex items-center justify-center"
-                :class="{ 'cursor-grab': zoomScale > 1, 'cursor-default': zoomScale <= 1 }"
+                :class="{ 'cursor-default': true }"
             >
                 <template x-if="previewItem">
                     <div 
@@ -136,8 +136,8 @@
                                     :src="getImageWithCache(previewItem.image_url)" 
                                     :alt="previewItem.title"
                                     class="max-w-[90vw] max-h-[85vh] object-contain rounded-xl sm:rounded-2xl shadow-2xl bg-black/50"
-                                    :class="{ 'cursor-grab active:cursor-grabbing': zoomScale > 1 }"
-                                    @mousedown="startPan"
+                                    :class="{ 'cursor-grabbing': zoomScale > 1 && isPanning, 'cursor-default': !isPanning || zoomScale <= 1 }"
+                                    @mousedown.prevent="startPan"
                                     @mousemove.window="handlePan"
                                     @mouseup.window="endPan"
                                     @click.stop
