@@ -4,7 +4,11 @@ function activityLogApp() {
         // State
         logs: [],
         loading: false,
-        openKebabId: null,
+        
+        // Menu State
+        activeMenuLog: null,
+        activeMenuButton: null,
+        menuPosition: { top: 0, left: 0, placement: 'bottom' },
         
         // Modal State
         selectedLog: null,
@@ -58,8 +62,19 @@ function activityLogApp() {
             this.fetchLogs();
             
             document.addEventListener('click', (e) => {
-                if (!e.target.closest('.kebab-menu-container')) { this.openKebabId = null; }
+                if (!e.target.closest('.kebab-menu-container') && !e.target.closest('[x-show="activeMenuLog"]')) {
+                    this.activeMenuLog = null;
+                }
             });
+
+            const updatePositionHandler = () => {
+                if (this.activeMenuLog && this.activeMenuButton) { this.updateMenuPosition(); }
+            };
+
+            const scrollContainer = document.querySelector('.table-scroll-container');
+            if (scrollContainer) { scrollContainer.addEventListener('scroll', updatePositionHandler); }
+            window.addEventListener('scroll', updatePositionHandler, true);
+            window.addEventListener('resize', updatePositionHandler);
 
             this.$watch('showDetailModal', value => { document.body.classList.toggle('overflow-hidden', value); });
             this.$watch('showAutoDeleteModal', value => { document.body.classList.toggle('overflow-hidden', value); });
@@ -94,14 +109,44 @@ function activityLogApp() {
 
         toggleTrash() {
             this.showTrash = !this.showTrash;
-            this.openKebabId = null;
+            this.activeMenuLog = null;
             this.applyFilters();
         },
 
-        toggleKebab(id) {
-            this.openKebabId = this.openKebabId === id ? null : id;
+        // Menu Logic
+        openMenu(log, event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (this.activeMenuLog && this.activeMenuLog.id === log.id) {
+                this.closeMenu();
+                return;
+            }
+
+            this.activeMenuLog = log;
+            this.activeMenuButton = event.currentTarget;
+            this.updateMenuPosition();
         },
 
+        updateMenuPosition() {
+            if (!this.activeMenuButton) return;
+            const rect = this.activeMenuButton.getBoundingClientRect();
+            const viewportHeight = window.innerHeight;
+            const spaceBelow = viewportHeight - rect.bottom;
+            const menuHeightEstimate = 180;
+            
+            let placement = 'bottom';
+            let topPos = rect.bottom + 4;
+
+            if (spaceBelow < menuHeightEstimate && rect.top > menuHeightEstimate) {
+                placement = 'top';
+                topPos = rect.top - 4;
+            }
+
+            this.menuPosition = { top: topPos, left: rect.right - 192, placement: placement };
+        },
+
+        closeMenu() { this.activeMenuLog = null; this.activeMenuButton = null; },
         applyFilters() { this.meta.current_page = 1; this.fetchLogs(); },
         resetFilters() { 
             this.filters = { search: '', action: '', level: '', user_id: '', date_from: '', date_to: '' }; 

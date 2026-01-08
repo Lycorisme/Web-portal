@@ -1,7 +1,7 @@
 {{-- CRUD Operations Module --}}
 
 async viewDetail(id) {
-    this.openKebabId = null;
+    this.closeMenu();
     try {
         showLoading('Memuat detail...');
         const response = await fetch(`/activity-log/${id}`);
@@ -21,7 +21,7 @@ closeDetailModal() {
 },
 
 async deleteLog(id) {
-    this.openKebabId = null;
+    this.closeMenu();
 
     showConfirm(
         'Hapus Log?',
@@ -47,7 +47,7 @@ async deleteLog(id) {
 },
 
 async restoreLog(id) {
-    this.openKebabId = null;
+    this.closeMenu();
     showConfirm(
         'Pulihkan Log?',
         'Log aktivitas akan dikembalikan ke daftar aktif.',
@@ -72,7 +72,7 @@ async restoreLog(id) {
 },
 
 async forceDeleteLog(id) {
-    this.openKebabId = null;
+    this.closeMenu();
     showConfirm(
         'Hapus Permanen?',
         'Data yang dihapus permanen TIDAK BISA dipulihkan kembali.',
