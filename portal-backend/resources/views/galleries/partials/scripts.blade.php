@@ -356,55 +356,72 @@ function galleryApp() {
         // Global Slideshow Logic
         previewList: [],
 
-        initPreviewList() {
-            // Deep copy galleries to previewList
-            this.previewList = JSON.parse(JSON.stringify(this.galleries));
-        },
-
-        async expandGroupAtIndex(index) {
-            const item = this.previewList[index];
-            if (!item.is_group || item.group_count <= 1) return;
-
-            // Fetch items
-            try {
-                const params = new URLSearchParams();
-                if(item.group_item_ids) {
-                    item.group_item_ids.forEach(id => params.append('ids[]', id));
-                }
-                
-                // Using existing album-items endpoint
-                const response = await fetch(`{{ route('galleries.album-items') }}?${params}`);
-                const result = await response.json();
-
-                if (result.success) {
-                    // Replace group placeholder with actual items
-                    // We remove 1 element at 'index' and add 'result.data' items
-                    this.previewList.splice(index, 1, ...result.data);
-                }
-            } catch (error) {
-                console.error('Error expanding group:', error);
-            }
-        },
-
         // Modified Open Preview
-        async openPreview(item) {
-            this.initPreviewList();
+        openPreview(item) {
+            // 1. Construct flattened list from current view
+            let flatList = [];
             
-            // Find index in the new list
-            let index = this.previewList.findIndex(g => g.id === item.id);
-            if (index === -1) return;
-
-            // If it's a group, expand it immediately
-            if (item.is_group && item.group_count > 1) {
-                await this.expandGroupAtIndex(index);
-                // After expansion, the index 'index' now points to the first child
-                // So we stick to 'index'
+            if (this.viewMode === 'grouped') {
+                this.galleries.forEach(g => {
+                    if (g.is_group && g.expanded_items && g.expanded_items.length > 0) {
+                        // Add all items from the group
+                        flatList.push(...g.expanded_items);
+                    } else {
+                        // Add single item (or group with no items/fallback)
+                        flatList.push(g);
+                    }
+                });
+            } else {
+                // Individual View: Copy all current items
+                flatList = JSON.parse(JSON.stringify(this.galleries));
             }
 
-            this.previewCurrentIndex = index;
+            this.previewList = flatList;
+
+            // 2. Determine start index
+            let foundIndex = -1;
+            
+            if (item.is_group && this.viewMode === 'grouped') {
+                // If clicking a group card, start at its first item
+                if (item.expanded_items && item.expanded_items.length > 0) {
+                    foundIndex = this.previewList.findIndex(x => x.id === item.expanded_items[0].id);
+                } else if (item.group_item_ids && item.group_item_ids.length > 0) {
+                     // Fallback if expanded_items missing but IDs exist (e.g. data not refreshed)
+                     // In this case we might fail to find it if we didn't fetch extended data.
+                     // But assuming we have refreshed data.
+                     foundIndex = this.previewList.findIndex(x => x.id === item.group_item_ids[0]);
+                }
+            } else {
+                // Single item click
+                foundIndex = this.previewList.findIndex(x => x.id === item.id);
+            }
+            
+            // Safety check
+            if (foundIndex === -1) {
+                // If we absolutely can't find it (e.g. pagination boundary edge case or data sync issue),
+                // fall back to just showing the clicked item as a single-item list?
+                // Or just start at 0.
+                if (item.is_group && item.expanded_items) {
+                     this.previewList = item.expanded_items; 
+                     foundIndex = 0;
+                } else {
+                    // Try to find by loosely matching IDs if string vs int
+                    foundIndex = this.previewList.findIndex(x => x.id == item.id);
+                    if (foundIndex === -1) {
+                         // Last resort: just put the item in
+                         this.previewList = [item];
+                         foundIndex = 0;
+                    }
+                }
+            }
+
+            this.previewCurrentIndex = foundIndex;
             this.previewItem = this.previewList[this.previewCurrentIndex];
-            this.previewDirection = 'next';
+            
             this.showPreviewModal = true;
+            this.showAlbumModal = false; 
+            
+            this.previewDirection = 'next';
             this.$nextTick(() => lucide.createIcons());
         },
 
@@ -413,67 +430,23 @@ function galleryApp() {
             this.openPreview(item);
         },
 
-        // Modified Navigation
-        async prevPreview() {
+        // Simplified Navigation (No merging/expanding)
+        prevPreview() {
             this.previewDirection = 'prev';
-            
-            let newIndex = this.previewCurrentIndex - 1;
-            
-            if (newIndex < 0) {
-                 newIndex = this.previewList.length - 1;
+            if (this.previewList.length > 0) {
+                this.previewCurrentIndex = (this.previewCurrentIndex - 1 + this.previewList.length) % this.previewList.length;
+                this.previewItem = this.previewList[this.previewCurrentIndex];
+                this.$nextTick(() => lucide.createIcons());
             }
-
-            // Check if ANY item in the direction is a group? 
-            // Simplified: Just update index. If we land on a group placeholder, expand it.
-            // But if we wrap around to end, and end is a group, we need to handle it.
-            
-            let targetItem = this.previewList[newIndex];
-
-            if (targetItem.is_group && targetItem.group_count > 1 && !targetItem.image_url) { 
-                // Assumption: placeholders might lack full image_url or have unique flag
-                // Actually we reuse the item structure. is_group=true is the flag.
-                // Expanded items should NOT have is_group=true or group_count > 1 (unless nested, unlikely)
-                // The API returns simple items.
-                
-                await this.expandGroupAtIndex(newIndex);
-                // After expansion, newIndex points to the *first* item of that group.
-                // But we are going PREV. So we want the LAST item of that group.
-                // The group was replaced by N items. 
-                // newIndex is the start. 
-                // We need to find how many items were added? 
-                // It's tricky to know exact count without reliable return.
-                // But wait, expandGroupAtIndex logic modifies the array.
-                // We can just rely on the fact that expanded items are now at [newIndex...newIndex+N]
-                // If we were going PREV into a group, logically we want the LAST item of that group.
-                // But simplified: just land on the first item of the group is acceptable, or user can tap prev again.
-                // Let's stick to simple: Land on first item of expanded group.
-                targetItem = this.previewList[newIndex];
-            }
-
-            this.previewCurrentIndex = newIndex;
-            this.previewItem = targetItem;
-            this.$nextTick(() => lucide.createIcons());
         },
 
-        async nextPreview() {
+        nextPreview() {
             this.previewDirection = 'next';
-            
-            let newIndex = this.previewCurrentIndex + 1;
-            if (newIndex >= this.previewList.length) {
-                newIndex = 0;
+            if (this.previewList.length > 0) {
+                this.previewCurrentIndex = (this.previewCurrentIndex + 1) % this.previewList.length;
+                this.previewItem = this.previewList[this.previewCurrentIndex];
+                this.$nextTick(() => lucide.createIcons());
             }
-
-            let targetItem = this.previewList[newIndex];
-            
-            if (targetItem && targetItem.is_group && targetItem.group_count > 1) {
-                await this.expandGroupAtIndex(newIndex);
-                // After expansion, newIndex is the first item of the group. Perfect for NEXT direction.
-                targetItem = this.previewList[newIndex];
-            }
-
-            this.previewCurrentIndex = newIndex;
-            this.previewItem = targetItem;
-            this.$nextTick(() => lucide.createIcons());
         },
 
         goToPreview(index) {

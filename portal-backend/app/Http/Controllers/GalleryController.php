@@ -237,6 +237,23 @@ class GalleryController extends Controller
                 'is_group' => $count > 1,
                 'group_count' => $count,
                 'group_item_ids' => $itemIds,
+                'expanded_items' => collect($group['items'])->map(function($g) {
+                    return [
+                        'id' => $g->id,
+                        'title' => $g->title,
+                        'description' => $g->description,
+                        'image_url' => $g->image_url,
+                        'thumbnail_url' => $g->thumbnail_url,
+                        'media_type' => $g->media_type,
+                        'video_url' => $g->video_url,
+                        'is_published' => $g->is_published,
+                        'created_at' => $g->created_at->format('d M Y H:i'),
+                        'uploader' => $g->uploader ? ['name' => $g->uploader->name] : null,
+                        'album' => $g->album,
+                        'location' => $g->location,
+                        'event_date' => $g->event_date?->format('d M Y'),
+                    ];
+                })->toArray(),
                 'preview_thumbnails' => $previewThumbnails,
                 'title' => $this->getBaseTitle($representative->title),
                 'description' => $representative->description,

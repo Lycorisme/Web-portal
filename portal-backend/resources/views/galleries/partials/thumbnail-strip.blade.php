@@ -1,6 +1,6 @@
 {{-- Thumbnail Strip (Bottom Navigation) --}}
 <div 
-    x-show="!showInfoModal && previewList.length > 1"
+    x-show="previewList.length > 1"
     x-transition:enter="transition ease-out duration-500 delay-300"
     x-transition:enter-start="opacity-0 translate-y-8"
     x-transition:enter-end="opacity-100 translate-y-0"
