@@ -7,7 +7,7 @@
     x-transition:leave="transition ease-[cubic-bezier(0.19,1,0.22,1)] duration-400"
     x-transition:leave-start="opacity-100 translate-x-0"
     x-transition:leave-end="opacity-0 translate-x-20"
-    class="fixed inset-y-0 right-0 z-[60] w-full sm:w-[400px] h-full sm:p-4 pointer-events-none flex flex-col justify-end sm:justify-center"
+    class="fixed inset-y-0 right-0 z-[100] w-full sm:w-[400px] h-full sm:p-4 pointer-events-none flex flex-col justify-end sm:justify-center"
 >
     <!-- 
       Backdrop for mobile only 

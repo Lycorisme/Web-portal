@@ -84,11 +84,17 @@ function galleryApp() {
         @include('galleries.partials.scripts.helpers')
 
         // ========================================
+        // ZOOM MODULE
+        // ========================================
+        @include('galleries.partials.scripts.zoom')
+
+        // ========================================
         // CORE METHODS
         // ========================================
         init() {
             this.fetchGalleries();
             this.fetchAlbums();
+            this.initZoom();
             
             document.addEventListener('click', (e) => {
                 if (!e.target.closest('.gallery-card') && !e.target.closest('[x-show="activeMenuItem"]')) {

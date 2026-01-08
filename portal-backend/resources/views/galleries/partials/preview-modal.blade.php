@@ -32,62 +32,27 @@
         ></div>
 
         {{-- Top Left Info (Modern & Clean) --}}
-        <div 
-            x-show="showPreviewModal && previewItem"
-            x-transition:enter="transition ease-out duration-300 delay-100"
-            x-transition:enter-start="opacity-0 -translate-y-2"
-            x-transition:enter-end="opacity-100 translate-y-0"
-            class="fixed top-6 left-6 z-30 max-w-[60%] sm:max-w-2xl flex flex-col gap-0.5 pointer-events-none leading-tight"
-        >
-            {{-- Counter & Category Badge --}}
-            <div class="flex items-center gap-3 mb-1">
-                {{-- Media Type --}}
-                <span 
-                    class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase border"
-                    :class="previewItem?.media_type === 'video' 
-                        ? 'bg-red-500/10 text-red-400 border-red-500/20' 
-                        : 'bg-white/10 text-white/80 border-white/10'"
-                >
-                    <i :data-lucide="previewItem?.media_type === 'video' ? 'video' : 'image'" class="w-3 h-3"></i>
-                    <span x-text="previewItem?.media_type === 'video' ? 'VIDEO' : 'IMG'"></span>
-                </span>
+        @include('galleries.partials.preview-header-info')
 
-                {{-- Counter --}}
-                <span class="text-white/50 text-xs font-medium tracking-wide font-mono">
-                    <span x-text="(previewCurrentIndex + 1).toString().padStart(2, '0')" class="text-white"></span>
-                    <span class="mx-0.5">/</span>
-                    <span x-text="galleries.length.toString().padStart(2, '0')"></span>
-                </span>
-            </div>
-
-            {{-- Title --}}
-            <h3 
-                class="text-white font-bold text-lg sm:text-2xl drop-shadow-md line-clamp-1"
-                x-text="previewItem?.title || 'Untitled'"
-            ></h3>
-            
-            {{-- Album / Context --}}
-            <div class="flex items-center gap-2 text-white/60 text-xs sm:text-sm font-medium">
-                <template x-if="previewItem?.album">
-                    <div class="flex items-center gap-1.5">
-                        <i data-lucide="layers" class="w-3.5 h-3.5 opacity-70"></i>
-                        <span x-text="previewItem.album" class="truncate max-w-[200px]"></span>
-                    </div>
-                </template>
-                
-                {{-- Date if available (Optional) --}}
-                <template x-if="previewItem?.date">
-                    <div class="flex items-center gap-1.5">
-                        <span class="w-1 h-1 rounded-full bg-white/30"></span>
-                        <span x-text="previewItem.date"></span>
-                    </div>
-                </template>
-            </div>
-        </div>
 
         {{-- Top Controls --}}
         <div class="fixed top-4 right-4 z-30 flex items-center gap-2">
+            {{-- Zoom Toggle Button (Only for Images) --}}
+            <template x-if="previewItem?.media_type === 'image'">
+                <button 
+                    @click="toggleZoomControls()"
+                    x-show="showPreviewModal"
+                    x-transition:enter="transition ease-out duration-300 delay-200"
+                    x-transition:enter-start="opacity-0 translate-y-4"
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    class="p-3 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all duration-300"
+                    :class="{ 'bg-white/20 text-white': showZoomControls }"
+                >
+                    <i data-lucide="zoom-in" class="w-6 h-6"></i>
+                </button>
+            </template>
             {{-- Info Button --}}
+
             <button 
                 @click="toggleInfoModal()"
                 x-show="showPreviewModal"
@@ -152,24 +117,28 @@
         </div>
 
         {{-- Content Container --}}
-        <div class="fixed inset-0 flex items-center justify-center p-4 sm:p-12 z-10 pointer-events-none pb-32 sm:pb-40">
+        <div class="fixed inset-0 flex items-center justify-center z-10 pointer-events-none pt-28 pb-48 sm:pt-32 sm:pb-56 px-4 sm:px-16">
             <div 
                 x-show="showPreviewModal && previewItem"
-                class="max-w-6xl w-full pointer-events-auto relative overflow-hidden"
+                class="w-full h-full pointer-events-auto relative"
             >
                 <template x-if="previewItem">
                     <div 
                         x-key="previewItem.id"
-                        class="relative w-full"
+                        class="w-full h-full flex items-center justify-center"
                         x-bind="previewTransition"
                     >
                         {{-- Image Preview --}}
                         <template x-if="previewItem.media_type === 'image'">
-                            <div class="relative">
+                            <div class="relative w-full h-full flex items-center justify-center overflow-hidden">
                                 <img 
                                     :src="previewItem.image_url" 
                                     :alt="previewItem.title"
-                                    class="max-w-full max-h-[60vh] mx-auto object-contain rounded-2xl shadow-2xl bg-black/50"
+                                    class="max-w-full max-h-full object-contain rounded-xl sm:rounded-2xl shadow-2xl bg-black/50 transition-transform duration-100 ease-out origin-center"
+                                    :style="`transform: scale(${zoomScale}) translate(${panX}px, ${panY}px); cursor: ${zoomScale > 1 ? 'grab' : 'default'}`"
+                                    @mousedown="startPan"
+                                    @mousemove.window="handlePan"
+                                    @mouseup.window="endPan"
                                     @click.stop
                                 >
                             </div>
@@ -177,9 +146,9 @@
 
                         {{-- Video Preview with YouTube Embed --}}
                         <template x-if="previewItem.media_type === 'video'">
-                            <div class="relative w-full max-w-4xl mx-auto" @click.stop>
-                                <template x-if="getYoutubeId(previewItem.video_url)">
-                                    <div class="aspect-video rounded-2xl overflow-hidden shadow-2xl bg-black">
+                            <div class="relative w-full h-full flex items-center justify-center" @click.stop>
+                                <div class="w-auto h-auto max-w-full max-h-full aspect-video rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl bg-black">
+                                    <template x-if="getYoutubeId(previewItem.video_url)">
                                         <iframe 
                                             :src="'https://www.youtube.com/embed/' + getYoutubeId(previewItem.video_url) + '?autoplay=1&rel=0'"
                                             class="w-full h-full"
@@ -187,16 +156,16 @@
                                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                                             allowfullscreen
                                         ></iframe>
-                                    </div>
-                                </template>
-                                <template x-if="!getYoutubeId(previewItem.video_url)">
-                                    <div class="aspect-video flex items-center justify-center bg-surface-800 rounded-2xl">
-                                        <a :href="previewItem.video_url" target="_blank" class="flex flex-col items-center text-white hover:text-theme-400 transition-colors">
-                                            <i data-lucide="external-link" class="w-12 h-12 mb-3"></i>
-                                            <p class="text-sm font-medium">Buka Video di Tab Baru</p>
-                                        </a>
-                                    </div>
-                                </template>
+                                    </template>
+                                    <template x-if="!getYoutubeId(previewItem.video_url)">
+                                        <div class="w-full h-full flex items-center justify-center bg-surface-800">
+                                            <a :href="previewItem.video_url" target="_blank" class="flex flex-col items-center text-white hover:text-theme-400 transition-colors p-6 text-center">
+                                                <i data-lucide="external-link" class="w-12 h-12 mb-3"></i>
+                                                <p class="text-sm font-medium">Buka Video di Tab Baru</p>
+                                            </a>
+                                        </div>
+                                    </template>
+                                </div>
                             </div>
                         </template>
                     </div>
@@ -205,6 +174,9 @@
         </div>
 
 
+
+        {{-- Zoom Controls --}}
+        @include('galleries.partials.preview-zoom-controls')
 
         {{-- Thumbnail Strip (Bottom) - Separated to partial --}}
         @include('galleries.partials.thumbnail-strip')

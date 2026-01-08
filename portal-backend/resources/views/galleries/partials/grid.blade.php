@@ -124,14 +124,14 @@
 
                     {{-- Video Play Button Overlay --}}
                     <template x-if="item.media_type === 'video'">
-                        <button 
-                            @click.stop="openPreview(item)"
-                            class="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-all duration-300 group/play cursor-pointer z-[5]"
-                        >
-                            <div class="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center shadow-lg transform transition-all duration-300 group-hover/play:scale-110 group-hover/play:bg-white">
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-all duration-300 pointer-events-none z-[5]">
+                            <button 
+                                @click.stop="openPreview(item)"
+                                class="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center shadow-lg transform transition-all duration-300 hover:scale-110 hover:bg-white pointer-events-auto group/play"
+                            >
                                 <i data-lucide="play" class="w-6 h-6 text-rose-600 ml-1 transition-transform duration-300 group-hover/play:scale-110"></i>
-                            </div>
-                        </button>
+                            </button>
+                        </div>
                     </template>
 
 
