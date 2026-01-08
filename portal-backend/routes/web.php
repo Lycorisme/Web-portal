@@ -10,6 +10,7 @@ use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\ArticleInteractionController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TagController;
+use App\Http\Controllers\GalleryController;
 
 // =============================================
 // Authentication Routes (Guest Only)
@@ -112,5 +113,19 @@ Route::middleware('auth')->group(function () {
     Route::post('/tags/{id}/restore', [TagController::class, 'restore'])->name('tags.restore');
     Route::delete('/tags/{id}/force', [TagController::class, 'forceDelete'])->name('tags.force-delete');
     Route::post('/tags/{tag}/toggle-active', [TagController::class, 'toggleActive'])->name('tags.toggle-active');
-});
 
+    // Gallery Routes
+    Route::get('/galleries', [GalleryController::class, 'index'])->name('galleries');
+    Route::get('/galleries/data', [GalleryController::class, 'getData'])->name('galleries.data');
+    Route::post('/galleries', [GalleryController::class, 'store'])->name('galleries.store');
+    Route::get('/galleries/{gallery}', [GalleryController::class, 'show'])->name('galleries.show');
+    Route::put('/galleries/{gallery}', [GalleryController::class, 'update'])->name('galleries.update');
+    Route::delete('/galleries/bulk', [GalleryController::class, 'bulkDestroy'])->name('galleries.bulk-destroy');
+    Route::post('/galleries/bulk-restore', [GalleryController::class, 'bulkRestore'])->name('galleries.bulk-restore');
+    Route::delete('/galleries/bulk-force', [GalleryController::class, 'bulkForceDelete'])->name('galleries.bulk-force-delete');
+    Route::delete('/galleries/{gallery}', [GalleryController::class, 'destroy'])->name('galleries.destroy');
+    Route::post('/galleries/{id}/restore', [GalleryController::class, 'restore'])->name('galleries.restore');
+    Route::delete('/galleries/{id}/force', [GalleryController::class, 'forceDelete'])->name('galleries.force-delete');
+    Route::post('/galleries/{gallery}/toggle-published', [GalleryController::class, 'togglePublished'])->name('galleries.toggle-published');
+    Route::post('/galleries/{gallery}/toggle-featured', [GalleryController::class, 'toggleFeatured'])->name('galleries.toggle-featured');
+});
