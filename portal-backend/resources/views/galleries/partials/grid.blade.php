@@ -32,117 +32,101 @@
             >
                 {{-- Image Container --}}
                 <div class="relative aspect-[4/3] overflow-hidden bg-surface-100 dark:bg-surface-700">
-                    {{-- Checkbox --}}
-                    <div class="absolute top-3 left-3 z-10">
-                        <input 
-                            type="checkbox"
-                            :value="item.id"
-                            x-model="selectedIds"
-                            class="w-5 h-5 rounded-lg border-2 border-white/50 bg-white/50 backdrop-blur-sm text-theme-600 focus:ring-theme-500 focus:ring-offset-0 cursor-pointer transition-all opacity-0 group-hover:opacity-100"
-                            :class="{'opacity-100': selectedIds.includes(item.id)}"
-                        >
+                {{-- Checkbox --}}
+                <div class="absolute top-3 left-3 z-[15]">
+                    <div 
+                        class="w-6 h-6 rounded-lg border-2 border-white/50 backdrop-blur-sm cursor-pointer transition-all duration-300 flex items-center justify-center shadow-lg"
+                        :class="selectedIds.includes(item.id) 
+                            ? 'bg-theme-500 border-theme-500 scale-100 opacity-100' 
+                            : 'bg-black/20 hover:bg-black/40 scale-90 opacity-0 group-hover:opacity-100 group-hover:scale-100'"
+                        @click.stop="toggleSelection(item.id)"
+                    >
+                        <i x-show="selectedIds.includes(item.id)" data-lucide="check" class="w-4 h-4 text-white"></i>
                     </div>
+                </div>
 
-                    {{-- Media Type Badge --}}
-                    <div class="absolute top-3 right-3 z-10">
-                        <span 
-                            class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold backdrop-blur-sm transition-transform duration-300 group-hover:scale-105"
-                            :class="item.media_type === 'video' 
-                                ? 'bg-rose-500/90 text-white' 
-                                : 'bg-white/90 dark:bg-surface-800/90 text-surface-700 dark:text-surface-300'"
-                        >
-                            <i :data-lucide="item.media_type === 'video' ? 'play' : 'image'" class="w-3 h-3"></i>
-                            <span x-text="item.media_type === 'video' ? 'Video' : 'Gambar'"></span>
+                {{-- Media Type Badge --}}
+                <div class="absolute top-3 right-3 z-10">
+                    <span 
+                        class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold backdrop-blur-sm transition-transform duration-300 group-hover:scale-105"
+                        :class="item.media_type === 'video' 
+                            ? 'bg-rose-500/90 text-white' 
+                            : 'bg-white/90 dark:bg-surface-800/90 text-surface-700 dark:text-surface-300'"
+                    >
+                        <i :data-lucide="item.media_type === 'video' ? 'play' : 'image'" class="w-3 h-3"></i>
+                        <span x-text="item.media_type === 'video' ? 'Video' : 'Gambar'"></span>
+                    </span>
+                </div>
+
+                {{-- Featured Badge --}}
+                <template x-if="item.is_featured">
+                    <div class="absolute top-12 right-3 z-10">
+                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold bg-amber-500/90 text-white backdrop-blur-sm">
+                            <i data-lucide="star" class="w-3 h-3"></i>
+                            Featured
                         </span>
                     </div>
+                </template>
 
-                    {{-- Featured Badge --}}
-                    <template x-if="item.is_featured">
-                        <div class="absolute top-12 right-3 z-10">
-                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold bg-amber-500/90 text-white backdrop-blur-sm">
-                                <i data-lucide="star" class="w-3 h-3"></i>
-                                Featured
-                            </span>
+                {{-- Image/Thumbnail --}}
+                <template x-if="item.thumbnail_url || item.image_url">
+                    <img 
+                        :src="item.thumbnail_url || item.image_url" 
+                        :alt="item.title"
+                        class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                        loading="lazy"
+                    >
+                </template>
+                <template x-if="!item.thumbnail_url && !item.image_url">
+                    <div class="w-full h-full flex items-center justify-center">
+                        <i data-lucide="image-off" class="w-12 h-12 text-surface-400"></i>
+                    </div>
+                </template>
+
+                {{-- Video Play Button Overlay - Clickable to open video --}}
+                <template x-if="item.media_type === 'video'">
+                    <button 
+                        @click.stop="openPreview(item)"
+                        class="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-all duration-300 group/play cursor-pointer z-[5]"
+                    >
+                        <div class="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center shadow-lg transform transition-all duration-300 group-hover/play:scale-110 group-hover/play:bg-white">
+                            <i data-lucide="play" class="w-6 h-6 text-rose-600 ml-1 transition-transform duration-300 group-hover/play:scale-110"></i>
                         </div>
-                    </template>
+                    </button>
+                </template>
 
-                    {{-- Image/Thumbnail --}}
-                    <template x-if="item.thumbnail_url || item.image_url">
-                        <img 
-                            :src="item.thumbnail_url || item.image_url" 
-                            :alt="item.title"
-                            class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-                            loading="lazy"
-                        >
-                    </template>
-                    <template x-if="!item.thumbnail_url && !item.image_url">
-                        <div class="w-full h-full flex items-center justify-center">
-                            <i data-lucide="image-off" class="w-12 h-12 text-surface-400"></i>
-                        </div>
-                    </template>
-
-                    {{-- Video Play Button Overlay - Clickable to open video --}}
-                    <template x-if="item.media_type === 'video'">
+                {{-- Action Menu Trigger (Visible on hover or active) --}}
+                <div 
+                    class="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/60 via-black/30 to-transparent transition-all duration-300 z-[10]"
+                    :class="(activeMenuItem && activeMenuItem.id === item.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'"
+                >
+                    <div class="flex items-center justify-center gap-2">
                         <button 
                             @click.stop="openPreview(item)"
-                            class="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-all duration-300 group/play cursor-pointer z-[5]"
+                            class="p-2 bg-white/90 rounded-lg hover:bg-white transition-all duration-200 transform hover:scale-110"
+                            title="Preview"
                         >
-                            <div class="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center shadow-lg transform transition-all duration-300 group-hover/play:scale-110 group-hover/play:bg-white">
-                                <i data-lucide="play" class="w-6 h-6 text-rose-600 ml-1 transition-transform duration-300 group-hover/play:scale-110"></i>
-                            </div>
+                            <i data-lucide="eye" class="w-4 h-4 text-surface-700"></i>
                         </button>
-                    </template>
+                        <button 
+                            @click.stop="openEditModal(item)"
+                            x-show="!item.deleted_at"
+                            class="p-2 bg-white/90 rounded-lg hover:bg-white transition-all duration-200 transform hover:scale-110"
+                            title="Edit"
+                        >
+                            <i data-lucide="pencil" class="w-4 h-4 text-surface-700"></i>
+                        </button>
+                        <button 
+                            @click.stop="openMenu(item, $event)"
+                            class="p-2 rounded-lg transition-all duration-200 transform hover:scale-110"
+                            :class="(activeMenuItem && activeMenuItem.id === item.id) ? 'bg-theme-500 text-white' : 'bg-white/90 hover:bg-white text-surface-700'"
+                            title="Opsi Lainnya"
+                        >
+                            <i data-lucide="more-vertical" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
 
-                    {{-- Quick Actions Overlay (for images) --}}
-                    <template x-if="item.media_type === 'image'">
-                        <div class="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/60 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300">
-                            <div class="flex items-center justify-center gap-2">
-                                <button 
-                                    @click.stop="openPreview(item)"
-                                    class="p-2 bg-white/90 rounded-lg hover:bg-white transition-all duration-200 transform hover:scale-110"
-                                    title="Preview"
-                                >
-                                    <i data-lucide="eye" class="w-4 h-4 text-surface-700"></i>
-                                </button>
-                                <button 
-                                    @click.stop="openEditModal(item)"
-                                    x-show="!item.deleted_at"
-                                    class="p-2 bg-white/90 rounded-lg hover:bg-white transition-all duration-200 transform hover:scale-110"
-                                    title="Edit"
-                                >
-                                    <i data-lucide="pencil" class="w-4 h-4 text-surface-700"></i>
-                                </button>
-                                <button 
-                                    @click.stop="openMenu(item, $event)"
-                                    class="p-2 bg-white/90 rounded-lg hover:bg-white transition-all duration-200 transform hover:scale-110"
-                                    title="Opsi Lainnya"
-                                >
-                                    <i data-lucide="more-vertical" class="w-4 h-4 text-surface-700"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </template>
-
-                    {{-- Overlay Actions for Video (bottom) --}}
-                    <template x-if="item.media_type === 'video'">
-                        <div class="absolute bottom-0 left-0 right-0 p-2 flex items-center justify-center gap-2 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 z-[6]">
-                            <button 
-                                @click.stop="openEditModal(item)"
-                                x-show="!item.deleted_at"
-                                class="p-2 bg-white/90 rounded-lg hover:bg-white transition-all duration-200 transform hover:scale-110"
-                                title="Edit"
-                            >
-                                <i data-lucide="pencil" class="w-4 h-4 text-surface-700"></i>
-                            </button>
-                            <button 
-                                @click.stop="openMenu(item, $event)"
-                                class="p-2 bg-white/90 rounded-lg hover:bg-white transition-all duration-200 transform hover:scale-110"
-                                title="Opsi Lainnya"
-                            >
-                                <i data-lucide="more-vertical" class="w-4 h-4 text-surface-700"></i>
-                            </button>
-                        </div>
-                    </template>
 
                     {{-- Deleted Overlay --}}
                     <template x-if="item.deleted_at">

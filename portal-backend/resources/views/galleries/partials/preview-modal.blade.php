@@ -33,50 +33,67 @@
             <i data-lucide="x" class="w-6 h-6"></i>
         </button>
 
-        {{-- Navigation Buttons --}}
-        <button 
-            @click.stop="prevPreview()"
-            x-show="showPreviewModal && galleries.length > 1"
-            x-transition:enter="transition ease-out duration-300 delay-300"
-            x-transition:enter-start="opacity-0 -translate-x-4"
-            x-transition:enter-end="opacity-100 translate-x-0"
-            class="fixed left-4 top-1/2 -translate-y-1/2 p-3 text-white/70 hover:text-white bg-black/30 hover:bg-black/50 rounded-full transition-all duration-300 z-20 hover:scale-110"
-        >
-            <i data-lucide="chevron-left" class="w-6 h-6"></i>
-        </button>
+        {{-- Navigation Controls Container --}}
+        <div class="fixed inset-x-0 bottom-0 z-30 p-4 sm:p-0 sm:inset-0 sm:pointer-events-none flex flex-col sm:flex-row items-center justify-between pointer-events-none">
+            
+            {{-- Prev Button (Desktop: Left Center, Mobile: Bottom Left) --}}
+            <button 
+                @click.stop="prevPreview()"
+                x-show="showPreviewModal && galleries.length > 1"
+                x-transition:enter="transition ease-out duration-300 delay-300"
+                x-transition:enter-start="opacity-0 -translate-x-4"
+                x-transition:enter-end="opacity-100 translate-x-0"
+                class="pointer-events-auto p-4 sm:p-3 text-white/70 hover:text-white bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full transition-all duration-300 hover:scale-110 active:scale-95 sm:fixed sm:left-4 sm:top-1/2 sm:-translate-y-1/2 absolute bottom-8 left-8 sm:static"
+            >
+                <i data-lucide="chevron-left" class="w-8 h-8 sm:w-10 sm:h-10"></i>
+            </button>
 
-        <button 
-            @click.stop="nextPreview()"
-            x-show="showPreviewModal && galleries.length > 1"
-            x-transition:enter="transition ease-out duration-300 delay-300"
-            x-transition:enter-start="opacity-0 translate-x-4"
-            x-transition:enter-end="opacity-100 translate-x-0"
-            class="fixed right-4 top-1/2 -translate-y-1/2 p-3 text-white/70 hover:text-white bg-black/30 hover:bg-black/50 rounded-full transition-all duration-300 z-20 hover:scale-110"
-        >
-            <i data-lucide="chevron-right" class="w-6 h-6"></i>
-        </button>
+            {{-- Next Button (Desktop: Right Center, Mobile: Bottom Right) --}}
+            <button 
+                @click.stop="nextPreview()"
+                x-show="showPreviewModal && galleries.length > 1"
+                x-transition:enter="transition ease-out duration-300 delay-300"
+                x-transition:enter-start="opacity-0 translate-x-4"
+                x-transition:enter-end="opacity-100 translate-x-0"
+                class="pointer-events-auto p-4 sm:p-3 text-white/70 hover:text-white bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full transition-all duration-300 hover:scale-110 active:scale-95 sm:fixed sm:right-4 sm:top-1/2 sm:-translate-y-1/2 absolute bottom-8 right-8 sm:static"
+            >
+                <i data-lucide="chevron-right" class="w-8 h-8 sm:w-10 sm:h-10"></i>
+            </button>
+            
+            {{-- Mobile Pagination Indicator (Centered Bottom) --}}
+            <div 
+                class="sm:hidden pointer-events-auto absolute bottom-10 left-1/2 -translate-x-1/2 px-4 py-2 bg-black/40 backdrop-blur-sm rounded-full text-white/90 text-sm font-medium"
+                x-show="showPreviewModal && galleries.length > 1"
+                x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-y-4"
+                x-transition:enter-end="opacity-100 translate-y-0"
+            >
+                <span x-text="(previewCurrentIndex + 1)"></span> / <span x-text="galleries.length"></span>
+            </div>
+        </div>
 
         {{-- Content Container --}}
-        <div class="fixed inset-0 flex items-center justify-center p-4 sm:p-8 z-10 pointer-events-none">
+        <div class="fixed inset-0 flex items-center justify-center p-4 sm:p-12 z-10 pointer-events-none pb-24 sm:pb-12">
             <div 
                 x-show="showPreviewModal && previewItem"
-                x-transition:enter="transition ease-out duration-500"
-                x-transition:enter-start="opacity-0 scale-90"
-                x-transition:enter-end="opacity-100 scale-100"
-                x-transition:leave="transition ease-in duration-300"
-                x-transition:leave-start="opacity-100 scale-100"
-                x-transition:leave-end="opacity-0 scale-90"
-                class="max-w-6xl w-full pointer-events-auto"
+                class="max-w-6xl w-full pointer-events-auto relative"
             >
                 <template x-if="previewItem">
-                    <div class="relative">
+                    <div 
+                        x-key="previewItem.id"
+                        class="relative w-full"
+                        x-transition:enter="transition ease-out duration-500"
+                        x-transition:enter-start="opacity-0 scale-95"
+                        :x-transition:enter-start="previewDirection === 'next' ? 'opacity-0 translate-x-12' : (previewDirection === 'prev' ? 'opacity-0 -translate-x-12' : 'opacity-0 scale-95')"
+                        x-transition:enter-end="opacity-100 translate-x-0 scale-100"
+                    >
                         {{-- Image Preview --}}
                         <template x-if="previewItem.media_type === 'image'">
                             <div class="relative">
                                 <img 
                                     :src="previewItem.image_url" 
                                     :alt="previewItem.title"
-                                    class="max-w-full max-h-[75vh] mx-auto object-contain rounded-2xl shadow-2xl"
+                                    class="max-w-full max-h-[75vh] mx-auto object-contain rounded-2xl shadow-2xl bg-black/50"
                                     @click.stop
                                 >
                             </div>
@@ -110,11 +127,14 @@
                         {{-- Caption --}}
                         <div 
                             class="mt-6 text-center text-white"
-                            x-transition:enter="transition ease-out duration-500 delay-200"
-                            x-transition:enter-start="opacity-0 translate-y-4"
-                            x-transition:enter-end="opacity-100 translate-y-0"
                         >
-                            <h3 class="text-xl font-bold mb-1" x-text="previewItem.title"></h3>
+                            <h3 
+                                class="text-xl font-bold mb-1" 
+                                x-text="previewItem.title"
+                                x-transition:enter="transition ease-out duration-500 delay-100"
+                                x-transition:enter-start="opacity-0 translate-y-2"
+                                x-transition:enter-end="opacity-100 translate-y-0"
+                            ></h3>
                             <p class="text-sm text-white/60" x-text="previewItem.album || ''"></p>
                             <template x-if="previewItem.description">
                                 <p class="text-sm text-white/50 mt-2 max-w-2xl mx-auto" x-text="previewItem.description"></p>

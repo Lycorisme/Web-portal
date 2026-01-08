@@ -17,6 +17,7 @@ function galleryApp() {
         showPreviewModal: false,
         previewItem: null,
         previewCurrentIndex: 0,
+        previewDirection: 'next',
         formMode: 'create',
         formData: {
             id: null,
@@ -84,9 +85,7 @@ function galleryApp() {
 
         async fetchGalleries() {
             this.loading = true;
-            this.selectedIds = [];
-            this.selectAll = false;
-
+            
             try {
                 const params = new URLSearchParams({
                     page: this.meta.current_page,
@@ -113,6 +112,21 @@ function galleryApp() {
             this.showTrash = !this.showTrash;
             this.activeMenuItem = null;
             this.applyFilters();
+        },
+
+        toggleSelection(id) {
+            if (this.selectedIds.includes(id)) {
+                this.selectedIds = this.selectedIds.filter(itemId => itemId !== id);
+                this.selectAll = false;
+            } else {
+                this.selectedIds.push(id);
+                // Check if all items are selected
+                const shownIds = this.galleries.map(g => g.id);
+                const allSelected = shownIds.every(sid => this.selectedIds.includes(sid));
+                if (allSelected && shownIds.length > 0) {
+                    this.selectAll = true;
+                }
+            }
         },
 
         // Menu Logic
@@ -157,33 +171,46 @@ function galleryApp() {
         openPreview(item) {
             this.previewItem = item;
             this.previewCurrentIndex = this.galleries.findIndex(g => g.id === item.id);
+            this.previewDirection = 'next';
             this.showPreviewModal = true;
             this.$nextTick(() => lucide.createIcons());
         },
 
         closePreview() {
             this.showPreviewModal = false;
-            this.previewItem = null;
+            setTimeout(() => {
+                this.previewItem = null;
+            }, 300);
         },
 
         prevPreview() {
+            this.previewDirection = 'prev';
             if (this.previewCurrentIndex > 0) {
                 this.previewCurrentIndex--;
             } else {
                 this.previewCurrentIndex = this.galleries.length - 1;
             }
-            this.previewItem = this.galleries[this.previewCurrentIndex];
-            this.$nextTick(() => lucide.createIcons());
+            // Trigger reactivity by setting previewItem after direction is set
+            this.previewItem = null; 
+            this.$nextTick(() => {
+                this.previewItem = this.galleries[this.previewCurrentIndex];
+                this.$nextTick(() => lucide.createIcons());
+            });
         },
 
         nextPreview() {
+            this.previewDirection = 'next';
             if (this.previewCurrentIndex < this.galleries.length - 1) {
                 this.previewCurrentIndex++;
             } else {
                 this.previewCurrentIndex = 0;
             }
-            this.previewItem = this.galleries[this.previewCurrentIndex];
-            this.$nextTick(() => lucide.createIcons());
+             // Trigger reactivity by setting previewItem after direction is set
+            this.previewItem = null;
+            this.$nextTick(() => {
+                this.previewItem = this.galleries[this.previewCurrentIndex];
+                this.$nextTick(() => lucide.createIcons());
+            });
         },
 
         getYoutubeId(url) {
