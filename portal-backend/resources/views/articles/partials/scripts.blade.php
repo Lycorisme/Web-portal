@@ -4,6 +4,7 @@ function articleApp() {
         // State
         articles: [],
         categories: @json($categories ?? []),
+        tags: @json($tags ?? []),
         loading: false,
         
         // Menu State
@@ -25,6 +26,7 @@ function articleApp() {
             thumbnail: null,
             thumbnail_url: '',
             category_id: '',
+            tag_ids: [],
             read_time: null,
             status: 'draft',
             meta_title: '',
@@ -107,6 +109,7 @@ function articleApp() {
         // ========================================
         init() {
             this.fetchArticles();
+            this.fetchTags();
             
             // Close menu when clicking outside
             document.addEventListener('click', (e) => {
@@ -146,6 +149,18 @@ function articleApp() {
             this.$watch('showActivityModal', value => {
                 document.body.classList.toggle('overflow-hidden', value);
             });
+        },
+
+        async fetchTags() {
+            try {
+                const response = await fetch(`{{ route('tags.data') }}?per_page=100&is_active=1`);
+                const result = await response.json();
+                if (result.success) {
+                    this.tags = result.data;
+                }
+            } catch (error) {
+                console.error('Error fetching tags:', error);
+            }
         },
 
         async fetchArticles() {

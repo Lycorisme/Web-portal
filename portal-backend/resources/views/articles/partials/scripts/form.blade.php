@@ -12,6 +12,7 @@ openCreateModal() {
         thumbnail: null,
         thumbnail_url: '',
         category_id: '',
+        tag_ids: [],
         read_time: null,
         status: 'draft',
         meta_title: '',
@@ -62,6 +63,7 @@ openEditModal(article) {
         thumbnail: null, // Reset file input
         thumbnail_url: article.thumbnail || '', // Existing URL
         category_id: article.category_id ? String(article.category_id) : '', // Ensure string for select
+        tag_ids: Array.isArray(article.tag_ids) ? article.tag_ids.map(id => String(id)) : [], // Ensure array of strings
         read_time: article.read_time || null,
         status: article.status || 'draft',
         meta_title: article.meta_title || '',
@@ -112,6 +114,7 @@ closeFormModal() {
         thumbnail: null,
         thumbnail_url: '',
         category_id: '',
+        tag_ids: [],
         read_time: null,
         status: 'draft',
         meta_title: '',
@@ -184,6 +187,13 @@ async submitForm() {
         if (this.formData.published_at) formDataStart.append('published_at', this.formData.published_at);
         formDataStart.append('is_pinned', this.formData.is_pinned ? 1 : 0);
         formDataStart.append('is_headline', this.formData.is_headline ? 1 : 0);
+
+        // Handle Tags
+        if (this.formData.tag_ids && this.formData.tag_ids.length > 0) {
+            this.formData.tag_ids.forEach(id => {
+                formDataStart.append('tag_ids[]', id);
+            });
+        }
 
         // Handle Thumbnail File
         if (this.formData.thumbnail instanceof File) {

@@ -17,7 +17,8 @@ class ArticleController extends Controller
     public function index(Request $request)
     {
         $categories = Category::active()->ordered()->get();
-        return view('articles.index', compact('categories'));
+        $tags = \App\Models\Tag::where('is_active', true)->orderBy('name')->get();
+        return view('articles.index', compact('categories', 'tags'));
     }
 
     /**
@@ -25,7 +26,7 @@ class ArticleController extends Controller
      */
     public function getData(Request $request): JsonResponse
     {
-        $query = Article::with(['author', 'categoryRelation']);
+        $query = Article::with(['author', 'categoryRelation', 'tags']);
 
         // Handle status filter (active vs trash)
         if ($request->status === 'trash') {
@@ -82,6 +83,7 @@ class ArticleController extends Controller
                 'meta_title' => $article->meta_title,
                 'meta_description' => $article->meta_description,
                 'meta_keywords' => $article->meta_keywords,
+                'tag_ids' => $article->tags->pluck('id')->toArray(),
                 'published_at' => $article->published_at?->format('d M Y H:i'),
                 'created_at' => $article->created_at->format('d M Y H:i'),
                 'created_at_human' => $article->created_at->diffForHumans(),
@@ -148,7 +150,7 @@ class ArticleController extends Controller
      */
     public function show(Article $article): JsonResponse
     {
-        $article->load(['author', 'categoryRelation']);
+        $article->load(['author', 'categoryRelation', 'tags']);
 
         return response()->json([
             'success' => true,
@@ -172,6 +174,7 @@ class ArticleController extends Controller
                 'meta_title' => $article->meta_title,
                 'meta_description' => $article->meta_description,
                 'meta_keywords' => $article->meta_keywords,
+                'tag_ids' => $article->tags->pluck('id')->toArray(),
                 'published_at' => $article->published_at?->format('d M Y H:i'),
                 'created_at' => $article->created_at->format('d M Y H:i'),
                 'updated_at' => $article->updated_at->format('d M Y H:i'),
@@ -191,6 +194,8 @@ class ArticleController extends Controller
             'content' => 'nullable|string',
             'thumbnail' => 'nullable|image|max:2048', // Max 2MB, image file
             'category_id' => 'nullable|exists:categories,id',
+            'tag_ids' => 'nullable|array',
+            'tag_ids.*' => 'exists:tags,id',
             'read_time' => 'nullable|integer|min:1',
             'status' => 'required|in:draft,pending,published,rejected',
             'meta_title' => 'nullable|string|max:255',
@@ -249,6 +254,11 @@ class ArticleController extends Controller
 
             $article = Article::create($data);
 
+            // Sync tags
+            if ($request->has('tag_ids')) {
+                $article->tags()->sync($request->tag_ids);
+            }
+
             ActivityLog::log(
                 ActivityLog::ACTION_CREATE,
                 "Membuat berita baru: {$article->title}",
@@ -261,7 +271,7 @@ class ArticleController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Berita berhasil ditambahkan.',
-                'data' => $article,
+                'data' => $article->load('tags'),
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -283,6 +293,8 @@ class ArticleController extends Controller
             'content' => 'nullable|string',
             'thumbnail' => 'nullable', // Allow string (existing URL) or file
             'category_id' => 'nullable|exists:categories,id',
+            'tag_ids' => 'nullable|array',
+            'tag_ids.*' => 'exists:tags,id',
             'read_time' => 'nullable|integer|min:1',
             'status' => 'required|in:draft,pending,published,rejected',
             'meta_title' => 'nullable|string|max:255',
@@ -342,6 +354,12 @@ class ArticleController extends Controller
 
             $oldValues = $article->getOriginal();
             $article->update($data);
+
+            // Sync tags
+            if ($request->has('tag_ids')) {
+                $article->tags()->sync($request->tag_ids);
+            }
+
             $newValues = $article->getChanges();
 
             ActivityLog::log(
@@ -356,7 +374,7 @@ class ArticleController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Berita berhasil diperbarui.',
-                'data' => $article->fresh(),
+                'data' => $article->fresh(['tags']),
             ]);
         } catch (\Exception $e) {
             return response()->json([

@@ -22,6 +22,60 @@
                     </div>
                 </div>
             </div>
+
+            <div class="bg-surface-50 dark:bg-surface-800/50 p-6 rounded-2xl border border-surface-100 dark:border-surface-700">
+                <h5 class="text-sm font-bold text-surface-900 dark:text-white mb-4 flex items-center gap-2">
+                    <i data-lucide="hash" class="w-4 h-4"></i> Label & Tags
+                </h5>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium text-surface-500 mb-1.5">Tags (Opsional)</label>
+                        <div class="relative" x-data="{ open: false, search: '' }">
+                            <div class="flex flex-wrap gap-2 p-2 min-h-[46px] bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-xl focus-within:ring-2 focus-within:ring-theme-500 focus-within:border-theme-500 transition-all cursor-text" @click="$refs.tagSearch.focus(); open = true">
+                                <template x-for="tagId in formData.tag_ids" :key="tagId">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-theme-50 dark:bg-theme-900/30 text-theme-600 dark:text-theme-400 text-xs font-semibold rounded-lg border border-theme-100 dark:border-theme-900/50">
+                                        <span x-text="tags.find(t => t.id == tagId)?.name"></span>
+                                        <button type="button" @click.stop="formData.tag_ids = formData.tag_ids.filter(id => id != tagId)" class="hover:text-theme-800">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                        </button>
+                                    </span>
+                                </template>
+                                <input 
+                                    x-ref="tagSearch"
+                                    x-model="search"
+                                    @focus="open = true"
+                                    @keydown.backspace="if (search === '' && formData.tag_ids.length > 0) formData.tag_ids.pop()"
+                                    @click.away="open = false"
+                                    type="text" 
+                                    placeholder="Cari tag..." 
+                                    class="flex-1 min-w-[120px] bg-transparent border-none focus:ring-0 p-1 text-sm dark:text-white"
+                                >
+                            </div>
+
+                            <div x-show="open && tags.filter(t => t.name.toLowerCase().includes(search.toLowerCase()) && !formData.tag_ids.includes(String(t.id))).length > 0" 
+                                 class="absolute z-50 w-full mt-2 bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-xl shadow-xl max-h-48 overflow-y-auto"
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="opacity-0 translate-y-2"
+                                 x-transition:enter-end="opacity-100 translate-y-0"
+                                 x-cloak>
+                                <div class="p-2 space-y-1">
+                                    <template x-for="tag in tags.filter(t => t.name.toLowerCase().includes(search.toLowerCase()) && !formData.tag_ids.includes(String(t.id)))" :key="tag.id">
+                                        <button 
+                                            type="button"
+                                            @click="formData.tag_ids.push(String(tag.id)); search = '';"
+                                            class="w-full flex items-center px-3 py-2 text-sm text-left hover:bg-surface-100 dark:hover:bg-surface-700 rounded-lg transition-colors group dark:text-white"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 text-surface-400 group-hover:text-theme-500"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                                            <span x-text="tag.name"></span>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="mt-2 text-[10px] text-surface-400">Pilih beberapa tag yang relevan dengan isi berita.</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="space-y-6">
