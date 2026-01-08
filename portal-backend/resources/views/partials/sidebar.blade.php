@@ -144,8 +144,8 @@
             <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Profil Saya</span>
         </a>
 
-        <a href="#"
-            class="flex items-center rounded-xl transition-all duration-200 group text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50"
+        <a href="{{ route('users') }}" wire:navigate
+            class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('users*') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
             :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
             :title="!sidebarOpen ? 'Kelola User' : ''">
             <i data-lucide="users" class="w-5 h-5 flex-shrink-0"></i>

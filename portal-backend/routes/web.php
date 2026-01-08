@@ -11,6 +11,7 @@ use App\Http\Controllers\ArticleInteractionController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\GalleryController;
+use App\Http\Controllers\UserController;
 
 // =============================================
 // Authentication Routes (Guest Only)
@@ -132,4 +133,18 @@ Route::middleware('auth')->group(function () {
     Route::delete('/galleries/{id}/force', [GalleryController::class, 'forceDelete'])->name('galleries.force-delete');
     Route::post('/galleries/{gallery}/toggle-published', [GalleryController::class, 'togglePublished'])->name('galleries.toggle-published');
     Route::post('/galleries/{gallery}/toggle-featured', [GalleryController::class, 'toggleFeatured'])->name('galleries.toggle-featured');
+
+    // User Management Routes
+    Route::get('/users', [UserController::class, 'index'])->name('users');
+    Route::get('/users/data', [UserController::class, 'getData'])->name('users.data');
+    Route::post('/users', [UserController::class, 'store'])->name('users.store');
+    Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
+    Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+    Route::delete('/users/bulk', [UserController::class, 'bulkDestroy'])->name('users.bulk-destroy');
+    Route::post('/users/bulk-restore', [UserController::class, 'bulkRestore'])->name('users.bulk-restore');
+    Route::delete('/users/bulk-force', [UserController::class, 'bulkForceDelete'])->name('users.bulk-force-delete');
+    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+    Route::post('/users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
+    Route::delete('/users/{id}/force', [UserController::class, 'forceDelete'])->name('users.force-delete');
+    Route::post('/users/{user}/unlock', [UserController::class, 'unlock'])->name('users.unlock');
 });
