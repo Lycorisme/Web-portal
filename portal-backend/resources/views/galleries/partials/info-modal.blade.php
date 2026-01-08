@@ -23,6 +23,9 @@
     <div 
         class="relative w-full h-[85vh] sm:h-full max-h-full flex flex-col pointer-events-auto bg-surface-900/95 sm:bg-black/80 backdrop-blur-2xl sm:rounded-3xl border-t sm:border border-white/10 shadow-2xl overflow-hidden"
         @click.stop
+        @wheel.stop
+        @touchstart.stop
+        @touchend.stop
     >
         {{-- Decorative Elements --}}
         <div class="absolute top-0 right-0 -mt-20 -mr-20 w-80 h-80 bg-theme-500/20 rounded-full blur-[100px] pointer-events-none"></div>
