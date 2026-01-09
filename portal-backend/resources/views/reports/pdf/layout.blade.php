@@ -77,31 +77,65 @@
             padding: 3px 0;
         }
 
-        /* TTD Styles - Diadaptasi dari Laporan Disposisi */
+        /* TTD Styles - Enhanced for Mandatum Standards */
         .ttd-wrapper {
             width: 100%;
-            margin-top: 20px;
+            margin-top: 30px;
         }
         .ttd-table {
             width: 100%;
             border: none;
         }
-        .ttd-table td { border: none; }
+        .ttd-table td { border: none; vertical-align: top; }
         .ttd-box {
-            width: 40%;
+            width: 45%;
             text-align: center;
+            position: relative;
+        }
+        .ttd-image-container {
+            position: relative;
+            height: 90px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 5px 0;
         }
         .ttd-image {
-            height: 70px;
-            margin: 5px auto;
-            display: block;
+            height: 80px;
+            z-index: 10;
+            position: relative;
+        }
+        .ttd-stamp {
+            height: 90px;
+            position: absolute;
+            left: 20px; /* Adjust based on visualization */
+            top: 0;
+            z-index: 5;
+            opacity: 0.8;
+            transform: rotate(-10deg); /* Slight rotation for realism */
         }
         .ttd-spacer {
-            height: 70px;
+            height: 90px;
+        }
+        .ttd-jabatan {
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 5px;
         }
         .ttd-nama {
             font-weight: bold;
             text-decoration: underline;
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
+        .tembusan {
+            font-size: 8pt;
+            text-align: left;
+            margin-top: 50px; /* Push to bottom if needed, or align visually */
+        }
+        .tembusan u {
+            font-weight: bold;
         }
     </style>
 </head>
@@ -167,18 +201,32 @@
     <div class="ttd-wrapper">
         <table class="ttd-table">
             <tr>
-                <td style="width: 60%;"></td>
+                <td style="width: 55%; vertical-align: bottom;">
+                    @if(!empty($settings['signature_cc']))
+                        <div class="tembusan">
+                            <u>Tembusan:</u>
+                            <div>{!! nl2br(e($settings['signature_cc'])) !!}</div>
+                        </div>
+                    @endif
+                </td>
                 <td class="ttd-box">
                     <p>
                         {{ $settings['letterhead_city'] ?? $settings['site_city'] ?? 'Kota' }}, {{ date('d F Y') }}
                     </p>
-                    <p>{{ $settings['leader_title'] ?? 'Pimpinan' }}</p> 
+                    <div class="ttd-jabatan">{{ $settings['leader_title'] ?? 'PIMPINAN' }}</div>
                     
-                    @if(!empty($settings['signature_url']))
-                        <img src="{{ public_path($settings['signature_url']) }}" class="ttd-image" alt="TTD">
-                    @else
-                        <div class="ttd-spacer"></div>
-                    @endif
+                    <div class="ttd-image-container">
+                        @if(!empty($settings['stamp_url']))
+                             {{-- Stempel posisi absolute relative terhadap container --}}
+                            <img src="{{ public_path($settings['stamp_url']) }}" class="ttd-stamp" alt="Stempel">
+                        @endif
+
+                        @if(!empty($settings['signature_url']))
+                            <img src="{{ public_path($settings['signature_url']) }}" class="ttd-image" alt="TTD">
+                        @else
+                            <div class="ttd-spacer"></div>
+                        @endif
+                    </div>
                     
                     <div class="ttd-nama">
                         {{ $settings['leader_name'] ?? '(................................)' }}

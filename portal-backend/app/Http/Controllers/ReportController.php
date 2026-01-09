@@ -64,6 +64,7 @@ class ReportController extends Controller
             'leader_name' => SiteSetting::get('leader_name', ''),
             'leader_title' => SiteSetting::get('leader_title', ''),
             'leader_nip' => SiteSetting::get('leader_nip', ''),
+            'signature_cc' => SiteSetting::get('signature_cc', ''),
 
             // Print Info
             'printed_by' => auth()->user()->name ?? 'System',

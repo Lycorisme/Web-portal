@@ -22,6 +22,7 @@ class SettingsController extends Controller
             'security' => SiteSetting::getByGroup('security'),
             'media' => SiteSetting::getByGroup('media'),
             'letterhead' => SiteSetting::getByGroup('letterhead'),
+            'signature' => SiteSetting::getByGroup('signature'),
         ];
 
         // Get raw settings for easy access

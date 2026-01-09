@@ -141,6 +141,13 @@
                     <span>Kop Surat</span>
                 </button>
 
+                <button @click="activeTab = 'signature'"
+                    :class="activeTab === 'signature' ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/30' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800'"
+                    class="flex-shrink-0 sm:flex-1 flex items-center justify-center gap-2 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl font-medium transition-all duration-200 text-sm whitespace-nowrap">
+                    <i data-lucide="pen-tool" class="w-4 h-4"></i>
+                    <span>Mandatum</span>
+                </button>
+
                 <button @click="activeTab = 'security'"
                     :class="activeTab === 'security' ? 'bg-gradient-to-r from-surface-800 to-surface-900 text-white shadow-lg shadow-surface-800/30' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800'"
                     class="flex-shrink-0 sm:flex-1 flex items-center justify-center gap-2 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl font-medium transition-all duration-200 text-sm whitespace-nowrap">
@@ -171,6 +178,8 @@
 
             {{-- Letterhead (Kop Surat) Settings Tab --}}
             @include('settings.partials.letterhead')
+            {{-- Mandatum (Signature) Settings Tab --}}
+            @include('settings.partials.signature')
 
             {{-- Security Settings Tab --}}
             @include('settings.partials.security')
