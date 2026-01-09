@@ -141,14 +141,35 @@
             <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Activity Log</span>
         </a>
 
-        <a href="#"
-            class="flex items-center rounded-xl transition-all duration-200 group text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50"
+        <a href="{{ route('blocked-clients') }}" wire:navigate
+            class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('blocked-clients*') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
             :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
-            :title="!sidebarOpen ? 'IP Terblokir' : ''">
-            <i data-lucide="shield-ban" class="w-5 h-5 flex-shrink-0"></i>
+            :title="!sidebarOpen ? 'IP Terblokir' : ''"
+            x-data="{
+                blockedCount: 0,
+                async fetchBlockedCount() {
+                    try {
+                        const response = await fetch('{{ route('blocked-clients.count') }}');
+                        const data = await response.json();
+                        this.blockedCount = data.count || 0;
+                    } catch (e) {
+                        console.error('Failed to fetch blocked count:', e);
+                    }
+                }
+            }"
+            x-init="fetchBlockedCount()">
+            <div class="relative">
+                <i data-lucide="shield-ban" class="w-5 h-5 flex-shrink-0"></i>
+                {{-- Dot indicator when sidebar collapsed --}}
+                <span x-show="!sidebarOpen && blockedCount > 0" x-cloak
+                    class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border border-white dark:border-surface-900 animate-pulse"></span>
+            </div>
             <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">IP Terblokir</span>
-            <span x-show="sidebarOpen" x-cloak
-                class="ml-auto bg-accent-amber/20 text-accent-amber text-xs font-semibold px-2 py-0.5 rounded-full">2</span>
+            {{-- Badge with count when sidebar expanded --}}
+            <span x-show="sidebarOpen && blockedCount > 0" x-cloak
+                class="ml-auto bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400 text-xs font-bold px-2 py-0.5 rounded-full shadow-sm"
+                x-text="blockedCount">
+            </span>
         </a>
 
         <div class="my-3 border-t border-surface-200/50 dark:border-surface-800/50 mx-2"></div>

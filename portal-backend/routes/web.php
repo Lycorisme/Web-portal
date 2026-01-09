@@ -13,6 +13,7 @@ use App\Http\Controllers\TagController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\TrashController;
+use App\Http\Controllers\BlockedClientController;
 
 // =============================================
 // Authentication Routes (Guest Only)
@@ -167,5 +168,18 @@ Route::middleware('auth')->group(function () {
         Route::post('/users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
         Route::delete('/users/{id}/force', [UserController::class, 'forceDelete'])->name('users.force-delete');
         Route::post('/users/{user}/unlock', [UserController::class, 'unlock'])->name('users.unlock');
+
+        // Blocked Clients (IP Block) Routes
+        Route::get('/blocked-clients', [BlockedClientController::class, 'index'])->name('blocked-clients');
+        Route::get('/blocked-clients/count', [BlockedClientController::class, 'getCount'])->name('blocked-clients.count');
+        Route::get('/blocked-clients/data', [BlockedClientController::class, 'getData'])->name('blocked-clients.data');
+        Route::post('/blocked-clients', [BlockedClientController::class, 'store'])->name('blocked-clients.store');
+        Route::get('/blocked-clients/{blockedClient}', [BlockedClientController::class, 'show'])->name('blocked-clients.show');
+        Route::put('/blocked-clients/{blockedClient}', [BlockedClientController::class, 'update'])->name('blocked-clients.update');
+        Route::delete('/blocked-clients/{blockedClient}', [BlockedClientController::class, 'destroy'])->name('blocked-clients.destroy');
+        Route::post('/blocked-clients/{blockedClient}/unblock', [BlockedClientController::class, 'unblock'])->name('blocked-clients.unblock');
+        Route::post('/blocked-clients/bulk-unblock', [BlockedClientController::class, 'bulkUnblock'])->name('blocked-clients.bulk-unblock');
+        Route::delete('/blocked-clients/bulk', [BlockedClientController::class, 'bulkDestroy'])->name('blocked-clients.bulk-destroy');
+        Route::post('/blocked-clients/clear-expired', [BlockedClientController::class, 'clearExpired'])->name('blocked-clients.clear-expired');
     });
 });
