@@ -17,8 +17,8 @@ class ProfileController extends Controller
      */
     public function index()
     {
-        // For demo, get first user or create dummy data
-        $user = User::first() ?? $this->getDemoUser();
+        // Get currently authenticated user
+        $user = auth()->user();
         
         // Get recent activities for this user
         $recentActivities = ActivityLog::where('user_id', $user->id ?? 1)
@@ -44,7 +44,7 @@ class ProfileController extends Controller
      */
     public function updateInfo(Request $request)
     {
-        $user = User::first();
+        $user = auth()->user();
         
         if (!$user) {
             return response()->json([
@@ -92,7 +92,7 @@ class ProfileController extends Controller
      */
     public function updatePhoto(Request $request)
     {
-        $user = User::first();
+        $user = auth()->user();
         
         if (!$user) {
             return response()->json([
@@ -134,7 +134,7 @@ class ProfileController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Foto profil berhasil diperbarui!',
-                'photo_url' => $user->profile_photo
+                'photo_url' => $user->avatar
             ]);
         }
 
@@ -146,7 +146,7 @@ class ProfileController extends Controller
      */
     public function deletePhoto(Request $request = null)
     {
-        $user = User::first();
+        $user = auth()->user();
         
         if (!$user) {
             if ($request && ($request->ajax() || $request->wantsJson())) {
@@ -190,7 +190,7 @@ class ProfileController extends Controller
      */
     public function updatePassword(Request $request)
     {
-        $user = User::first();
+        $user = auth()->user();
         
         if (!$user) {
             return response()->json([

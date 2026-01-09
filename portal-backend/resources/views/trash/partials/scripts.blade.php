@@ -5,6 +5,7 @@ function trashApp() {
         items: [],
         loading: false,
         counts: @json($counts ?? []),
+        currentUserIsSuperAdmin: {{ auth()->user()->isSuperAdmin() ? 'true' : 'false' }},
         
         // Menu State
         activeMenuItem: null,

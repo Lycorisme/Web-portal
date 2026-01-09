@@ -44,7 +44,7 @@
         </button>
 
         {{-- Actions for Active Items --}}
-        <div x-show="activeMenuUser && !activeMenuUser.deleted_at && activeMenuUser.id !== currentUserId">
+        <div x-show="activeMenuUser && !activeMenuUser.deleted_at && activeMenuUser.id !== currentUserId && (currentUserIsSuperAdmin || activeMenuUser.role !== 'super_admin')">
             <div class="h-px bg-surface-100 dark:bg-surface-700/50 my-1 mx-2"></div>
             <button 
                 @click="deleteUser(activeMenuUser.id); closeMenu()"

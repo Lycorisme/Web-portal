@@ -202,6 +202,7 @@ class TrashController extends Controller
                     'name' => $item->name,
                     'subtitle' => $item->email,
                     'extra' => ucfirst($item->role ?? 'User'),
+                    'role_code' => $item->role,
                     'avatar' => $item->avatar_url,
                 ]);
             case 'activity_log':
@@ -297,6 +298,14 @@ class TrashController extends Controller
                 return response()->json(['success' => false, 'message' => 'Item tidak ditemukan'], 404);
             }
 
+            // Protect Super Admin from deletion
+            if ($type === 'user' && $item->role === 'super_admin' && !auth()->user()->isSuperAdmin()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak memiliki wewenang untuk menghapus permanen Super Administrator.',
+                ], 403);
+            }
+
             $itemName = $item->name ?? $item->title ?? $item->action ?? 'Item';
             
             // Force delete
@@ -390,6 +399,11 @@ class TrashController extends Controller
                 $record = $modelClass::onlyTrashed()->find($item['id']);
                 
                 if ($record) {
+                    // Protect Super Admin
+                    if ($item['type'] === 'user' && $record->role === 'super_admin' && !auth()->user()->isSuperAdmin()) {
+                        continue; // Skip protected users
+                    }
+
                     $record->forceDelete();
                     $deleted++;
                 }
@@ -420,8 +434,14 @@ class TrashController extends Controller
         try {
             if ($type === 'all') {
                 foreach ($this->modelMap as $modelClass) {
-                    $count = $modelClass::onlyTrashed()->count();
-                    $modelClass::onlyTrashed()->forceDelete();
+                    if ($type === 'user' && !auth()->user()->isSuperAdmin()) {
+                        $query = $modelClass::onlyTrashed()->where('role', '!=', 'super_admin');
+                        $count = $query->count();
+                        $query->forceDelete();
+                    } else {
+                        $count = $modelClass::onlyTrashed()->count();
+                        $modelClass::onlyTrashed()->forceDelete();
+                    }
                     $deleted += $count;
                 }
             } else {
@@ -429,8 +449,16 @@ class TrashController extends Controller
                     return response()->json(['success' => false, 'message' => 'Invalid type'], 400);
                 }
                 $modelClass = $this->modelMap[$type];
-                $deleted = $modelClass::onlyTrashed()->count();
-                $modelClass::onlyTrashed()->forceDelete();
+                
+                // Special handling for users to protect Super Admin
+                if ($type === 'user' && !auth()->user()->isSuperAdmin()) {
+                    $query = $modelClass::onlyTrashed()->where('role', '!=', 'super_admin');
+                    $deleted = $query->count();
+                    $query->forceDelete();
+                } else {
+                    $deleted = $modelClass::onlyTrashed()->count();
+                    $modelClass::onlyTrashed()->forceDelete();
+                }
             }
             
             DB::commit();

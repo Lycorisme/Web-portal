@@ -5,6 +5,7 @@ function userApp() {
         users: [],
         loading: false,
         currentUserId: {{ auth()->id() }},
+        currentUserIsSuperAdmin: {{ auth()->user()->isSuperAdmin() ? 'true' : 'false' }},
         
         // Menu State
         activeMenuUser: null,

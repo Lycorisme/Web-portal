@@ -268,6 +268,14 @@ class UserController extends Controller
                 ], 403);
             }
 
+            // Prevent deleting Super Admin by non-Super Admin
+            if ($user->isSuperAdmin() && !auth()->user()->isSuperAdmin()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak memiliki wewenang untuk menghapus Super Administrator.',
+                ], 403);
+            }
+
             $user->delete();
 
             ActivityLog::log(
@@ -306,6 +314,18 @@ class UserController extends Controller
             $ids = array_filter($request->ids, fn($id) => $id != auth()->id());
 
             $users = User::whereIn('id', $ids)->get();
+
+            // Check for Super Admin protection
+            if (!auth()->user()->isSuperAdmin()) {
+                foreach ($users as $user) {
+                    if ($user->isSuperAdmin()) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Terdapat akun Super Administrator yang tidak dapat Anda hapus.',
+                        ], 403);
+                    }
+                }
+            }
             $count = 0;
 
             foreach ($users as $user) {
@@ -377,6 +397,14 @@ class UserController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'Anda tidak dapat menghapus akun sendiri secara permanen.',
+                ], 403);
+            }
+
+            // Prevent deleting Super Admin by non-Super Admin
+            if ($user->isSuperAdmin() && !auth()->user()->isSuperAdmin()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak memiliki wewenang untuk menghapus permanen Super Administrator.',
                 ], 403);
             }
 
@@ -463,6 +491,18 @@ class UserController extends Controller
             $ids = array_filter($request->ids, fn($id) => $id != auth()->id());
 
             $users = User::withTrashed()->whereIn('id', $ids)->get();
+            
+            // Check for Super Admin protection
+            if (!auth()->user()->isSuperAdmin()) {
+                foreach ($users as $user) {
+                    if ($user->isSuperAdmin()) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Terdapat akun Super Administrator yang tidak dapat Anda hapus permanen.',
+                        ], 403);
+                    }
+                }
+            }
             
             foreach ($users as $user) {
                 $oldData = $user->toArray();

@@ -5,9 +5,9 @@
         <div class="relative group mb-4 sm:mb-6 cursor-pointer" @click="$refs.photoInput.click()">
             <div class="w-32 h-32 sm:w-40 sm:h-40 lg:w-48 lg:h-48 rounded-2xl sm:rounded-3xl overflow-hidden ring-4 transition-all duration-300"
                  :class="pendingPhotoFile ? 'ring-theme-500 ring-offset-2' : 'ring-surface-200 dark:ring-surface-700 group-hover:ring-theme-500'">
-                @if($user->profile_photo)
+                @if($user->avatar)
                     <img id="profilePhotoPreview" 
-                         src="{{ $user->profile_photo }}" 
+                         src="{{ $user->avatar }}" 
                          alt="{{ $user->name }}" 
                          class="w-full h-full object-cover">
                 @else
@@ -17,6 +17,7 @@
                         </span>
                     </div>
                 @endif
+
                 
                 {{-- Overlay on Hover --}}
                 <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
