@@ -9,17 +9,31 @@
         date: '{{ date('d F Y') }}',
         
         // Helper untuk preview gambar
-        previewImage(event, targetRef) {
+        previewImage(event, targetRef, urlProperty) {
             const file = event.target.files[0];
             if (file) {
+                // Update URL for local preview
+                if (urlProperty) {
+                    this[urlProperty] = URL.createObjectURL(file);
+                }
+
+                // Update Ref for side preview (legacy support)
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    this.$refs[targetRef].src = e.target.result;
-                    this.$refs[targetRef].style.display = 'block';
+                    if (this.$refs[targetRef]) {
+                        this.$refs[targetRef].src = e.target.result;
+                        this.$refs[targetRef].style.display = 'block';
+                    }
                 };
                 reader.readAsDataURL(file);
             }
-        }
+        },
+        
+        // State for drag & drop UI
+        isDraggingSig: false,
+        isDraggingStamp: false,
+        sigUrl: '{{ $rawSettings['signature_url'] ?? '' }}',
+        stampUrl: '{{ $rawSettings['stamp_url'] ?? '' }}'
      }"
      x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
     <div class="bg-white dark:bg-surface-900/50 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-surface-200/50 dark:border-surface-800/50 p-4 sm:p-6 lg:p-8">
@@ -105,20 +119,51 @@
                         <label class="block text-sm font-medium text-surface-700 dark:text-surface-300">
                             Tanda Tangan (PNG Transparan)
                         </label>
-                        <div class="flex items-center gap-4">
-                            <div class="w-20 h-20 rounded-lg border-2 border-dashed border-surface-300 dark:border-surface-600 flex items-center justify-center overflow-hidden bg-checkerboard">
-                                @if(!empty($rawSettings['signature_url']))
-                                    <img src="{{ asset($rawSettings['signature_url']) }}" class="w-full h-full object-contain" alt="Current Signature">
-                                @else
-                                    <i data-lucide="pen-tool" class="w-8 h-8 text-surface-400"></i>
-                                @endif
+                        <div 
+                            @dragover.prevent="isDraggingSig = true"
+                            @dragleave.prevent="isDraggingSig = false"
+                            @drop.prevent="
+                                isDraggingSig = false;
+                                const file = $event.dataTransfer.files[0];
+                                if (file) {
+                                    $refs.sigInput.files = $event.dataTransfer.files;
+                                    previewImage({ target: { files: [file] } }, 'previewSig', 'sigUrl');
+                                }
+                            "
+                            class="relative w-full h-40 rounded-2xl border-2 border-dashed transition-all duration-300 ease-out overflow-hidden group"
+                            :class="isDraggingSig 
+                                ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/10 scale-[1.02] shadow-xl ring-4 ring-emerald-500/10' 
+                                : 'border-surface-300 dark:border-surface-700 bg-surface-50 dark:bg-surface-800/50 hover:border-emerald-400 hover:bg-surface-100 dark:hover:bg-surface-800'"
+                        >
+                            <input 
+                                type="file" 
+                                name="signature_url" 
+                                id="signature_url"
+                                x-ref="sigInput"
+                                accept="image/*"
+                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                @change="previewImage($event, 'previewSig', 'sigUrl')"
+                            >
+                            <input type="hidden" name="signature_url_current" value="{{ $rawSettings['signature_url'] ?? '' }}">
+
+                            {{-- Empty State --}}
+                            <div x-show="!sigUrl" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none transition-transform duration-300" :class="isDraggingSig ? 'scale-110' : 'scale-100'">
+                                <div class="p-3 bg-white dark:bg-surface-700 rounded-xl shadow-sm mb-3 group-hover:scale-110 transition-transform duration-300">
+                                    <i data-lucide="pen-tool" class="w-8 h-8 text-surface-400 group-hover:text-emerald-500 transition-colors"></i>
+                                </div>
+                                <p class="text-sm font-medium text-surface-600 dark:text-surface-300">Klik atau Drop Tanda Tangan</p>
+                                <p class="text-xs text-surface-400 mt-1">PNG Transparan (Max 2MB)</p>
                             </div>
-                            <div class="flex-1">
-                                <input type="file" name="signature_url" id="signature_url" accept="image/*"
-                                    @change="previewImage($event, 'previewSig')"
-                                    class="block w-full text-sm text-surface-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 dark:file:bg-emerald-900/30 dark:file:text-emerald-400">
-                                <p class="mt-1 text-xs text-surface-500">Upload scan tanda tangan atau QR Code TTE (Max: 2MB)</p>
-                                <input type="hidden" name="signature_url_current" value="{{ $rawSettings['signature_url'] ?? '' }}">
+
+                            {{-- Preview --}}
+                            <div x-show="sigUrl" class="absolute inset-0 w-full h-full p-4 flex items-center justify-center bg-surface-100 dark:bg-surface-800">
+                                <img :src="sigUrl" class="max-w-full max-h-full object-contain drop-shadow-sm transition-transform duration-500 group-hover:scale-105">
+                                
+                                {{-- Hover Overlay --}}
+                                <div class="absolute inset-0 bg-black/40 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center text-white z-20 pointer-events-none">
+                                    <i data-lucide="refresh-cw" class="w-8 h-8 mb-2 drop-shadow-md"></i>
+                                    <span class="text-xs font-medium bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm">Ganti Gambar</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -128,20 +173,51 @@
                         <label class="block text-sm font-medium text-surface-700 dark:text-surface-300">
                             Stempel Instansi (PNG Transparan)
                         </label>
-                        <div class="flex items-center gap-4">
-                            <div class="w-20 h-20 rounded-lg border-2 border-dashed border-surface-300 dark:border-surface-600 flex items-center justify-center overflow-hidden bg-checkerboard">
-                                @if(!empty($rawSettings['stamp_url']))
-                                    <img src="{{ asset($rawSettings['stamp_url']) }}" class="w-full h-full object-contain" alt="Current Stamp">
-                                @else
-                                    <i data-lucide="stamp" class="w-8 h-8 text-surface-400"></i>
-                                @endif
+                        <div 
+                            @dragover.prevent="isDraggingStamp = true"
+                            @dragleave.prevent="isDraggingStamp = false"
+                            @drop.prevent="
+                                isDraggingStamp = false;
+                                const file = $event.dataTransfer.files[0];
+                                if (file) {
+                                    $refs.stampInput.files = $event.dataTransfer.files;
+                                    previewImage({ target: { files: [file] } }, 'previewStamp', 'stampUrl');
+                                }
+                            "
+                            class="relative w-full h-40 rounded-2xl border-2 border-dashed transition-all duration-300 ease-out overflow-hidden group"
+                            :class="isDraggingStamp 
+                                ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/10 scale-[1.02] shadow-xl ring-4 ring-emerald-500/10' 
+                                : 'border-surface-300 dark:border-surface-700 bg-surface-50 dark:bg-surface-800/50 hover:border-emerald-400 hover:bg-surface-100 dark:hover:bg-surface-800'"
+                        >
+                            <input 
+                                type="file" 
+                                name="stamp_url" 
+                                id="stamp_url" 
+                                x-ref="stampInput"
+                                accept="image/*"
+                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                @change="previewImage($event, 'previewStamp', 'stampUrl')"
+                            >
+                            <input type="hidden" name="stamp_url_current" value="{{ $rawSettings['stamp_url'] ?? '' }}">
+
+                            {{-- Empty State --}}
+                            <div x-show="!stampUrl" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none transition-transform duration-300" :class="isDraggingStamp ? 'scale-110' : 'scale-100'">
+                                <div class="p-3 bg-white dark:bg-surface-700 rounded-xl shadow-sm mb-3 group-hover:scale-110 transition-transform duration-300">
+                                    <i data-lucide="stamp" class="w-8 h-8 text-surface-400 group-hover:text-emerald-500 transition-colors"></i>
+                                </div>
+                                <p class="text-sm font-medium text-surface-600 dark:text-surface-300">Klik atau Drop Stempel</p>
+                                <p class="text-xs text-surface-400 mt-1">PNG Transparan (Max 2MB)</p>
                             </div>
-                            <div class="flex-1">
-                                <input type="file" name="stamp_url" id="stamp_url" accept="image/*"
-                                    @change="previewImage($event, 'previewStamp')"
-                                    class="block w-full text-sm text-surface-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 dark:file:bg-emerald-900/30 dark:file:text-emerald-400">
-                                <p class="mt-1 text-xs text-surface-500">Upload scan stempel basah transparan (Max: 2MB)</p>
-                                <input type="hidden" name="stamp_url_current" value="{{ $rawSettings['stamp_url'] ?? '' }}">
+
+                            {{-- Preview --}}
+                            <div x-show="stampUrl" class="absolute inset-0 w-full h-full p-4 flex items-center justify-center bg-surface-100 dark:bg-surface-800">
+                                <img :src="stampUrl" class="max-w-full max-h-full object-contain drop-shadow-sm transition-transform duration-500 group-hover:scale-105">
+                                
+                                {{-- Hover Overlay --}}
+                                <div class="absolute inset-0 bg-black/40 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center text-white z-20 pointer-events-none">
+                                    <i data-lucide="refresh-cw" class="w-8 h-8 mb-2 drop-shadow-md"></i>
+                                    <span class="text-xs font-medium bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm">Ganti Gambar</span>
+                                </div>
                             </div>
                         </div>
                     </div>

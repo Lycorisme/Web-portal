@@ -78,46 +78,117 @@
                     Deskripsi Website
                 </label>
                 <textarea name="site_description" id="site_description" rows="4"
+                    class="w-full px-4 py-3 bg-surface-50 dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-xl text-surface-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200 resize-y"
                     placeholder="Deskripsi singkat tentang portal berita Anda...">{{ $rawSettings['site_description'] ?? '' }}</textarea>
             </div>
 
             {{-- Logo --}}
-            <div class="space-y-4">
+            <div class="space-y-4" x-data="{ isDragging: false, previewUrl: '{{ $rawSettings['logo_url'] ?? '' }}' }">
                 <label class="block text-sm font-medium text-surface-700 dark:text-surface-300">
                     Logo Utama
                 </label>
-                <div class="relative group">
-                    <div class="w-full h-40 border-2 border-dashed border-surface-300 dark:border-surface-700 rounded-2xl flex flex-col items-center justify-center bg-surface-50 dark:bg-surface-800/50 hover:border-primary-500 transition-colors cursor-pointer overflow-hidden">
-                        @if(!empty($rawSettings['logo_url']))
-                            <img src="{{ $rawSettings['logo_url'] }}" alt="Logo" class="max-h-full max-w-full object-contain p-4">
-                        @else
-                            <i data-lucide="upload-cloud" class="w-12 h-12 text-surface-400 mb-2"></i>
-                            <p class="text-sm text-surface-500">Klik untuk upload logo</p>
-                            <p class="text-xs text-surface-400">PNG, JPG, SVG (max 2MB)</p>
-                        @endif
-                    </div>
-                    <input type="file" name="logo_url" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer">
+                <div 
+                    @dragover.prevent="isDragging = true"
+                    @dragleave.prevent="isDragging = false"
+                    @drop.prevent="
+                        isDragging = false;
+                        const file = $event.dataTransfer.files[0];
+                        if (file) {
+                            $refs.logoInput.files = $event.dataTransfer.files; 
+                            previewUrl = URL.createObjectURL(file);
+                        }
+                    "
+                    class="relative w-full h-48 rounded-2xl border-2 border-dashed transition-all duration-300 ease-out overflow-hidden group"
+                    :class="isDragging 
+                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/10 scale-[1.02] shadow-xl ring-4 ring-primary-500/10' 
+                        : 'border-surface-300 dark:border-surface-700 bg-surface-50 dark:bg-surface-800/50 hover:border-primary-400 hover:bg-surface-100 dark:hover:bg-surface-800'"
+                >
+                    <input 
+                        type="file" 
+                        name="logo_url" 
+                        x-ref="logoInput"
+                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                        accept="image/*"
+                        @change="
+                            const file = $event.target.files[0];
+                            if (file) {
+                                previewUrl = URL.createObjectURL(file);
+                            }
+                        "
+                    >
                     <input type="hidden" name="logo_url_current" value="{{ $rawSettings['logo_url'] ?? '' }}">
+
+                    {{-- Empty State --}}
+                    <div x-show="!previewUrl" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none transition-transform duration-300" :class="isDragging ? 'scale-110' : 'scale-100'">
+                        <div class="p-3 bg-white dark:bg-surface-700 rounded-xl shadow-sm mb-3 group-hover:scale-110 transition-transform duration-300">
+                            <i data-lucide="upload-cloud" class="w-8 h-8 text-surface-400 group-hover:text-primary-500 transition-colors"></i>
+                        </div>
+                        <p class="text-sm font-medium text-surface-600 dark:text-surface-300">Klik atau Drop Logo</p>
+                        <p class="text-xs text-surface-400 mt-1">PNG, JPG, SVG (Max 2MB)</p>
+                    </div>
+
+                    {{-- Preview --}}
+                    <div x-show="previewUrl" class="absolute inset-0 w-full h-full p-4 flex items-center justify-center bg-surface-100 dark:bg-surface-800">
+                         <img :src="previewUrl" class="max-w-full max-h-full object-contain drop-shadow-sm transition-transform duration-500 group-hover:scale-105">
+                         
+                         {{-- Hover Overlay --}}
+                        <div class="absolute inset-0 bg-black/40 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center text-white z-20 pointer-events-none">
+                            <i data-lucide="refresh-cw" class="w-8 h-8 mb-2 drop-shadow-md"></i>
+                            <span class="text-xs font-medium bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm">Ganti Logo</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             {{-- Favicon --}}
-            <div class="space-y-4">
+            <div class="space-y-4" x-data="{ isDragging: false, previewUrl: '{{ $rawSettings['favicon_url'] ?? '' }}' }">
                 <label class="block text-sm font-medium text-surface-700 dark:text-surface-300">
                     Favicon
                 </label>
-                <div class="relative group">
-                    <div class="w-full h-40 border-2 border-dashed border-surface-300 dark:border-surface-700 rounded-2xl flex flex-col items-center justify-center bg-surface-50 dark:bg-surface-800/50 hover:border-primary-500 transition-colors cursor-pointer overflow-hidden">
-                        @if(!empty($rawSettings['favicon_url']))
-                            <img src="{{ $rawSettings['favicon_url'] }}" alt="Favicon" class="w-16 h-16 object-contain">
-                        @else
-                            <i data-lucide="bookmark" class="w-12 h-12 text-surface-400 mb-2"></i>
-                            <p class="text-sm text-surface-500">Klik untuk upload favicon</p>
-                            <p class="text-xs text-surface-400">ICO, PNG (32x32 atau 64x64)</p>
-                        @endif
-                    </div>
-                    <input type="file" name="favicon_url" accept="image/*,.ico" class="absolute inset-0 opacity-0 cursor-pointer">
+                <div 
+                    @dragover.prevent="isDragging = true"
+                    @dragleave.prevent="isDragging = false"
+                    @drop.prevent="
+                        isDragging = false;
+                        const file = $event.dataTransfer.files[0];
+                        if (file) {
+                             $refs.favInput.files = $event.dataTransfer.files;
+                             previewUrl = URL.createObjectURL(file);
+                        }
+                    "
+                    class="relative w-32 h-32 rounded-2xl border-2 border-dashed transition-all duration-300 ease-out overflow-hidden group"
+                    :class="isDragging 
+                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/10 scale-[1.02] shadow-xl ring-4 ring-primary-500/10' 
+                        : 'border-surface-300 dark:border-surface-700 bg-surface-50 dark:bg-surface-800/50 hover:border-primary-400 hover:bg-surface-100 dark:hover:bg-surface-800'"
+                >
+                    <input 
+                        type="file" 
+                        name="favicon_url" 
+                        x-ref="favInput"
+                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                        accept="image/*,.ico"
+                        @change="
+                            const file = $event.target.files[0];
+                            if (file) {
+                                previewUrl = URL.createObjectURL(file);
+                            }
+                        "
+                    >
                     <input type="hidden" name="favicon_url_current" value="{{ $rawSettings['favicon_url'] ?? '' }}">
+
+                    {{-- Empty State --}}
+                    <div x-show="!previewUrl" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center p-2">
+                        <i data-lucide="bookmark" class="w-6 h-6 text-surface-400 mb-2 group-hover:text-primary-500 transition-colors"></i>
+                        <span class="text-xs text-surface-500">Upload</span>
+                    </div>
+
+                    {{-- Preview --}}
+                    <div x-show="previewUrl" class="absolute inset-0 w-full h-full p-6 flex items-center justify-center bg-surface-100 dark:bg-surface-800">
+                         <img :src="previewUrl" class="w-16 h-16 object-contain drop-shadow-sm transition-transform duration-500 group-hover:scale-110">
+                         
+                         {{-- Overlay --}}
+                         <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-200 z-20"></div>
+                    </div>
                 </div>
             </div>
         </div>
