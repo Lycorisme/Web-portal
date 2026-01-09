@@ -86,14 +86,12 @@
         </a>
 
 
-        <a href="#"
-            class="flex items-center rounded-xl transition-all duration-200 group text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50"
+        <a href="{{ route('trash') }}" wire:navigate
+            class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('trash*') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
             :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
             :title="!sidebarOpen ? 'Tong Sampah' : ''">
             <i data-lucide="trash-2" class="w-5 h-5 flex-shrink-0"></i>
             <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Tong Sampah</span>
-            <span x-show="sidebarOpen" x-cloak
-                class="ml-auto bg-accent-rose/20 text-accent-rose text-xs font-semibold px-2 py-0.5 rounded-full">3</span>
         </a>
 
         <div class="my-3 border-t border-surface-200/50 dark:border-surface-800/50 mx-2"></div>

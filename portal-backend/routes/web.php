@@ -12,6 +12,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\TrashController;
 
 // =============================================
 // Authentication Routes (Guest Only)
@@ -147,4 +148,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
     Route::delete('/users/{id}/force', [UserController::class, 'forceDelete'])->name('users.force-delete');
     Route::post('/users/{user}/unlock', [UserController::class, 'unlock'])->name('users.unlock');
+
+    // Trash Routes
+    Route::get('/trash', [TrashController::class, 'index'])->name('trash');
+    Route::get('/trash/data', [TrashController::class, 'getData'])->name('trash.data');
+    Route::post('/trash/{type}/{id}/restore', [TrashController::class, 'restore'])->name('trash.restore');
+    Route::delete('/trash/{type}/{id}/force', [TrashController::class, 'forceDelete'])->name('trash.force-delete');
+    Route::post('/trash/bulk-restore', [TrashController::class, 'bulkRestore'])->name('trash.bulk-restore');
+    Route::delete('/trash/bulk-force', [TrashController::class, 'bulkForceDelete'])->name('trash.bulk-force-delete');
+    Route::delete('/trash/empty', [TrashController::class, 'emptyTrash'])->name('trash.empty');
 });
