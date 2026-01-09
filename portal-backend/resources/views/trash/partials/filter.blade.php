@@ -21,17 +21,17 @@
         {{-- Enhanced Search Input --}}
         <div class="flex-1 min-w-0">
             <div class="relative group">
-                <div class="absolute inset-0 bg-gradient-to-r from-rose-500/20 to-rose-600/20 rounded-2xl blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-300"></div>
+                <div class="absolute inset-0 bg-gradient-to-r from-theme-500/20 to-theme-600/20 rounded-2xl blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-300"></div>
                 <div class="relative flex items-center">
                     <div class="absolute left-3 sm:left-4 flex items-center justify-center">
-                        <i data-lucide="search" class="w-5 h-5 text-surface-400 group-focus-within:text-rose-500 transition-colors"></i>
+                        <i data-lucide="search" class="w-5 h-5 text-surface-400 group-focus-within:text-theme-500 transition-colors"></i>
                     </div>
                     <input 
                         type="text"
                         x-model="filters.search"
                         @keyup.enter="applyFilters()"
                         placeholder="Cari item..."
-                        class="w-full pl-10 sm:pl-12 pr-4 py-3 bg-surface-50 dark:bg-surface-800/80 border-2 border-surface-200 dark:border-surface-700 rounded-2xl text-sm text-surface-900 dark:text-white placeholder-surface-400 focus:ring-0 focus:border-rose-500 dark:focus:border-rose-500 transition-all duration-300 shadow-sm"
+                        class="w-full pl-10 sm:pl-12 pr-4 py-3 bg-surface-50 dark:bg-surface-800/80 border-2 border-surface-200 dark:border-surface-700 rounded-2xl text-sm text-surface-900 dark:text-white placeholder-surface-400 focus:ring-0 focus:border-theme-500 dark:focus:border-theme-500 transition-all duration-300 shadow-sm"
                     >
                     <div class="absolute right-3 flex items-center gap-1.5" x-show="filters.search" style="display: none;">
                         <button 
@@ -49,7 +49,7 @@
         <button 
             @click="emptyTrash()"
             :disabled="counts.all === 0"
-            class="flex-shrink-0 inline-flex items-center justify-center p-3 sm:px-4 sm:py-3 bg-gradient-to-r from-rose-500 to-rose-600 text-white rounded-2xl hover:from-rose-600 hover:to-rose-700 transition-all duration-300 group/empty shadow-lg shadow-rose-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="flex-shrink-0 inline-flex items-center justify-center p-3 sm:px-4 sm:py-3 bg-theme-gradient text-white rounded-2xl hover:opacity-90 transition-all duration-300 group/empty shadow-lg shadow-theme-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
             title="Kosongkan Tong Sampah"
         >
             <i data-lucide="trash-2" class="w-5 h-5 group-hover/empty:scale-110 transition-transform"></i>
@@ -60,36 +60,42 @@
     {{-- Type Filter Cards --}}
     <div class="overflow-x-auto -mx-4 sm:-mx-6 px-4 sm:px-6 pb-2 scrollbar-thin scrollbar-thumb-surface-300 dark:scrollbar-thumb-surface-600">
         <div class="flex gap-2 sm:gap-3 min-w-max">
-            {{-- All Types Card --}}
+            
+            {{-- All Types Card (TOMBOL SEMUA) --}}
             <button 
                 @click="filters.type = 'all'; applyFilters()"
-                class="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl font-medium text-sm transition-all duration-300 border whitespace-nowrap"
+                class="group flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl font-medium text-sm transition-colors duration-200 border whitespace-nowrap bg-white dark:bg-surface-800 text-surface-600 dark:text-surface-300 hover:bg-surface-50 dark:hover:bg-surface-700"
                 :class="filters.type === 'all' 
-                    ? 'bg-gradient-to-r from-rose-500 to-rose-600 text-white border-rose-600 shadow-lg shadow-rose-500/25' 
-                    : 'bg-white dark:bg-surface-800 text-surface-600 dark:text-surface-300 border-surface-200 dark:border-surface-700 hover:bg-surface-50 dark:hover:bg-surface-700 hover:border-surface-300 dark:hover:border-surface-600'"
+                    ? 'border-theme-500 shadow-md ring-1 ring-theme-500/20' 
+                    : 'border-surface-200 dark:border-surface-700'"
             >
-                <div class="w-8 h-8 rounded-lg flex items-center justify-center"
-                    :class="filters.type === 'all' ? 'bg-white/20' : 'bg-surface-100 dark:bg-surface-700'">
-                    <i data-lucide="layers" class="w-4 h-4" :class="filters.type === 'all' ? 'text-white' : 'text-surface-500 dark:text-surface-400'"></i>
+                {{-- Icon Wrapper --}}
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors duration-200 bg-theme-100 dark:bg-theme-900/30 group-hover:bg-theme-200 dark:group-hover:bg-theme-900/50">
+                    <i data-lucide="layers" class="w-4 h-4 text-theme-600 dark:text-theme-400"></i>
                 </div>
+                
+                {{-- Text Info --}}
                 <div class="flex flex-col items-start">
                     <span class="text-xs opacity-70">Semua</span>
                     <span class="font-bold" x-text="counts.all || 0"></span>
                 </div>
             </button>
 
+            {{-- Dynamic Loop Cards (TOMBOL LOOPING) --}}
             @foreach($typeLabels as $type => $label)
             <button 
                 @click="filters.type = '{{ $type }}'; applyFilters()"
-                class="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl font-medium text-sm transition-all duration-300 border whitespace-nowrap"
+                class="group flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl font-medium text-sm transition-colors duration-200 border whitespace-nowrap bg-white dark:bg-surface-800 text-surface-600 dark:text-surface-300 hover:bg-surface-50 dark:hover:bg-surface-700"
                 :class="filters.type === '{{ $type }}' 
-                    ? 'bg-gradient-to-r from-rose-500 to-rose-600 text-white border-rose-600 shadow-lg shadow-rose-500/25' 
-                    : 'bg-white dark:bg-surface-800 text-surface-600 dark:text-surface-300 border-surface-200 dark:border-surface-700 hover:bg-surface-50 dark:hover:bg-surface-700 hover:border-surface-300 dark:hover:border-surface-600'"
+                    ? 'border-theme-500 shadow-md ring-1 ring-theme-500/20' 
+                    : 'border-surface-200 dark:border-surface-700'"
             >
-                <div class="w-8 h-8 rounded-lg flex items-center justify-center"
-                    :class="filters.type === '{{ $type }}' ? 'bg-white/20' : 'bg-surface-100 dark:bg-surface-700'">
-                    <i data-lucide="{{ $typeIcons[$type] }}" class="w-4 h-4" :class="filters.type === '{{ $type }}' ? 'text-white' : 'text-surface-500 dark:text-surface-400'"></i>
+                {{-- Icon Wrapper --}}
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors duration-200 bg-theme-100 dark:bg-theme-900/30 group-hover:bg-theme-200 dark:group-hover:bg-theme-900/50">
+                    <i data-lucide="{{ $typeIcons[$type] }}" class="w-4 h-4 text-theme-600 dark:text-theme-400"></i>
                 </div>
+
+                {{-- Text Info --}}
                 <div class="flex flex-col items-start">
                     <span class="text-xs opacity-70">{{ $label }}</span>
                     <span class="font-bold" x-text="counts['{{ $type }}'] || 0"></span>

@@ -3,9 +3,9 @@
         <div class="flex items-center gap-5">
             {{-- Animated Icon Container --}}
             <div class="relative">
-                <div class="absolute inset-0 bg-gradient-to-tr from-rose-500/20 to-rose-300/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div class="absolute inset-0 bg-gradient-to-tr from-theme-500/20 to-theme-300/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <div class="relative p-3.5 bg-white dark:bg-surface-800 rounded-2xl border border-surface-200/50 dark:border-surface-700/50 shadow-lg shadow-surface-100/50 dark:shadow-surface-900/50 ring-1 ring-white/50 dark:ring-surface-700/50">
-                    <i data-lucide="trash-2" class="w-8 h-8 text-rose-600 dark:text-rose-400"></i>
+                    <i data-lucide="trash-2" class="w-8 h-8 text-theme-600 dark:text-theme-400"></i>
                 </div>
             </div>
             
@@ -19,7 +19,7 @@
                         <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
                     </a>
                     <i data-lucide="chevron-right" class="w-3 h-3 text-surface-300 dark:text-surface-600"></i>
-                    <span class="text-rose-600 dark:text-rose-400">Tong Sampah</span>
+                    <span class="text-theme-600 dark:text-theme-400">Tong Sampah</span>
                 </nav>
             </div>
         </div>

@@ -10,16 +10,16 @@
         class="fixed z-[100] bottom-4 sm:bottom-10 left-0 right-0 flex justify-center px-4 pointer-events-none"
         x-cloak
     >
-        <div class="pointer-events-auto bg-white/95 dark:bg-surface-800/95 backdrop-blur-xl border border-rose-100 dark:border-surface-600 p-3 sm:p-2 sm:pr-3 sm:pl-4 rounded-xl sm:rounded-2xl shadow-2xl shadow-rose-500/10 dark:shadow-black/50 flex flex-col sm:flex-row items-center gap-3 sm:gap-8 w-full sm:w-auto max-w-md sm:max-w-2xl ring-1 ring-rose-500/10 dark:ring-surface-500/30 transform transition-all">
+        <div class="pointer-events-auto bg-white/95 dark:bg-surface-800/95 backdrop-blur-xl border border-theme-100 dark:border-surface-600 p-3 sm:p-2 sm:pr-3 sm:pl-4 rounded-xl sm:rounded-2xl shadow-2xl shadow-theme-500/10 dark:shadow-black/50 flex flex-col sm:flex-row items-center gap-3 sm:gap-8 w-full sm:w-auto max-w-md sm:max-w-2xl ring-1 ring-theme-500/10 dark:ring-surface-500/30 transform transition-all">
             
             {{-- Selected Count --}}
             <div class="flex items-center justify-between w-full sm:w-auto gap-3">
                 <div class="flex items-center gap-3">
                     <span class="flex h-2 w-2 relative">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-theme-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-theme-500"></span>
                     </span>
-                    <span class="text-rose-600 dark:text-rose-400 font-semibold text-sm whitespace-nowrap">
+                    <span class="text-theme-600 dark:text-theme-400 font-semibold text-sm whitespace-nowrap">
                         <span x-text="selectedItems.length"></span> item dipilih
                     </span>
                 </div>

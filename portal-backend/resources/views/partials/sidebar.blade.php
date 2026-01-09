@@ -90,8 +90,20 @@
             class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('trash*') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
             :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
             :title="!sidebarOpen ? 'Tong Sampah' : ''">
-            <i data-lucide="trash-2" class="w-5 h-5 flex-shrink-0"></i>
+            <div class="relative">
+                <i data-lucide="trash-2" class="w-5 h-5 flex-shrink-0"></i>
+                @if(isset($trashedCount) && $trashedCount > 0)
+                    <span x-show="!sidebarOpen" x-cloak
+                        class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border border-white dark:border-surface-900"></span>
+                @endif
+            </div>
             <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Tong Sampah</span>
+            @if(isset($trashedCount) && $trashedCount > 0)
+                <span x-show="sidebarOpen" x-cloak
+                    class="ml-auto bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400 text-xs font-bold px-2 py-0.5 rounded-full shadow-sm">
+                    {{ $trashedCount }}
+                </span>
+            @endif
         </a>
 
         <div class="my-3 border-t border-surface-200/50 dark:border-surface-800/50 mx-2"></div>

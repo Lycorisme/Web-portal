@@ -7,7 +7,7 @@
         class="absolute inset-0 bg-white/80 dark:bg-surface-900/80 backdrop-blur-sm flex items-center justify-center z-20"
     >
         <div class="flex flex-col items-center gap-3">
-            <div class="w-10 h-10 border-4 border-rose-500/30 border-t-rose-500 rounded-full animate-spin"></div>
+            <div class="w-10 h-10 border-4 border-theme-500/30 border-t-theme-500 rounded-full animate-spin"></div>
             <span class="text-sm text-surface-600 dark:text-surface-400">Memuat data...</span>
         </div>
     </div>
@@ -22,7 +22,7 @@
                             type="checkbox"
                             x-model="selectAll"
                             @change="toggleSelectAll()"
-                            class="w-4 h-4 rounded border-surface-300 dark:border-surface-600 text-rose-600 focus:ring-rose-500"
+                            class="w-4 h-4 rounded border-surface-300 dark:border-surface-600 text-theme-600 focus:ring-theme-500"
                         >
                     </th>
                     <th class="px-4 py-3 text-left text-xs font-semibold text-surface-500 dark:text-surface-400 uppercase tracking-wider whitespace-nowrap">
@@ -44,14 +44,14 @@
             </thead>
             <tbody class="divide-y divide-surface-100 dark:divide-surface-800">
                 <template x-for="item in items" :key="item.type + '-' + item.id">
-                    <tr class="transition-colors border-b border-surface-100 dark:border-surface-800 bg-rose-50/50 hover:bg-rose-100/50 dark:bg-rose-900/10 dark:hover:bg-rose-900/20">
+                    <tr class="transition-colors border-b border-surface-100 dark:border-surface-800 bg-theme-50/50 hover:bg-theme-100/50 dark:bg-theme-900/10 dark:hover:bg-theme-900/20">
                         {{-- Checkbox --}}
                         <td class="px-4 py-3">
                             <input 
                                 type="checkbox"
                                 :value="JSON.stringify({type: item.type, id: item.id})"
                                 x-model="selectedItems"
-                                class="w-4 h-4 rounded border-surface-300 dark:border-surface-600 text-rose-600 focus:ring-rose-500"
+                                class="w-4 h-4 rounded border-surface-300 dark:border-surface-600 text-theme-600 focus:ring-theme-500"
                             >
                         </td>
 
@@ -76,8 +76,8 @@
                                 </template>
                                 {{-- Icon for others --}}
                                 <template x-if="!(item.type === 'gallery' && item.thumbnail) && !(item.type === 'user' && item.avatar)">
-                                    <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm bg-rose-100 dark:bg-rose-900/30">
-                                        <i :data-lucide="item.type_icon" class="w-5 h-5 text-rose-600 dark:text-rose-400"></i>
+                                    <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm bg-theme-100 dark:bg-theme-900/30">
+                                        <i :data-lucide="item.type_icon" class="w-5 h-5 text-theme-600 dark:text-theme-400"></i>
                                     </div>
                                 </template>
                                 <div>

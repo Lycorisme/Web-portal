@@ -46,7 +46,7 @@
                     <button 
                         @click="goToPage(page)"
                         :class="meta.current_page === page 
-                            ? 'bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow-md' 
+                            ? 'bg-theme-gradient text-white shadow-md' 
                             : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800'"
                         class="min-w-[36px] h-9 px-3 rounded-lg font-medium text-sm transition-all"
                         x-text="page"
