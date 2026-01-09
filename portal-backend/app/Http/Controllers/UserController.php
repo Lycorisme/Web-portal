@@ -121,7 +121,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|in:super_admin,admin,author',
+            'role' => 'required|in:super_admin,admin,editor,author',
             'phone' => 'nullable|string|max:20',
             'position' => 'nullable|string|max:255',
             'bio' => 'nullable|string|max:1000',
@@ -129,9 +129,18 @@ class UserController extends Controller
             'profile_photo' => 'nullable|image|max:2048',
         ]);
 
+        // Only Super Admin can create Super Admin
+        if ($request->role === 'super_admin' && !auth()->user()->isSuperAdmin()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki wewenang untuk membuat akun Super Administrator.',
+            ], 403);
+        }
+
         try {
             $data = $request->only(['name', 'email', 'role', 'phone', 'position', 'bio', 'location']);
             $data['password'] = Hash::make($request->password);
+
 
             // Handle profile photo upload
             if ($request->hasFile('profile_photo')) {
@@ -202,13 +211,29 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'password' => 'nullable|string|min:8|confirmed',
-            'role' => 'required|in:super_admin,admin,author',
+            'role' => 'required|in:super_admin,admin,editor,author',
             'phone' => 'nullable|string|max:20',
             'position' => 'nullable|string|max:255',
             'bio' => 'nullable|string|max:1000',
             'location' => 'nullable|string|max:255',
             'profile_photo' => 'nullable|image|max:2048',
         ]);
+
+        // Only Super Admin can assign/change to Super Admin role
+        if ($request->role === 'super_admin' && !auth()->user()->isSuperAdmin()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki wewenang untuk memberikan role Super Administrator.',
+            ], 403);
+        }
+
+        // Non Super Admin cannot modify Super Admin users
+        if ($user->isSuperAdmin() && !auth()->user()->isSuperAdmin()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki wewenang untuk mengubah akun Super Administrator.',
+            ], 403);
+        }
 
         try {
             $data = $request->only(['name', 'email', 'role', 'phone', 'position', 'bio', 'location']);
@@ -573,6 +598,7 @@ class UserController extends Controller
         return match ($role) {
             'super_admin' => 'Super Admin',
             'admin' => 'Admin',
+            'editor' => 'Editor',
             'author' => 'Penulis',
             default => ucfirst($role),
         };

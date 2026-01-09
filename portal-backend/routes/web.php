@@ -34,51 +34,17 @@ Route::get('/', function () {
 // Protected Routes (Auth Required)
 // =============================================
 Route::middleware('auth')->group(function () {
-    // Dashboard Routes
+    // Dashboard Routes - All authenticated users
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Settings Routes
-    Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
-    Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
-    Route::put('/settings/{group}', [SettingsController::class, 'updateGroup'])->name('settings.update.group');
-
-    // Activity Log Routes
-    Route::get('/activity-log/settings', [ActivityLogController::class, 'getSettings'])->name('activity-log.settings');
-    Route::put('/activity-log/settings', [ActivityLogController::class, 'updateSettings'])->name('activity-log.settings.update');
-    Route::get('/activity-log', [ActivityLogController::class, 'index'])->name('activity-log');
-    Route::get('/activity-log/data', [ActivityLogController::class, 'getData'])->name('activity-log.data');
-    Route::get('/activity-log/{activityLog}', [ActivityLogController::class, 'show'])->name('activity-log.show');
-    Route::delete('/activity-log/bulk', [ActivityLogController::class, 'bulkDestroy'])->name('activity-log.bulk-destroy');
-    Route::post('/activity-log/bulk-restore', [ActivityLogController::class, 'bulkRestore'])->name('activity-log.bulk-restore');
-    Route::delete('/activity-log/bulk-force', [ActivityLogController::class, 'bulkForceDelete'])->name('activity-log.bulk-force-delete');
-    Route::delete('/activity-log/{activityLog}', [ActivityLogController::class, 'destroy'])->name('activity-log.destroy');
-    Route::post('/activity-log/{id}/restore', [ActivityLogController::class, 'restore'])->name('activity-log.restore');
-    Route::delete('/activity-log/{id}/force', [ActivityLogController::class, 'forceDelete'])->name('activity-log.force-delete');
-    Route::post('/activity-log/clear-old', [ActivityLogController::class, 'clearOld'])->name('activity-log.clear-old');
-
-    // Profile Routes
+    // Profile Routes - All authenticated users
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
     Route::put('/profile/info', [ProfileController::class, 'updateInfo'])->name('profile.info.update');
     Route::post('/profile/photo', [ProfileController::class, 'updatePhoto'])->name('profile.photo.update');
     Route::delete('/profile/photo', [ProfileController::class, 'deletePhoto'])->name('profile.photo.delete');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
 
-    // Category Routes
-    Route::get('/categories', [CategoryController::class, 'index'])->name('categories');
-    Route::get('/categories/data', [CategoryController::class, 'getData'])->name('categories.data');
-    Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
-    Route::get('/categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
-    Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
-    Route::delete('/categories/bulk', [CategoryController::class, 'bulkDestroy'])->name('categories.bulk-destroy');
-    Route::post('/categories/bulk-restore', [CategoryController::class, 'bulkRestore'])->name('categories.bulk-restore');
-    Route::delete('/categories/bulk-force', [CategoryController::class, 'bulkForceDelete'])->name('categories.bulk-force-delete');
-    Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
-    Route::post('/categories/{id}/restore', [CategoryController::class, 'restore'])->name('categories.restore');
-    Route::delete('/categories/{id}/force', [CategoryController::class, 'forceDelete'])->name('categories.force-delete');
-    Route::post('/categories/{category}/toggle-active', [CategoryController::class, 'toggleActive'])->name('categories.toggle-active');
-    Route::post('/categories/update-sort', [CategoryController::class, 'updateSort'])->name('categories.update-sort');
-
-    // Article Routes
+    // Article Routes - All authenticated users (with role-based filtering in controller)
     Route::get('/articles', [ArticleController::class, 'index'])->name('articles');
     Route::get('/articles/data', [ArticleController::class, 'getData'])->name('articles.data');
     Route::post('/articles', [ArticleController::class, 'store'])->name('articles.store');
@@ -102,21 +68,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/comments/{comment}/restore', [ArticleInteractionController::class, 'restoreComment'])->name('comments.restore');
     Route::delete('/comments/{comment}/force', [ArticleInteractionController::class, 'forceDeleteComment'])->name('comments.force-delete');
 
-    // Tag Routes
-    Route::get('/tags', [TagController::class, 'index'])->name('tags');
-    Route::get('/tags/data', [TagController::class, 'getData'])->name('tags.data');
-    Route::post('/tags', [TagController::class, 'store'])->name('tags.store');
-    Route::get('/tags/{tag}', [TagController::class, 'show'])->name('tags.show');
-    Route::put('/tags/{tag}', [TagController::class, 'update'])->name('tags.update');
-    Route::delete('/tags/bulk', [TagController::class, 'bulkDestroy'])->name('tags.bulk-destroy');
-    Route::post('/tags/bulk-restore', [TagController::class, 'bulkRestore'])->name('tags.bulk-restore');
-    Route::delete('/tags/bulk-force', [TagController::class, 'bulkForceDelete'])->name('tags.bulk-force-delete');
-    Route::delete('/tags/{tag}', [TagController::class, 'destroy'])->name('tags.destroy');
-    Route::post('/tags/{id}/restore', [TagController::class, 'restore'])->name('tags.restore');
-    Route::delete('/tags/{id}/force', [TagController::class, 'forceDelete'])->name('tags.force-delete');
-    Route::post('/tags/{tag}/toggle-active', [TagController::class, 'toggleActive'])->name('tags.toggle-active');
-
-    // Gallery Routes
+    // Gallery Routes - All authenticated users
     Route::get('/galleries', [GalleryController::class, 'index'])->name('galleries');
     Route::get('/galleries/data', [GalleryController::class, 'getData'])->name('galleries.data');
     Route::get('/galleries/grouped', [GalleryController::class, 'getGroupedData'])->name('galleries.grouped');
@@ -135,21 +87,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/galleries/{gallery}/toggle-published', [GalleryController::class, 'togglePublished'])->name('galleries.toggle-published');
     Route::post('/galleries/{gallery}/toggle-featured', [GalleryController::class, 'toggleFeatured'])->name('galleries.toggle-featured');
 
-    // User Management Routes
-    Route::get('/users', [UserController::class, 'index'])->name('users');
-    Route::get('/users/data', [UserController::class, 'getData'])->name('users.data');
-    Route::post('/users', [UserController::class, 'store'])->name('users.store');
-    Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
-    Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
-    Route::delete('/users/bulk', [UserController::class, 'bulkDestroy'])->name('users.bulk-destroy');
-    Route::post('/users/bulk-restore', [UserController::class, 'bulkRestore'])->name('users.bulk-restore');
-    Route::delete('/users/bulk-force', [UserController::class, 'bulkForceDelete'])->name('users.bulk-force-delete');
-    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
-    Route::post('/users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
-    Route::delete('/users/{id}/force', [UserController::class, 'forceDelete'])->name('users.force-delete');
-    Route::post('/users/{user}/unlock', [UserController::class, 'unlock'])->name('users.unlock');
-
-    // Trash Routes
+    // Trash Routes - All authenticated users (with role-based filtering in controller)
     Route::get('/trash', [TrashController::class, 'index'])->name('trash');
     Route::get('/trash/count', [TrashController::class, 'getCount'])->name('trash.count');
     Route::get('/trash/data', [TrashController::class, 'getData'])->name('trash.data');
@@ -158,4 +96,76 @@ Route::middleware('auth')->group(function () {
     Route::post('/trash/bulk-restore', [TrashController::class, 'bulkRestore'])->name('trash.bulk-restore');
     Route::delete('/trash/bulk-force', [TrashController::class, 'bulkForceDelete'])->name('trash.bulk-force-delete');
     Route::delete('/trash/empty', [TrashController::class, 'emptyTrash'])->name('trash.empty');
+
+    // =============================================
+    // Admin & Editor Routes (super_admin, admin, editor)
+    // =============================================
+    Route::middleware('role:super_admin,admin,editor')->group(function () {
+        // Category Routes
+        Route::get('/categories', [CategoryController::class, 'index'])->name('categories');
+        Route::get('/categories/data', [CategoryController::class, 'getData'])->name('categories.data');
+        Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
+        Route::get('/categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
+        Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+        Route::delete('/categories/bulk', [CategoryController::class, 'bulkDestroy'])->name('categories.bulk-destroy');
+        Route::post('/categories/bulk-restore', [CategoryController::class, 'bulkRestore'])->name('categories.bulk-restore');
+        Route::delete('/categories/bulk-force', [CategoryController::class, 'bulkForceDelete'])->name('categories.bulk-force-delete');
+        Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+        Route::post('/categories/{id}/restore', [CategoryController::class, 'restore'])->name('categories.restore');
+        Route::delete('/categories/{id}/force', [CategoryController::class, 'forceDelete'])->name('categories.force-delete');
+        Route::post('/categories/{category}/toggle-active', [CategoryController::class, 'toggleActive'])->name('categories.toggle-active');
+        Route::post('/categories/update-sort', [CategoryController::class, 'updateSort'])->name('categories.update-sort');
+
+        // Tag Routes
+        Route::get('/tags', [TagController::class, 'index'])->name('tags');
+        Route::get('/tags/data', [TagController::class, 'getData'])->name('tags.data');
+        Route::post('/tags', [TagController::class, 'store'])->name('tags.store');
+        Route::get('/tags/{tag}', [TagController::class, 'show'])->name('tags.show');
+        Route::put('/tags/{tag}', [TagController::class, 'update'])->name('tags.update');
+        Route::delete('/tags/bulk', [TagController::class, 'bulkDestroy'])->name('tags.bulk-destroy');
+        Route::post('/tags/bulk-restore', [TagController::class, 'bulkRestore'])->name('tags.bulk-restore');
+        Route::delete('/tags/bulk-force', [TagController::class, 'bulkForceDelete'])->name('tags.bulk-force-delete');
+        Route::delete('/tags/{tag}', [TagController::class, 'destroy'])->name('tags.destroy');
+        Route::post('/tags/{id}/restore', [TagController::class, 'restore'])->name('tags.restore');
+        Route::delete('/tags/{id}/force', [TagController::class, 'forceDelete'])->name('tags.force-delete');
+        Route::post('/tags/{tag}/toggle-active', [TagController::class, 'toggleActive'])->name('tags.toggle-active');
+    });
+
+    // =============================================
+    // Admin Only Routes (super_admin, admin)
+    // =============================================
+    Route::middleware('role:super_admin,admin')->group(function () {
+        // Settings Routes
+        Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
+        Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
+        Route::put('/settings/{group}', [SettingsController::class, 'updateGroup'])->name('settings.update.group');
+
+        // Activity Log Routes
+        Route::get('/activity-log/settings', [ActivityLogController::class, 'getSettings'])->name('activity-log.settings');
+        Route::put('/activity-log/settings', [ActivityLogController::class, 'updateSettings'])->name('activity-log.settings.update');
+        Route::get('/activity-log', [ActivityLogController::class, 'index'])->name('activity-log');
+        Route::get('/activity-log/data', [ActivityLogController::class, 'getData'])->name('activity-log.data');
+        Route::get('/activity-log/{activityLog}', [ActivityLogController::class, 'show'])->name('activity-log.show');
+        Route::delete('/activity-log/bulk', [ActivityLogController::class, 'bulkDestroy'])->name('activity-log.bulk-destroy');
+        Route::post('/activity-log/bulk-restore', [ActivityLogController::class, 'bulkRestore'])->name('activity-log.bulk-restore');
+        Route::delete('/activity-log/bulk-force', [ActivityLogController::class, 'bulkForceDelete'])->name('activity-log.bulk-force-delete');
+        Route::delete('/activity-log/{activityLog}', [ActivityLogController::class, 'destroy'])->name('activity-log.destroy');
+        Route::post('/activity-log/{id}/restore', [ActivityLogController::class, 'restore'])->name('activity-log.restore');
+        Route::delete('/activity-log/{id}/force', [ActivityLogController::class, 'forceDelete'])->name('activity-log.force-delete');
+        Route::post('/activity-log/clear-old', [ActivityLogController::class, 'clearOld'])->name('activity-log.clear-old');
+
+        // User Management Routes
+        Route::get('/users', [UserController::class, 'index'])->name('users');
+        Route::get('/users/data', [UserController::class, 'getData'])->name('users.data');
+        Route::post('/users', [UserController::class, 'store'])->name('users.store');
+        Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
+        Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+        Route::delete('/users/bulk', [UserController::class, 'bulkDestroy'])->name('users.bulk-destroy');
+        Route::post('/users/bulk-restore', [UserController::class, 'bulkRestore'])->name('users.bulk-restore');
+        Route::delete('/users/bulk-force', [UserController::class, 'bulkForceDelete'])->name('users.bulk-force-delete');
+        Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+        Route::post('/users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
+        Route::delete('/users/{id}/force', [UserController::class, 'forceDelete'])->name('users.force-delete');
+        Route::post('/users/{user}/unlock', [UserController::class, 'unlock'])->name('users.unlock');
+    });
 });

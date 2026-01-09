@@ -166,6 +166,7 @@
                                 :class="formErrors.role ? 'border-rose-500' : 'border-surface-200 dark:border-surface-700'"
                             >
                                 <option value="author">Penulis</option>
+                                <option value="editor">Editor</option>
                                 <option value="admin">Admin</option>
                                 <option value="super_admin">Super Admin</option>
                             </select>

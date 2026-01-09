@@ -28,6 +28,12 @@ class ArticleController extends Controller
     {
         $query = Article::with(['author', 'categoryRelation', 'tags']);
 
+        // Author can only see their own articles
+        $user = auth()->user();
+        if ($user->isAuthor()) {
+            $query->where('author_id', $user->id);
+        }
+
         // Handle status filter (active vs trash)
         if ($request->status === 'trash') {
             $query->onlyTrashed();
@@ -238,8 +244,14 @@ class ArticleController extends Controller
                 $counter++;
             }
             
-            // Set author (placeholder - will be current user when auth is implemented)
-            $data['author_id'] = 1;
+            // Set author to current authenticated user
+            $data['author_id'] = auth()->id();
+            
+            // Author cannot publish directly - force to pending/draft
+            $user = auth()->user();
+            if ($user->isAuthor() && $data['status'] === 'published') {
+                $data['status'] = 'pending';
+            }
             
             // Set read time if not provided
             if (empty($data['read_time']) && !empty($data['content'])) {
@@ -286,6 +298,15 @@ class ArticleController extends Controller
      */
     public function update(Request $request, Article $article): JsonResponse
     {
+        // Author can only update their own articles
+        $user = auth()->user();
+        if ($user->isAuthor() && $article->author_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki akses untuk mengedit berita ini.',
+            ], 403);
+        }
+
         $request->validate([
             'title' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255|unique:articles,slug,' . $article->id,
@@ -345,6 +366,11 @@ class ArticleController extends Controller
             if (empty($data['read_time']) && !empty($data['content'])) {
                 $wordCount = str_word_count(strip_tags($data['content']));
                 $data['read_time'] = max(1, ceil($wordCount / 200));
+            }
+
+            // Author cannot publish directly - force to pending
+            if ($user->isAuthor() && $data['status'] === 'published') {
+                $data['status'] = 'pending';
             }
 
             // Set published_at
@@ -430,6 +456,15 @@ class ArticleController extends Controller
      */
     public function destroy(Article $article): JsonResponse
     {
+        // Author can only delete their own articles
+        $user = auth()->user();
+        if ($user->isAuthor() && $article->author_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki akses untuk menghapus berita ini.',
+            ], 403);
+        }
+
         try {
             $article->delete();
 
@@ -465,7 +500,15 @@ class ArticleController extends Controller
         ]);
 
         try {
-            $articles = Article::whereIn('id', $request->ids)->get();
+            $query = Article::whereIn('id', $request->ids);
+            
+            // Author can only delete their own articles
+            $user = auth()->user();
+            if ($user->isAuthor()) {
+                $query->where('author_id', $user->id);
+            }
+            
+            $articles = $query->get();
             $count = 0;
 
             foreach ($articles as $article) {
@@ -637,6 +680,25 @@ class ArticleController extends Controller
      */
     public function toggleStatus(Article $article, Request $request): JsonResponse
     {
+        // Author cannot publish articles
+        $user = auth()->user();
+        if ($user->isAuthor()) {
+            // Author can only change their own articles
+            if ($article->author_id !== $user->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak memiliki akses untuk mengubah status berita ini.',
+                ], 403);
+            }
+            // Author cannot publish directly
+            if ($request->status === 'published') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak memiliki akses untuk mempublish berita. Berita akan direview oleh Editor.',
+                ], 403);
+            }
+        }
+
         $request->validate([
             'status' => 'required|in:draft,pending,published,rejected',
         ]);

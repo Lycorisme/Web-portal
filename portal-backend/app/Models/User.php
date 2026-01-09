@@ -121,9 +121,88 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if user is an admin.
+     * Check if user is an admin (includes super_admin and editor).
      */
     public function isAdmin(): bool
+    {
+        return in_array($this->role, ['super_admin', 'admin', 'editor']);
+    }
+
+    /**
+     * Check if user is an editor.
+     */
+    public function isEditor(): bool
+    {
+        return $this->role === 'editor';
+    }
+
+    /**
+     * Check if user is an author.
+     */
+    public function isAuthor(): bool
+    {
+        return $this->role === 'author';
+    }
+
+    /**
+     * Check if user can manage content (articles, categories, galleries).
+     * Super Admin, Admin, and Editor can manage all content.
+     */
+    public function canManageContent(): bool
+    {
+        return in_array($this->role, ['super_admin', 'admin', 'editor']);
+    }
+
+    /**
+     * Check if user can manage users.
+     * Only Super Admin and Admin can manage users.
+     */
+    public function canManageUsers(): bool
+    {
+        return in_array($this->role, ['super_admin', 'admin']);
+    }
+
+    /**
+     * Check if user can access security features (Activity Log, IP Blocked).
+     * Only Super Admin and Admin can access security.
+     */
+    public function canAccessSecurity(): bool
+    {
+        return in_array($this->role, ['super_admin', 'admin']);
+    }
+
+    /**
+     * Check if user can publish articles.
+     * Authors cannot publish articles directly.
+     */
+    public function canPublishArticle(): bool
+    {
+        return in_array($this->role, ['super_admin', 'admin', 'editor']);
+    }
+
+    /**
+     * Check if user can manage categories.
+     * Authors cannot manage categories.
+     */
+    public function canManageCategories(): bool
+    {
+        return in_array($this->role, ['super_admin', 'admin', 'editor']);
+    }
+
+    /**
+     * Check if user can manage tags.
+     * Authors cannot manage tags.
+     */
+    public function canManageTags(): bool
+    {
+        return in_array($this->role, ['super_admin', 'admin', 'editor']);
+    }
+
+    /**
+     * Check if user can access settings.
+     * Only Super Admin and Admin can access settings.
+     */
+    public function canAccessSettings(): bool
     {
         return in_array($this->role, ['super_admin', 'admin']);
     }

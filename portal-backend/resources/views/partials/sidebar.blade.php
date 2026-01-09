@@ -78,6 +78,7 @@
             <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Kelola Berita</span>
         </a>
 
+        @if(auth()->user()->canManageCategories())
         <a href="{{ route('categories') }}" wire:navigate
             class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('categories*') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
             :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
@@ -85,7 +86,9 @@
             <i data-lucide="folder-tree" class="w-5 h-5 flex-shrink-0"></i>
             <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Kategori</span>
         </a>
+        @endif
 
+        @if(auth()->user()->canManageTags())
         <a href="{{ route('tags') }}" wire:navigate
             class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('tags*') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
             :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
@@ -93,6 +96,7 @@
             <i data-lucide="tags" class="w-5 h-5 flex-shrink-0"></i>
             <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Tag</span>
         </a>
+        @endif
 
         <a href="{{ route('galleries') }}" wire:navigate
             class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('galleries*') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
@@ -123,7 +127,8 @@
 
         <div class="my-3 border-t border-surface-200/50 dark:border-surface-800/50 mx-2"></div>
 
-        {{-- Keamanan --}}
+        {{-- Keamanan - Hanya untuk Super Admin dan Admin --}}
+        @if(auth()->user()->canAccessSecurity())
         <p x-show="sidebarOpen" x-cloak
             class="px-3 text-xs font-semibold text-surface-400 dark:text-surface-500 uppercase tracking-wider mb-3 transition-opacity duration-300">
             Keamanan</p>
@@ -147,12 +152,14 @@
         </a>
 
         <div class="my-3 border-t border-surface-200/50 dark:border-surface-800/50 mx-2"></div>
+        @endif
 
         {{-- Pengaturan --}}
         <p x-show="sidebarOpen" x-cloak
             class="px-3 text-xs font-semibold text-surface-400 dark:text-surface-500 uppercase tracking-wider mb-3 transition-opacity duration-300">
             Pengaturan</p>
 
+        @if(auth()->user()->canAccessSettings())
         <a href="{{ route('settings') }}" wire:navigate
             class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('settings') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
             :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
@@ -160,6 +167,7 @@
             <i data-lucide="settings" class="w-5 h-5 flex-shrink-0"></i>
             <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Pengaturan Situs</span>
         </a>
+        @endif
 
         <a href="{{ route('profile') }}" wire:navigate
             class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('profile*') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
@@ -169,6 +177,7 @@
             <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Profil Saya</span>
         </a>
 
+        @if(auth()->user()->canManageUsers())
         <a href="{{ route('users') }}" wire:navigate
             class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('users*') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
             :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
@@ -176,6 +185,7 @@
             <i data-lucide="users" class="w-5 h-5 flex-shrink-0"></i>
             <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Kelola User</span>
         </a>
+        @endif
     </nav>
 
     {{-- Sidebar Footer - Version Info --}}

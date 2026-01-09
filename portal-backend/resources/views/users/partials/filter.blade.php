@@ -70,6 +70,7 @@
                     <option value="">Semua Role</option>
                     <option value="super_admin">Super Admin</option>
                     <option value="admin">Admin</option>
+                    <option value="editor">Editor</option>
                     <option value="author">Penulis</option>
                 </select>
             </div>
