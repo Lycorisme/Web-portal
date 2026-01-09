@@ -127,12 +127,7 @@
                     <span>Tampilan</span>
                 </button>
 
-                <button @click="activeTab = 'media'"
-                    :class="activeTab === 'media' ? 'bg-gradient-to-r from-teal-500 to-accent-cyan text-white shadow-lg shadow-teal-500/30' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800'"
-                    class="flex-shrink-0 sm:flex-1 flex items-center justify-center gap-2 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl font-medium transition-all duration-200 text-sm whitespace-nowrap">
-                    <i data-lucide="image" class="w-4 h-4"></i>
-                    <span>Media</span>
-                </button>
+
 
                 <button @click="activeTab = 'letterhead'"
                     :class="activeTab === 'letterhead' ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-lg shadow-indigo-500/30' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800'"
@@ -173,8 +168,7 @@
             {{-- Appearance Settings Tab --}}
             @include('settings.partials.appearance')
 
-            {{-- Media Settings Tab --}}
-            @include('settings.partials.media')
+
 
             {{-- Letterhead (Kop Surat) Settings Tab --}}
             @include('settings.partials.letterhead')

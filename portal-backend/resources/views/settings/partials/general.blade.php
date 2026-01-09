@@ -78,8 +78,47 @@
                     Deskripsi Website
                 </label>
                 <textarea name="site_description" id="site_description" rows="4"
-                    class="w-full px-4 py-3 bg-surface-50 dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-xl text-surface-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200 resize-none"
                     placeholder="Deskripsi singkat tentang portal berita Anda...">{{ $rawSettings['site_description'] ?? '' }}</textarea>
+            </div>
+
+            {{-- Logo --}}
+            <div class="space-y-4">
+                <label class="block text-sm font-medium text-surface-700 dark:text-surface-300">
+                    Logo Utama
+                </label>
+                <div class="relative group">
+                    <div class="w-full h-40 border-2 border-dashed border-surface-300 dark:border-surface-700 rounded-2xl flex flex-col items-center justify-center bg-surface-50 dark:bg-surface-800/50 hover:border-primary-500 transition-colors cursor-pointer overflow-hidden">
+                        @if(!empty($rawSettings['logo_url']))
+                            <img src="{{ $rawSettings['logo_url'] }}" alt="Logo" class="max-h-full max-w-full object-contain p-4">
+                        @else
+                            <i data-lucide="upload-cloud" class="w-12 h-12 text-surface-400 mb-2"></i>
+                            <p class="text-sm text-surface-500">Klik untuk upload logo</p>
+                            <p class="text-xs text-surface-400">PNG, JPG, SVG (max 2MB)</p>
+                        @endif
+                    </div>
+                    <input type="file" name="logo_url" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer">
+                    <input type="hidden" name="logo_url_current" value="{{ $rawSettings['logo_url'] ?? '' }}">
+                </div>
+            </div>
+
+            {{-- Favicon --}}
+            <div class="space-y-4">
+                <label class="block text-sm font-medium text-surface-700 dark:text-surface-300">
+                    Favicon
+                </label>
+                <div class="relative group">
+                    <div class="w-full h-40 border-2 border-dashed border-surface-300 dark:border-surface-700 rounded-2xl flex flex-col items-center justify-center bg-surface-50 dark:bg-surface-800/50 hover:border-primary-500 transition-colors cursor-pointer overflow-hidden">
+                        @if(!empty($rawSettings['favicon_url']))
+                            <img src="{{ $rawSettings['favicon_url'] }}" alt="Favicon" class="w-16 h-16 object-contain">
+                        @else
+                            <i data-lucide="bookmark" class="w-12 h-12 text-surface-400 mb-2"></i>
+                            <p class="text-sm text-surface-500">Klik untuk upload favicon</p>
+                            <p class="text-xs text-surface-400">ICO, PNG (32x32 atau 64x64)</p>
+                        @endif
+                    </div>
+                    <input type="file" name="favicon_url" accept="image/*,.ico" class="absolute inset-0 opacity-0 cursor-pointer">
+                    <input type="hidden" name="favicon_url_current" value="{{ $rawSettings['favicon_url'] ?? '' }}">
+                </div>
             </div>
         </div>
     </div>
