@@ -231,56 +231,104 @@ class TrashController extends Controller
     public function restore(Request $request, string $type, int $id)
     {
         if (!isset($this->modelMap[$type])) {
+            \Log::error("Trash Restore: Invalid type {$type}");
             return response()->json(['success' => false, 'message' => 'Invalid type'], 400);
         }
 
         $modelClass = $this->modelMap[$type];
-        $item = $modelClass::onlyTrashed()->find($id);
+        
+        try {
+            // Find item (only in trash)
+            $item = $modelClass::onlyTrashed()->find($id);
 
-        if (!$item) {
-            return response()->json(['success' => false, 'message' => 'Item tidak ditemukan'], 404);
+            if (!$item) {
+                \Log::error("Trash Restore: Item not found ID {$id} Type {$type}");
+                return response()->json(['success' => false, 'message' => 'Item tidak ditemukan di tong sampah'], 404);
+            }
+
+            // Restore item
+            $item->restore();
+
+            // Try to log activity, but don't fail if it fails
+            try {
+                ActivityLog::log(
+                    ActivityLog::ACTION_RESTORE,
+                    "Memulihkan {$this->typeLabels[$type]}: " . ($item->name ?? $item->title ?? $item->action ?? 'Item'),
+                    $item
+                );
+            } catch (\Exception $logError) {
+                \Log::error("Trash Restore Log Error: " . $logError->getMessage());
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => "{$this->typeLabels[$type]} berhasil dipulihkan",
+            ]);
+
+        } catch (\Illuminate\Database\QueryException $e) {
+            \Log::error("Trash Restore Query Error: " . $e->getMessage());
+            // Check for duplicate entry error (Code 23000)
+            if ($e->errorInfo[1] == 1062) {
+                return response()->json([
+                    'success' => false, 
+                    'message' => "Gagal memulihkan: Data unik (slug/email/kode) sudah digunakan oleh data aktif lain."
+                ], 409);
+            }
+            return response()->json(['success' => false, 'message' => 'Database error: ' . $e->getMessage()], 500);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Gagal memulihkan item: ' . $e->getMessage()], 500);
         }
-
-        $item->restore();
-
-        ActivityLog::log(
-            ActivityLog::ACTION_RESTORE,
-            "Memulihkan {$this->typeLabels[$type]}: " . ($item->name ?? $item->title ?? $item->action ?? 'Item'),
-            $item
-        );
-
-        return response()->json([
-            'success' => true,
-            'message' => "{$this->typeLabels[$type]} berhasil dipulihkan",
-        ]);
     }
 
     public function forceDelete(Request $request, string $type, int $id)
     {
         if (!isset($this->modelMap[$type])) {
+            \Log::error("Trash ForceDelete: Invalid type {$type}");
             return response()->json(['success' => false, 'message' => 'Invalid type'], 400);
         }
 
         $modelClass = $this->modelMap[$type];
-        $item = $modelClass::onlyTrashed()->find($id);
 
-        if (!$item) {
-            return response()->json(['success' => false, 'message' => 'Item tidak ditemukan'], 404);
+        try {
+            $item = $modelClass::onlyTrashed()->find($id);
+
+            if (!$item) {
+                \Log::error("Trash ForceDelete: Item not found ID {$id} Type {$type}");
+                return response()->json(['success' => false, 'message' => 'Item tidak ditemukan'], 404);
+            }
+
+            $itemName = $item->name ?? $item->title ?? $item->action ?? 'Item';
+            
+            // Force delete
+            $item->forceDelete();
+
+            try {
+                ActivityLog::log(
+                    ActivityLog::ACTION_FORCE_DELETE,
+                    "Menghapus permanen {$this->typeLabels[$type]}: {$itemName}"
+                );
+            } catch (\Exception $logError) {
+                \Log::error("Trash ForceDelete Log Error: " . $logError->getMessage());
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => "{$this->typeLabels[$type]} berhasil dihapus permanen",
+            ]);
+
+        } catch (\Illuminate\Database\QueryException $e) {
+            \Log::error("Trash ForceDelete Query Error: " . $e->getMessage());
+            // Check for foreign key constraint error (Code 23000)
+            if ($e->errorInfo[1] == 1451) {
+                return response()->json([
+                    'success' => false, 
+                    'message' => "Gagal menghapus: Item ini masih digunakan oleh data lain (Artikel, Log, dll)."
+                ], 409);
+            }
+            return response()->json(['success' => false, 'message' => 'Database error: ' . $e->getMessage()], 500);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Gagal menghapus item: ' . $e->getMessage()], 500);
         }
-
-        $itemName = $item->name ?? $item->title ?? $item->action ?? 'Item';
-        
-        $item->forceDelete();
-
-        ActivityLog::log(
-            ActivityLog::ACTION_FORCE_DELETE,
-            "Menghapus permanen {$this->typeLabels[$type]}: {$itemName}"
-        );
-
-        return response()->json([
-            'success' => true,
-            'message' => "{$this->typeLabels[$type]} berhasil dihapus permanen",
-        ]);
     }
 
     public function bulkRestore(Request $request)

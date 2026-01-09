@@ -127,10 +127,39 @@
     }
 
     // Show confirm dialog
-    function showConfirm(title, message, callback, options = {}) {
+    // Show confirm dialog
+    function showConfirm(title, message, callbackOrConfirmText, optionsOrColor = {}) {
+        let callback = null;
+        let options = {};
+        
+        // Check if called with (title, message, confirmText, color) - Promise style
+        if (typeof callbackOrConfirmText === 'string') {
+            options = {
+                confirmText: callbackOrConfirmText,
+                color: optionsOrColor
+            };
+        } 
+        // Check if called with (title, message, callback, options) - Callback style
+        else if (typeof callbackOrConfirmText === 'function') {
+            callback = callbackOrConfirmText;
+            options = optionsOrColor || {};
+        } else {
+             // Fallback or just options
+             options = callbackOrConfirmText || {};
+        }
+
         const isDark = document.documentElement.classList.contains('dark');
         
-        Swal.fire({
+        // Determine button style
+        let confirmClass = 'swal2-confirm';
+        if (options.color === 'rose' || options.color === 'red') {
+             // We append custom color classes. Ensure Tailwind classes work with Swal
+             confirmClass += ' swal-danger'; 
+        } else if (options.color === 'emerald' || options.color === 'green') {
+             confirmClass += ' swal-success';
+        }
+        
+        return Swal.fire({
             title: title,
             text: message,
             icon: options.icon || 'warning',
@@ -139,13 +168,14 @@
             cancelButtonText: options.cancelText || 'Batal',
             reverseButtons: true,
             customClass: {
-                confirmButton: 'swal2-confirm',
+                confirmButton: confirmClass,
                 cancelButton: 'swal2-cancel'
             }
         }).then((result) => {
             if (result.isConfirmed && callback) {
                 callback();
             }
+            return result.isConfirmed;
         });
     }
 

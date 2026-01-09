@@ -1,5 +1,7 @@
 // Restore single item
 async restoreItem(item) {
+    if (!item) return;
+
     const confirmed = await showConfirm(
         'Pulihkan Item?',
         `Apakah Anda yakin ingin memulihkan ${item.type_label}: "${item.name}"?`,
@@ -10,7 +12,15 @@ async restoreItem(item) {
     if (!confirmed) return;
 
     try {
-        const response = await fetch(`/trash/${item.type}/${item.id}/restore`, {
+        // Manual URL construction to avoid encoding issues with route() placeholders
+        const url = `{{ url('trash') }}/${item.type}/${item.id}/restore`;
+        
+        console.log('--- RESTORE ACTION ---');
+        console.log('Item:', item);
+        console.log('URL:', url);
+        console.log('CSRF:', document.querySelector('meta[name="csrf-token"]').content);
+
+        const response = await fetch(url, {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -34,6 +44,8 @@ async restoreItem(item) {
 
 // Force delete single item
 async forceDeleteItem(item) {
+    if (!item) return;
+
     const confirmed = await showConfirm(
         'Hapus Permanen?',
         `Apakah Anda yakin ingin menghapus permanen ${item.type_label}: "${item.name}"? Tindakan ini tidak dapat dibatalkan!`,
@@ -44,7 +56,15 @@ async forceDeleteItem(item) {
     if (!confirmed) return;
 
     try {
-        const response = await fetch(`/trash/${item.type}/${item.id}/force`, {
+        // Manual URL construction to avoid encoding issues with route() placeholders
+        const url = `{{ url('trash') }}/${item.type}/${item.id}/force`;
+        
+        console.log('--- FORCE DELETE ACTION ---');
+        console.log('Item:', item);
+        console.log('URL:', url);
+        console.log('CSRF:', document.querySelector('meta[name="csrf-token"]').content);
+
+        const response = await fetch(url, {
             method: 'DELETE',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
