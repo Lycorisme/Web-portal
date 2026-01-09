@@ -2,364 +2,164 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>{{ $title ?? 'Laporan' }}</title>
+    <title>{{ $title ?? 'Laporan' }} - {{ $settings['site_name'] ?? 'Portal' }}</title>
     <style>
-        /* Reset and Base Styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'DejaVu Sans', Arial, sans-serif;
-            font-size: 11px;
-            line-height: 1.5;
-            color: #000000;
-            background-color: #ffffff;
-        }
-
-        /* Page Layout */
-        @page {
-            margin: 20mm 15mm 25mm 15mm;
-        }
-
-        /* Header Styles */
-        .header {
-            border-bottom: 3px double #000000;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-        }
-
-        .header-content {
-            display: table;
-            width: 100%;
-        }
-
-        .header-logo {
-            display: table-cell;
-            width: 80px;
-            vertical-align: middle;
-        }
-
-        .header-logo img {
-            max-width: 70px;
-            max-height: 70px;
-        }
-
-        .header-text {
-            display: table-cell;
-            vertical-align: middle;
-            padding-left: 15px;
-        }
-
-        .header-title {
-            font-size: 16px;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-bottom: 3px;
-        }
-
-        .header-address {
-            font-size: 10px;
-            color: #333333;
-        }
-
-        /* Letterhead Image */
-        .letterhead {
-            width: 100%;
-            margin-bottom: 20px;
-        }
-
-        .letterhead img {
-            width: 100%;
-            max-height: 100px;
-            object-fit: contain;
-        }
-
-        /* Document Title */
-        .document-title {
+        body { font-family: Arial, sans-serif; font-size: 10pt; color: #333; line-height: 1.4; }
+        
+        /* Kop Surat Styles - Diadaptasi dari Laporan Disposisi */
+        .kop-surat {
             text-align: center;
-            margin: 25px 0;
+            border-bottom: 3px double #000;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
         }
+        .kop-surat table { width: 100%; border-collapse: collapse; border: none; }
+        .kop-surat td { border: none; }
+        .kop-surat .logo-cell { width: 100px; text-align: center; vertical-align: middle; }
+        .kop-surat .text-cell { text-align: center; vertical-align: middle; }
+        
+        /* Menggunakan logo_url dari site_settings */
+        .kop-surat img { max-height: 80px; max-width: 80px; }
+        
+        .kop-surat .instansi-induk { margin: 0; font-size: 12pt; text-transform: uppercase; }
+        .kop-surat h2 { margin: 0; font-size: 16pt; text-transform: uppercase; font-weight: bold; }
+        .kop-surat p { margin: 2px 0; font-size: 9pt; }
 
-        .document-title h1 {
-            font-size: 16px;
-            font-weight: bold;
-            text-transform: uppercase;
-            text-decoration: underline;
-            margin-bottom: 5px;
-        }
+        .judul { text-align: center; margin-bottom: 20px; }
+        .judul h3 { margin: 0; text-decoration: underline; font-size: 12pt; font-weight: bold; text-transform: uppercase; }
+        .judul p { margin: 5px 0; font-size: 10pt; }
 
-        .document-title .period {
-            font-size: 11px;
-            color: #333333;
-        }
-
-        /* Table Styles */
-        .data-table {
+        /* Table Data Styles */
+        table.data-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
             margin-bottom: 20px;
         }
-
-        .data-table th {
-            background-color: #f5f5f5;
-            border: 1px solid #000000;
-            padding: 8px 6px;
-            text-align: left;
-            font-weight: bold;
-            font-size: 10px;
-            text-transform: uppercase;
-        }
-
-        .data-table td {
-            border: 1px solid #000000;
-            padding: 6px;
-            font-size: 10px;
+        table.data-table th, table.data-table td {
+            border: 1px solid #000;
+            padding: 6px 4px;
             vertical-align: top;
         }
-
-        .data-table th.center,
-        .data-table td.center {
+        table.data-table th {
+            background-color: #f2f2f2;
             text-align: center;
-        }
-
-        .data-table th.number,
-        .data-table td.number {
-            text-align: center;
-            width: 40px;
-        }
-
-        .data-table tr:nth-child(even) {
-            background-color: #fafafa;
-        }
-
-        /* Summary Section */
-        .summary {
-            margin-top: 15px;
-            font-size: 11px;
-        }
-
-        .summary-item {
-            margin-bottom: 5px;
-        }
-
-        /* Footer Styles */
-        .footer {
-            position: fixed;
-            bottom: -20mm;
-            left: 0;
-            right: 0;
-            height: 20mm;
-            font-size: 9px;
-            color: #666666;
-            border-top: 1px solid #cccccc;
-            padding-top: 5px;
-        }
-
-        .footer-content {
-            display: table;
-            width: 100%;
-        }
-
-        .footer-left {
-            display: table-cell;
-            width: 50%;
-            text-align: left;
-        }
-
-        .footer-right {
-            display: table-cell;
-            width: 50%;
-            text-align: right;
-        }
-
-        /* Signature Section */
-        .signature-section {
-            margin-top: 40px;
-            page-break-inside: avoid;
-        }
-
-        .signature-box {
-            float: right;
-            width: 200px;
-            text-align: center;
-        }
-
-        .signature-date {
-            margin-bottom: 5px;
-            font-size: 10px;
-        }
-
-        .signature-space {
-            height: 60px;
-            position: relative;
-        }
-
-        .signature-space img {
-            max-width: 100px;
-            max-height: 50px;
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        .stamp-space img {
-            max-width: 80px;
-            max-height: 80px;
-            position: absolute;
-            right: 10px;
-            top: 0;
-            opacity: 0.8;
-        }
-
-        .signature-name {
             font-weight: bold;
-            font-size: 10px;
-            border-top: 1px solid #000000;
-            padding-top: 5px;
+            text-transform: uppercase;
+            font-size: 9pt;
         }
 
-        /* Utility Classes */
-        .text-center {
-            text-align: center;
-        }
+        .center { text-align: center; }
+        .number { text-align: center; width: 30px; }
 
-        .text-right {
-            text-align: right;
-        }
-
-        .text-bold {
-            font-weight: bold;
-        }
-
-        .clearfix::after {
-            content: "";
-            clear: both;
-            display: table;
-        }
-
-        /* Page Break */
-        .page-break {
-            page-break-after: always;
-        }
-
-        /* Status Badges */
+        /* Badge Styles */
         .badge {
-            display: inline-block;
-            padding: 2px 6px;
-            font-size: 9px;
+            padding: 2px 5px;
             border-radius: 3px;
+            font-size: 8pt;
+            color: #fff;
+            display: inline-block;
+            text-transform: uppercase;
+        }
+        .badge-success { background-color: #28a745; }
+        .badge-secondary { background-color: #6c757d; color: #fff; }
+        .badge-warning { background-color: #ffc107; color: #000; }
+        .badge-danger { background-color: #dc3545; }
+        .badge-info { background-color: #17a2b8; color: #fff; }
+
+        /* Summary Box */
+        .summary {
+            margin-bottom: 30px;
+            width: 300px;
+        }
+        .summary-item {
+            font-size: 10pt;
+            border-bottom: 1px dashed #ccc;
+            padding: 3px 0;
         }
 
-        .badge-success {
-            background-color: #d4edda;
-            color: #155724;
+        /* TTD Styles - Diadaptasi dari Laporan Disposisi */
+        .ttd-wrapper {
+            width: 100%;
+            margin-top: 20px;
         }
-
-        .badge-warning {
-            background-color: #fff3cd;
-            color: #856404;
+        .ttd-table {
+            width: 100%;
+            border: none;
         }
-
-        .badge-danger {
-            background-color: #f8d7da;
-            color: #721c24;
+        .ttd-table td { border: none; }
+        .ttd-box {
+            width: 40%;
+            text-align: center;
         }
-
-        .badge-info {
-            background-color: #d1ecf1;
-            color: #0c5460;
+        .ttd-image {
+            height: 70px;
+            margin: 5px auto;
+            display: block;
         }
-
-        .badge-secondary {
-            background-color: #e2e3e5;
-            color: #383d41;
+        .ttd-spacer {
+            height: 70px;
+        }
+        .ttd-nama {
+            font-weight: bold;
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    {{-- Header with Letterhead or Logo --}}
-    @if(!empty($settings['letterhead_url']))
-        <div class="letterhead">
-            <img src="{{ $settings['letterhead_url'] }}" alt="Kop Surat">
-        </div>
-    @else
-        <div class="header">
-            <div class="header-content">
-                @if(!empty($settings['logo_url']))
-                    <div class="header-logo">
-                        <img src="{{ $settings['logo_url'] }}" alt="Logo">
-                    </div>
-                @endif
-                <div class="header-text">
-                    <div class="header-title">{{ $settings['site_name'] ?? 'Portal Admin' }}</div>
-                    <div class="header-address">
-                        @if(!empty($settings['site_address']))
-                            {{ $settings['site_address'] }}<br>
-                        @endif
-                        @if(!empty($settings['site_phone']) || !empty($settings['site_email']))
-                            @if(!empty($settings['site_phone']))
-                                Telp: {{ $settings['site_phone'] }}
-                            @endif
-                            @if(!empty($settings['site_phone']) && !empty($settings['site_email']))
-                                |
-                            @endif
-                            @if(!empty($settings['site_email']))
-                                Email: {{ $settings['site_email'] }}
-                            @endif
-                        @endif
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
 
-    {{-- Document Title --}}
-    <div class="document-title">
-        <h1>{{ $title ?? 'Laporan' }}</h1>
-        @if(isset($period))
-            <p class="period">Periode: {{ $period }}</p>
-        @endif
+    <div class="kop-surat">
+        <table>
+            <tr>
+                <td class="logo-cell">
+                    @if(!empty($settings['logo_url']))
+                        {{-- Pastikan path benar sesuai filesystem Laravel --}}
+                        <img src="{{ public_path($settings['logo_url']) }}" alt="Logo">
+                    @endif
+                </td>
+                <td class="text-cell">
+                    @if(!empty($settings['parent_organization']))
+                        <div class="instansi-induk">{{ $settings['parent_organization'] }}</div>
+                    @endif
+                    <h2>{{ $settings['site_name'] ?? 'BTIKP PORTAL' }}</h2>
+                    <p>{{ $settings['site_address'] ?? '' }}</p>
+                    <p>
+                        @if(!empty($settings['site_phone'])) Telp: {{ $settings['site_phone'] }} @endif
+                        @if(!empty($settings['site_email'])) | Email: {{ $settings['site_email'] }} @endif
+                        @if(!empty($settings['site_website'])) | Web: {{ $settings['site_website'] }} @endif
+                    </p>
+                </td>
+            </tr>
+        </table>
     </div>
 
-    {{-- Content --}}
     @yield('content')
 
-    {{-- Signature Section --}}
-    @if(!empty($settings['signature_url']) || !empty($settings['printed_by']))
-        <div class="signature-section clearfix">
-            <div class="signature-box">
-                <div class="signature-date">{{ $settings['printed_at'] ?? now()->format('d F Y') }}</div>
-                <div class="signature-space">
+    <div class="ttd-wrapper">
+        <table class="ttd-table">
+            <tr>
+                <td style="width: 60%;"></td>
+                <td class="ttd-box">
+                    <p>
+                        {{ $settings['site_city'] ?? 'Kota' }}, {{ date('d F Y') }}
+                    </p>
+                    <p>{{ $settings['leader_title'] ?? 'Pimpinan' }}</p> 
+                    
                     @if(!empty($settings['signature_url']))
-                        <img src="{{ $settings['signature_url'] }}" alt="Tanda Tangan">
+                        <img src="{{ public_path($settings['signature_url']) }}" class="ttd-image" alt="TTD">
+                    @else
+                        <div class="ttd-spacer"></div>
                     @endif
-                    @if(!empty($settings['stamp_url']))
-                        <span class="stamp-space">
-                            <img src="{{ $settings['stamp_url'] }}" alt="Stempel">
-                        </span>
+                    
+                    <div class="ttd-nama">
+                        {{ $settings['leader_name'] ?? '(................................)' }}
+                    </div>
+                    @if(!empty($settings['leader_nip']))
+                        <div>NIP. {{ $settings['leader_nip'] }}</div>
                     @endif
-                </div>
-                <div class="signature-name">{{ $settings['printed_by'] ?? 'Administrator' }}</div>
-            </div>
-        </div>
-    @endif
-
-    {{-- Footer --}}
-    <div class="footer">
-        <div class="footer-content">
-            <div class="footer-left">
-                Dicetak pada: {{ $settings['printed_at'] ?? now()->format('d F Y, H:i') }}
-            </div>
-            <div class="footer-right">
-                {{ $settings['site_name'] ?? 'Portal Admin' }}
-            </div>
-        </div>
+                </td>
+            </tr>
+        </table>
     </div>
+
 </body>
 </html>

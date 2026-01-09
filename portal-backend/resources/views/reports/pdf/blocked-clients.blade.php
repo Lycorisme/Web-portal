@@ -1,6 +1,11 @@
 @extends('reports.pdf.layout')
 
 @section('content')
+    <div class="judul">
+        <h3>LAPORAN DATA IP TERBLOKIR</h3>
+        <p>Periode: {{ $date_from ?? '-' }} s/d {{ $date_to ?? '-' }}</p>
+    </div>
+
     <table class="data-table">
         <thead>
             <tr>
@@ -28,12 +33,12 @@
                     <td class="center">
                         @if($client->is_blocked)
                             @if($client->isExpired())
-                                <span class="badge badge-secondary">Expired</span>
+                                <span class="badge badge-secondary">EXPIRED</span>
                             @else
-                                <span class="badge badge-danger">Terblokir</span>
+                                <span class="badge badge-danger">TERBLOKIR</span>
                             @endif
                         @else
-                            <span class="badge badge-success">Tidak Terblokir</span>
+                            <span class="badge badge-success">CLEAN</span>
                         @endif
                     </td>
                     <td style="font-size: 8px; word-break: break-all;">
@@ -42,7 +47,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" class="text-center">Tidak ada data IP terblokir.</td>
+                    <td colspan="6" class="center">Tidak ada data IP terblokir.</td>
                 </tr>
             @endforelse
         </tbody>

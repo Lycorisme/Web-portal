@@ -1,6 +1,11 @@
 @extends('reports.pdf.layout')
 
 @section('content')
+    <div class="judul">
+        <h3>LAPORAN DATA KATEGORI</h3>
+        <p>Periode: {{ $date_from ?? '-' }} s/d {{ $date_to ?? '-' }}</p>
+    </div>
+
     <table class="data-table">
         <thead>
             <tr>
@@ -21,16 +26,16 @@
                     <td class="center">{{ $category->articles_count ?? 0 }}</td>
                     <td class="center">
                         @if($category->is_active)
-                            <span class="badge badge-success">Aktif</span>
+                            <span class="badge badge-success">AKTIF</span>
                         @else
-                            <span class="badge badge-secondary">Nonaktif</span>
+                            <span class="badge badge-secondary">NONAKTIF</span>
                         @endif
                     </td>
                     <td class="center">{{ $category->created_at->format('d/m/Y') }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" class="text-center">Tidak ada data kategori.</td>
+                    <td colspan="6" class="center">Tidak ada data kategori.</td>
                 </tr>
             @endforelse
         </tbody>

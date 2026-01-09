@@ -1,6 +1,11 @@
 @extends('reports.pdf.layout')
 
 @section('content')
+    <div class="judul">
+        <h3>LAPORAN DATA GALERI</h3>
+        <p>Periode: {{ $date_from ?? '-' }} s/d {{ $date_to ?? '-' }}</p>
+    </div>
+
     <table class="data-table">
         <thead>
             <tr>
@@ -20,11 +25,11 @@
                     <td>{{ $gallery->album ?? '-' }}</td>
                     <td class="center">
                         @if($gallery->media_type === 'image')
-                            <span class="badge badge-info">Gambar</span>
+                            <span class="badge badge-info">GAMBAR</span>
                         @elseif($gallery->media_type === 'video')
-                            <span class="badge badge-warning">Video</span>
+                            <span class="badge badge-warning">VIDEO</span>
                         @else
-                            <span class="badge badge-secondary">{{ $gallery->media_type }}</span>
+                            <span class="badge badge-secondary">{{ strtoupper($gallery->media_type) }}</span>
                         @endif
                     </td>
                     <td>{{ $gallery->uploader->name ?? '-' }}</td>
@@ -32,7 +37,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" class="text-center">Tidak ada data gallery.</td>
+                    <td colspan="6" class="center">Tidak ada data galeri.</td>
                 </tr>
             @endforelse
         </tbody>

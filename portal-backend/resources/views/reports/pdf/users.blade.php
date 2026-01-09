@@ -1,6 +1,11 @@
 @extends('reports.pdf.layout')
 
 @section('content')
+    <div class="judul">
+        <h3>LAPORAN DATA PENGGUNA</h3>
+        <p>Periode: {{ $date_from ?? '-' }} s/d {{ $date_to ?? '-' }}</p>
+    </div>
+
     <table class="data-table">
         <thead>
             <tr>
@@ -21,35 +26,35 @@
                     <td class="center">
                         @switch($user->role)
                             @case('super_admin')
-                                <span class="badge badge-danger">Super Admin</span>
+                                <span class="badge badge-danger">SUPER ADMIN</span>
                                 @break
                             @case('admin')
-                                <span class="badge badge-warning">Admin</span>
+                                <span class="badge badge-warning">ADMIN</span>
                                 @break
                             @case('editor')
-                                <span class="badge badge-info">Editor</span>
+                                <span class="badge badge-info text-white">EDITOR</span>
                                 @break
                             @case('author')
-                                <span class="badge badge-success">Author</span>
+                                <span class="badge badge-success">AUTHOR</span>
                                 @break
                             @default
-                                <span class="badge badge-secondary">{{ $user->role }}</span>
+                                <span class="badge badge-secondary">{{ strtoupper($user->role) }}</span>
                         @endswitch
                     </td>
                     <td class="center">
                         @if($user->isLocked())
-                            <span class="badge badge-danger">Terkunci</span>
+                            <span class="badge badge-danger">TERKUNCI</span>
                         @else
-                            <span class="badge badge-success">Aktif</span>
+                            <span class="badge badge-success">AKTIF</span>
                         @endif
                     </td>
                     <td class="center">
-                        {{ $user->last_login_at ? $user->last_login_at->format('d/m/Y H:i') : '-' }}
+                        {{ $user->last_login_at ? \Carbon\Carbon::parse($user->last_login_at)->format('d/m/Y H:i') : '-' }}
                     </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" class="text-center">Tidak ada data pengguna.</td>
+                    <td colspan="6" class="center">Tidak ada data pengguna.</td>
                 </tr>
             @endforelse
         </tbody>

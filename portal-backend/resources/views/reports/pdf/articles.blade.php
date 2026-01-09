@@ -1,6 +1,11 @@
 @extends('reports.pdf.layout')
 
 @section('content')
+    <div class="judul">
+        <h3>LAPORAN DATA ARTIKEL</h3>
+        <p>Periode: {{ $date_from ?? '-' }} s/d {{ $date_to ?? '-' }}</p>
+    </div>
+
     <table class="data-table">
         <thead>
             <tr>
@@ -20,30 +25,24 @@
                     <td>{{ $article->categoryRelation->name ?? '-' }}</td>
                     <td>{{ $article->author->name ?? '-' }}</td>
                     <td class="center">
-                        @switch($article->status)
-                            @case('published')
-                                <span class="badge badge-success">Published</span>
-                                @break
-                            @case('draft')
-                                <span class="badge badge-secondary">Draft</span>
-                                @break
-                            @case('pending')
-                                <span class="badge badge-warning">Pending</span>
-                                @break
-                            @case('rejected')
-                                <span class="badge badge-danger">Rejected</span>
-                                @break
-                            @default
-                                <span class="badge badge-secondary">{{ $article->status }}</span>
-                        @endswitch
+                        @php
+                            $statusClass = match($article->status) {
+                                'published' => 'badge-success',
+                                'draft' => 'badge-secondary',
+                                'pending' => 'badge-warning',
+                                'rejected' => 'badge-danger',
+                                default => 'badge-secondary'
+                            };
+                        @endphp
+                        <span class="badge {{ $statusClass }}">{{ strtoupper($article->status) }}</span>
                     </td>
                     <td class="center">
-                        {{ $article->published_at ? $article->published_at->format('d/m/Y') : '-' }}
+                        {{ $article->published_at ? \Carbon\Carbon::parse($article->published_at)->format('d/m/Y') : '-' }}
                     </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" class="text-center">Tidak ada data artikel.</td>
+                    <td colspan="6" class="center">Tidak ada data artikel pada periode ini.</td>
                 </tr>
             @endforelse
         </tbody>
@@ -52,7 +51,6 @@
     <div class="summary">
         <div class="summary-item"><strong>Total Artikel:</strong> {{ $items->count() }}</div>
         <div class="summary-item"><strong>Published:</strong> {{ $items->where('status', 'published')->count() }}</div>
-        <div class="summary-item"><strong>Draft:</strong> {{ $items->where('status', 'draft')->count() }}</div>
         <div class="summary-item"><strong>Pending:</strong> {{ $items->where('status', 'pending')->count() }}</div>
     </div>
 @endsection

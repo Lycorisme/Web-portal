@@ -5,17 +5,10 @@
 @section('content')
 <div x-data="reportsPage()" x-init="init()">
     {{-- Header --}}
-    <div class="mb-6">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-space font-bold text-surface-900 dark:text-white">Laporan</h1>
-                <p class="text-surface-500 dark:text-surface-400 mt-1">Generate dan unduh laporan dalam format PDF</p>
-            </div>
-        </div>
-    </div>
+    @include('reports.partials.header')
 
     {{-- Report Cards Grid --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-slide-up" style="animation-delay: 0.1s;">
         {{-- Article Report Card --}}
         <div class="bg-white dark:bg-surface-800 rounded-2xl shadow-sm border border-surface-200 dark:border-surface-700 overflow-hidden hover:shadow-lg transition-shadow duration-300">
             <div class="p-6">
@@ -340,125 +333,5 @@
 @endsection
 
 @push('scripts')
-<script>
-function reportsPage() {
-    return {
-        loading: {
-            articles: false,
-            categories: false,
-            users: false,
-            activityLogs: false,
-            blockedClients: false,
-            galleries: false
-        },
-        forms: {
-            articles: {
-                start_date: '',
-                end_date: '',
-                status: ''
-            },
-            categories: {
-                start_date: '',
-                end_date: '',
-                is_active: ''
-            },
-            users: {
-                start_date: '',
-                end_date: '',
-                role: ''
-            },
-            activityLogs: {
-                start_date: '',
-                end_date: '',
-                action: ''
-            },
-            blockedClients: {
-                start_date: '',
-                end_date: '',
-                is_blocked: ''
-            },
-            galleries: {
-                start_date: '',
-                end_date: '',
-                media_type: ''
-            }
-        },
-
-        init() {
-            // Set default date range (last 30 days)
-            const today = new Date();
-            const lastMonth = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
-            
-            const formatDate = (date) => date.toISOString().split('T')[0];
-            
-            Object.keys(this.forms).forEach(key => {
-                this.forms[key].start_date = formatDate(lastMonth);
-                this.forms[key].end_date = formatDate(today);
-            });
-
-            // Reinitialize Lucide icons
-            this.$nextTick(() => {
-                if (typeof lucide !== 'undefined') {
-                    lucide.createIcons();
-                }
-            });
-        },
-
-        async generateReport(type) {
-            // Map form key to loading key
-            const loadingKeys = {
-                'articles': 'articles',
-                'categories': 'categories',
-                'users': 'users',
-                'activity-logs': 'activityLogs',
-                'blocked-clients': 'blockedClients',
-                'galleries': 'galleries'
-            };
-
-            const formKeys = {
-                'articles': 'articles',
-                'categories': 'categories',
-                'users': 'users',
-                'activity-logs': 'activityLogs',
-                'blocked-clients': 'blockedClients',
-                'galleries': 'galleries'
-            };
-
-            const loadingKey = loadingKeys[type];
-            const formKey = formKeys[type];
-            
-            this.loading[loadingKey] = true;
-
-            try {
-                const form = this.forms[formKey];
-                const params = new URLSearchParams();
-
-                Object.keys(form).forEach(key => {
-                    if (form[key]) {
-                        params.append(key, form[key]);
-                    }
-                });
-
-                const url = `/reports/${type}?${params.toString()}`;
-                
-                // Open in new tab or download
-                window.location.href = url;
-
-                // Small delay to show loading state
-                await new Promise(resolve => setTimeout(resolve, 1000));
-            } catch (error) {
-                console.error('Error generating report:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal',
-                    text: 'Terjadi kesalahan saat generate laporan.',
-                    confirmButtonColor: 'var(--theme-primary)',
-                });
-            } finally {
-                this.loading[loadingKey] = false;
-            }
-        }
-    };
-}
-</script>
+@include('reports.partials.scripts')
 @endpush
