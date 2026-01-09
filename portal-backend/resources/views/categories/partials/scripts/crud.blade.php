@@ -18,7 +18,7 @@ async deleteCategory(id) {
                     },
                 });
                 const result = await response.json();
-                if (result.success) { this.fetchCategories(); showToast('success', result.message); } 
+                if (result.success) { this.fetchCategories(); showToast('success', result.message); window.dispatchEvent(new CustomEvent('trash-updated')); } 
                 else { showToast('error', result.message); }
             } catch (error) { console.error('Error:', error); showToast('error', 'Gagal menghapus'); } 
             finally { closeLoading(); }
@@ -43,7 +43,7 @@ async restoreCategory(id) {
                     },
                 });
                 const result = await response.json();
-                if (result.success) { this.fetchCategories(); showToast('success', result.message); } 
+                if (result.success) { this.fetchCategories(); showToast('success', result.message); window.dispatchEvent(new CustomEvent('trash-updated')); } 
                 else { showToast('error', result.message); }
             } catch (error) { console.error('Error:', error); showToast('error', 'Gagal memulihkan'); } 
             finally { closeLoading(); }
@@ -68,7 +68,7 @@ async forceDeleteCategory(id) {
                     },
                 });
                 const result = await response.json();
-                if (result.success) { this.fetchCategories(); showToast('success', result.message); } 
+                if (result.success) { this.fetchCategories(); showToast('success', result.message); window.dispatchEvent(new CustomEvent('trash-updated')); } 
                 else { showToast('error', result.message); }
             } catch (error) { console.error('Error:', error); showToast('error', 'Gagal menghapus'); } 
             finally { closeLoading(); }

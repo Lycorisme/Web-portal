@@ -7,6 +7,23 @@
 
 {{-- Desktop Sidebar --}}
 <aside 
+    x-data="{ 
+        trashedCount: {{ $trashedCount ?? 0 }},
+        async fetchTrashCount() {
+            try {
+                const response = await fetch('{{ route('trash.count') }}');
+                const data = await response.json();
+                this.trashedCount = data.count || 0;
+            } catch (e) {
+                console.error('Failed to fetch trash count:', e);
+            }
+        }
+    }"
+    x-init="
+        fetchTrashCount();
+        document.addEventListener('livewire:navigated', () => fetchTrashCount());
+        window.addEventListener('trash-updated', () => fetchTrashCount());
+    "
     :class="sidebarOpen ? 'translate-x-0 w-72' : 'lg:translate-x-0 lg:w-20 -translate-x-full'"
     class="fixed left-0 top-0 h-full bg-white/95 dark:bg-surface-900/95 backdrop-blur-xl border-r border-surface-200/50 dark:border-surface-800/50 transition-all duration-300 ease-out z-50 flex flex-col shadow-xl shadow-surface-900/5 overflow-hidden"
     x-cloak>
@@ -92,18 +109,16 @@
             :title="!sidebarOpen ? 'Tong Sampah' : ''">
             <div class="relative">
                 <i data-lucide="trash-2" class="w-5 h-5 flex-shrink-0"></i>
-                @if(isset($trashedCount) && $trashedCount > 0)
-                    <span x-show="!sidebarOpen" x-cloak
-                        class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border border-white dark:border-surface-900"></span>
-                @endif
+                {{-- Dot indicator when sidebar collapsed --}}
+                <span x-show="!sidebarOpen && trashedCount > 0" x-cloak
+                    class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border border-white dark:border-surface-900 animate-pulse"></span>
             </div>
             <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Tong Sampah</span>
-            @if(isset($trashedCount) && $trashedCount > 0)
-                <span x-show="sidebarOpen" x-cloak
-                    class="ml-auto bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400 text-xs font-bold px-2 py-0.5 rounded-full shadow-sm">
-                    {{ $trashedCount }}
-                </span>
-            @endif
+            {{-- Badge with count when sidebar expanded --}}
+            <span x-show="sidebarOpen && trashedCount > 0" x-cloak
+                class="ml-auto bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400 text-xs font-bold px-2 py-0.5 rounded-full shadow-sm"
+                x-text="trashedCount">
+            </span>
         </a>
 
         <div class="my-3 border-t border-surface-200/50 dark:border-surface-800/50 mx-2"></div>

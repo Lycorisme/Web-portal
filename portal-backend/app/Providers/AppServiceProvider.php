@@ -27,24 +27,29 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Share trashed count for sidebar badge
         View::composer('partials.sidebar', function ($view) {
-            $trashedCount = 0;
-            $models = [
-                Article::class, 
-                Category::class, 
-                Tag::class, 
-                Gallery::class, 
-                User::class, 
-                ActivityLog::class
-            ];
-            
-            foreach ($models as $model) {
-                if (method_exists($model, 'onlyTrashed')) {
-                    $trashedCount += $model::onlyTrashed()->count();
+            try {
+                $trashedCount = 0;
+                $models = [
+                    Article::class, 
+                    Category::class, 
+                    Tag::class, 
+                    Gallery::class, 
+                    User::class, 
+                    ActivityLog::class
+                ];
+                
+                foreach ($models as $model) {
+                    if (method_exists($model, 'onlyTrashed')) {
+                        $trashedCount += $model::onlyTrashed()->count();
+                    }
                 }
+                
+                $view->with('trashedCount', $trashedCount);
+            } catch (\Exception $e) {
+                $view->with('trashedCount', 0);
             }
-            
-            $view->with('trashedCount', $trashedCount);
         });
     }
 }

@@ -151,6 +151,7 @@ Route::middleware('auth')->group(function () {
 
     // Trash Routes
     Route::get('/trash', [TrashController::class, 'index'])->name('trash');
+    Route::get('/trash/count', [TrashController::class, 'getCount'])->name('trash.count');
     Route::get('/trash/data', [TrashController::class, 'getData'])->name('trash.data');
     Route::post('/trash/{type}/{id}/restore', [TrashController::class, 'restore'])->name('trash.restore');
     Route::delete('/trash/{type}/{id}/force', [TrashController::class, 'forceDelete'])->name('trash.force-delete');

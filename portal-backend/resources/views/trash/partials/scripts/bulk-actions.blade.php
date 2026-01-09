@@ -37,6 +37,7 @@ async bulkRestore() {
             this.selectedItems = [];
             this.selectAll = false;
             this.fetchItems();
+            window.dispatchEvent(new CustomEvent('trash-updated'));
         } else { 
             showToast('error', result.message); 
         }
@@ -76,6 +77,7 @@ async bulkForceDelete() {
             this.selectedItems = [];
             this.selectAll = false;
             this.fetchItems();
+            window.dispatchEvent(new CustomEvent('trash-updated'));
         } else { 
             showToast('error', result.message); 
         }

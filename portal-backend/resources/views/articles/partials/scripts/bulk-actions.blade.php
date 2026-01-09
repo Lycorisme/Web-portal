@@ -36,6 +36,7 @@ async bulkDelete() {
                 if (result.success) {
                     this.fetchArticles();
                     showToast('success', result.message);
+                    window.dispatchEvent(new CustomEvent('trash-updated'));
                 } else {
                     showToast('error', result.message);
                 }
@@ -73,6 +74,7 @@ async bulkRestore() {
                 if (result.success) {
                     this.fetchArticles();
                     showToast('success', result.message);
+                    window.dispatchEvent(new CustomEvent('trash-updated'));
                 } else {
                     showToast('error', result.message);
                 }
@@ -110,6 +112,7 @@ async bulkForceDelete() {
                 if (result.success) {
                     this.fetchArticles();
                     showToast('success', result.message);
+                    window.dispatchEvent(new CustomEvent('trash-updated'));
                 } else {
                     showToast('error', result.message);
                 }

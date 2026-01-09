@@ -22,6 +22,7 @@ async deleteArticle(id) {
                 if (result.success) {
                     this.fetchArticles();
                     showToast('success', result.message);
+                    window.dispatchEvent(new CustomEvent('trash-updated'));
                 } else {
                     showToast('error', result.message);
                 }
@@ -56,6 +57,7 @@ async restoreArticle(id) {
                 if (result.success) {
                     this.fetchArticles();
                     showToast('success', result.message);
+                    window.dispatchEvent(new CustomEvent('trash-updated'));
                 } else {
                     showToast('error', result.message);
                 }
@@ -90,6 +92,7 @@ async forceDeleteArticle(id) {
                 if (result.success) {
                     this.fetchArticles();
                     showToast('success', result.message);
+                    window.dispatchEvent(new CustomEvent('trash-updated'));
                 } else {
                     showToast('error', result.message);
                 }

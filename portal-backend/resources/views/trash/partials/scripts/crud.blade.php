@@ -22,6 +22,7 @@ async restoreItem(item) {
         if (result.success) {
             showToast('success', result.message);
             this.fetchItems();
+            window.dispatchEvent(new CustomEvent('trash-updated'));
         } else { 
             showToast('error', result.message); 
         }
@@ -55,6 +56,7 @@ async forceDeleteItem(item) {
         if (result.success) {
             showToast('success', result.message);
             this.fetchItems();
+            window.dispatchEvent(new CustomEvent('trash-updated'));
         } else { 
             showToast('error', result.message); 
         }
@@ -90,6 +92,7 @@ async emptyTrash() {
         if (result.success) {
             showToast('success', result.message);
             this.fetchItems();
+            window.dispatchEvent(new CustomEvent('trash-updated'));
         } else { 
             showToast('error', result.message); 
         }

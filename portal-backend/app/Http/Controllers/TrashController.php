@@ -51,6 +51,16 @@ class TrashController extends Controller
         ]);
     }
 
+    /**
+     * Get trash count for sidebar badge (AJAX endpoint)
+     */
+    public function getCount()
+    {
+        return response()->json([
+            'count' => $this->getTrashedCounts()['all']
+        ]);
+    }
+
     public function getData(Request $request)
     {
         $type = $request->input('type', 'all');
@@ -233,7 +243,11 @@ class TrashController extends Controller
 
         $item->restore();
 
-        ActivityLog::logActivity('restore', $this->typeLabels[$type], $item->id, "Memulihkan {$this->typeLabels[$type]}: " . ($item->name ?? $item->title ?? $item->action ?? 'Item'));
+        ActivityLog::log(
+            ActivityLog::ACTION_RESTORE,
+            "Memulihkan {$this->typeLabels[$type]}: " . ($item->name ?? $item->title ?? $item->action ?? 'Item'),
+            $item
+        );
 
         return response()->json([
             'success' => true,
@@ -258,7 +272,10 @@ class TrashController extends Controller
         
         $item->forceDelete();
 
-        ActivityLog::logActivity('force_delete', $this->typeLabels[$type], $id, "Menghapus permanen {$this->typeLabels[$type]}: {$itemName}");
+        ActivityLog::log(
+            ActivityLog::ACTION_FORCE_DELETE,
+            "Menghapus permanen {$this->typeLabels[$type]}: {$itemName}"
+        );
 
         return response()->json([
             'success' => true,
@@ -291,7 +308,10 @@ class TrashController extends Controller
             }
             DB::commit();
 
-            ActivityLog::logActivity('bulk_restore', 'Trash', null, "Memulihkan {$restored} item dari tong sampah");
+            ActivityLog::log(
+                ActivityLog::ACTION_RESTORE,
+                "Memulihkan {$restored} item dari tong sampah"
+            );
 
             return response()->json([
                 'success' => true,
@@ -328,7 +348,10 @@ class TrashController extends Controller
             }
             DB::commit();
 
-            ActivityLog::logActivity('bulk_force_delete', 'Trash', null, "Menghapus permanen {$deleted} item");
+            ActivityLog::log(
+                ActivityLog::ACTION_FORCE_DELETE,
+                "Menghapus permanen {$deleted} item dari tong sampah"
+            );
 
             return response()->json([
                 'success' => true,
@@ -364,7 +387,10 @@ class TrashController extends Controller
             
             DB::commit();
 
-            ActivityLog::logActivity('empty_trash', 'Trash', null, "Mengosongkan tong sampah ({$deleted} item)");
+            ActivityLog::log(
+                ActivityLog::ACTION_FORCE_DELETE,
+                "Mengosongkan tong sampah ({$deleted} item)"
+            );
 
             return response()->json([
                 'success' => true,
