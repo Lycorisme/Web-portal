@@ -14,6 +14,7 @@ use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\TrashController;
 use App\Http\Controllers\BlockedClientController;
+use App\Http\Controllers\ReportController;
 
 // =============================================
 // Authentication Routes (Guest Only)
@@ -140,6 +141,15 @@ Route::middleware('auth')->group(function () {
         Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
         Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
         Route::put('/settings/{group}', [SettingsController::class, 'updateGroup'])->name('settings.update.group');
+
+        // Report Routes
+        Route::get('/reports', [ReportController::class, 'index'])->name('reports');
+        Route::get('/reports/articles', [ReportController::class, 'generateArticleReport'])->name('reports.articles');
+        Route::get('/reports/categories', [ReportController::class, 'generateCategoryReport'])->name('reports.categories');
+        Route::get('/reports/users', [ReportController::class, 'generateUserReport'])->name('reports.users');
+        Route::get('/reports/activity-logs', [ReportController::class, 'generateActivityLogReport'])->name('reports.activity-logs');
+        Route::get('/reports/blocked-clients', [ReportController::class, 'generateBlockedClientReport'])->name('reports.blocked-clients');
+        Route::get('/reports/galleries', [ReportController::class, 'generateGalleryReport'])->name('reports.galleries');
 
         // Activity Log Routes
         Route::get('/activity-log/settings', [ActivityLogController::class, 'getSettings'])->name('activity-log.settings');

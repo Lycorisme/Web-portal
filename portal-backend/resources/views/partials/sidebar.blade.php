@@ -188,6 +188,14 @@
             <i data-lucide="settings" class="w-5 h-5 flex-shrink-0"></i>
             <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Pengaturan Situs</span>
         </a>
+
+        <a href="{{ route('reports') }}" wire:navigate
+            class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('reports*') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
+            :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
+            :title="!sidebarOpen ? 'Laporan' : ''">
+            <i data-lucide="file-text" class="w-5 h-5 flex-shrink-0"></i>
+            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Laporan</span>
+        </a>
         @endif
 
         <a href="{{ route('profile') }}" wire:navigate
