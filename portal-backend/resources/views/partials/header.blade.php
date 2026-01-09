@@ -31,64 +31,14 @@
             </button>
 
             {{-- Notifications --}}
-            <div class="relative" x-data="{ open: false }">
-                <button @click="open = !open"
+            <div class="relative" x-data="{ showNotificationModal: false }">
+                <button @click="showNotificationModal = true"
                     class="relative p-2.5 rounded-xl bg-surface-100 dark:bg-surface-800 hover:bg-surface-200 dark:hover:bg-surface-700 transition-all duration-200">
                     <i data-lucide="bell" class="w-5 h-5 text-surface-600 dark:text-surface-400"></i>
                     <span class="absolute -top-1 -right-1 w-5 h-5 bg-accent-rose text-white text-xs font-bold rounded-full flex items-center justify-center animate-pulse">3</span>
                 </button>
 
-                {{-- Notification Panel --}}
-                <div x-show="open" @click.away="open = false"
-                    x-transition:enter="transition ease-out duration-200"
-                    x-transition:enter-start="opacity-0 translate-y-2 scale-95"
-                    x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                    x-transition:leave="transition ease-in duration-150"
-                    x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-                    x-transition:leave-end="opacity-0 translate-y-2 scale-95"
-                    class="absolute right-0 mt-2 w-80 bg-white dark:bg-surface-900 rounded-2xl shadow-2xl shadow-surface-900/20 border border-surface-200 dark:border-surface-800 overflow-hidden"
-                    x-cloak>
-                    <div class="p-4 border-b border-surface-200 dark:border-surface-800">
-                        <h3 class="font-semibold text-surface-900 dark:text-white">Notifikasi</h3>
-                    </div>
-                    <div class="max-h-64 overflow-y-auto">
-                        <a href="#"
-                            class="flex items-start gap-3 p-4 hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors border-b border-surface-100 dark:border-surface-800/50">
-                            <div class="w-10 h-10 rounded-xl bg-accent-emerald/20 flex items-center justify-center flex-shrink-0">
-                                <i data-lucide="check-circle" class="w-5 h-5 text-accent-emerald"></i>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-sm font-medium text-surface-900 dark:text-white">Berita berhasil dipublish</p>
-                                <p class="text-xs text-surface-500 mt-0.5">2 menit yang lalu</p>
-                            </div>
-                        </a>
-                        <a href="#"
-                            class="flex items-start gap-3 p-4 hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors border-b border-surface-100 dark:border-surface-800/50">
-                            <div class="w-10 h-10 rounded-xl bg-accent-amber/20 flex items-center justify-center flex-shrink-0">
-                                <i data-lucide="shield-alert" class="w-5 h-5 text-accent-amber"></i>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-sm font-medium text-surface-900 dark:text-white">IP 192.168.1.45 terblokir</p>
-                                <p class="text-xs text-surface-500 mt-0.5">15 menit yang lalu</p>
-                            </div>
-                        </a>
-                        <a href="#"
-                            class="flex items-start gap-3 p-4 hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors">
-                            <div class="w-10 h-10 rounded-xl bg-theme-100 flex items-center justify-center flex-shrink-0">
-                                <i data-lucide="user-plus" class="w-5 h-5 text-theme-600"></i>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-sm font-medium text-surface-900 dark:text-white">User baru terdaftar</p>
-                                <p class="text-xs text-surface-500 mt-0.5">1 jam yang lalu</p>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="p-3 border-t border-surface-200 dark:border-surface-800">
-                        <a href="#" class="block text-center text-sm font-medium text-theme-600 hover:text-theme-700">
-                            Lihat Semua Notifikasi
-                        </a>
-                    </div>
-                </div>
+                @include('partials.notification-modal')
             </div>
 
             {{-- User Profile Dropdown --}}
