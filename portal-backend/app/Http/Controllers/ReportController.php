@@ -29,14 +29,43 @@ class ReportController extends Controller
     private function getReportSettings(): array
     {
         return [
+            // General Site Settings (fallback)
             'site_name' => SiteSetting::get('site_name', 'Portal Admin'),
             'site_address' => SiteSetting::get('site_address', ''),
             'site_phone' => SiteSetting::get('site_phone', ''),
             'site_email' => SiteSetting::get('site_email', ''),
+            'site_city' => SiteSetting::get('site_city', ''),
+
+            // Letterhead Settings - Organization Hierarchy
+            'letterhead_parent_org_1' => SiteSetting::get('letterhead_parent_org_1', ''),
+            'letterhead_parent_org_2' => SiteSetting::get('letterhead_parent_org_2', ''),
+            'letterhead_org_name' => SiteSetting::get('letterhead_org_name', ''),
+
+            // Letterhead Settings - Address
+            'letterhead_street' => SiteSetting::get('letterhead_street', ''),
+            'letterhead_district' => SiteSetting::get('letterhead_district', ''),
+            'letterhead_city' => SiteSetting::get('letterhead_city', ''),
+            'letterhead_province' => SiteSetting::get('letterhead_province', ''),
+            'letterhead_postal_code' => SiteSetting::get('letterhead_postal_code', ''),
+
+            // Letterhead Settings - Contact
+            'letterhead_phone' => SiteSetting::get('letterhead_phone', ''),
+            'letterhead_fax' => SiteSetting::get('letterhead_fax', ''),
+            'letterhead_email' => SiteSetting::get('letterhead_email', ''),
+            'letterhead_website' => SiteSetting::get('letterhead_website', ''),
+
+            // Media Settings
             'logo_url' => SiteSetting::get('logo_url', ''),
             'letterhead_url' => SiteSetting::get('letterhead_url', ''),
             'signature_url' => SiteSetting::get('signature_url', ''),
             'stamp_url' => SiteSetting::get('stamp_url', ''),
+
+            // Leader / Organization Settings
+            'leader_name' => SiteSetting::get('leader_name', ''),
+            'leader_title' => SiteSetting::get('leader_title', ''),
+            'leader_nip' => SiteSetting::get('leader_nip', ''),
+
+            // Print Info
             'printed_by' => auth()->user()->name ?? 'System',
             'printed_at' => Carbon::now()->locale('id')->isoFormat('D MMMM Y, HH:mm'),
         ];

@@ -117,15 +117,45 @@
                     @endif
                 </td>
                 <td class="text-cell">
-                    @if(!empty($settings['parent_organization']))
-                        <div class="instansi-induk">{{ $settings['parent_organization'] }}</div>
+                    {{-- Hierarki Instansi 1 (Tingkat Atas) --}}
+                    @if(!empty($settings['letterhead_parent_org_1']))
+                        <div class="instansi-induk">{{ $settings['letterhead_parent_org_1'] }}</div>
                     @endif
-                    <h2>{{ $settings['site_name'] ?? 'BTIKP PORTAL' }}</h2>
-                    <p>{{ $settings['site_address'] ?? '' }}</p>
+
+                    {{-- Hierarki Instansi 2 (Tingkat Bawah) --}}
+                    @if(!empty($settings['letterhead_parent_org_2']))
+                        <div class="instansi-induk" style="font-size: 13pt; font-weight: bold;">{{ $settings['letterhead_parent_org_2'] }}</div>
+                    @endif
+
+                    {{-- Nama Organisasi Utama --}}
+                    <h2>{{ $settings['letterhead_org_name'] ?? $settings['site_name'] ?? 'BTIKP PORTAL' }}</h2>
+
+                    {{-- Alamat Lengkap --}}
                     <p>
-                        @if(!empty($settings['site_phone'])) Telp: {{ $settings['site_phone'] }} @endif
-                        @if(!empty($settings['site_email'])) | Email: {{ $settings['site_email'] }} @endif
-                        @if(!empty($settings['site_website'])) | Web: {{ $settings['site_website'] }} @endif
+                        {{ $settings['letterhead_street'] ?? $settings['site_address'] ?? '' }}@if(!empty($settings['letterhead_district'])), {{ $settings['letterhead_district'] }}@endif@if(!empty($settings['letterhead_city'])), {{ $settings['letterhead_city'] }}@endif@if(!empty($settings['letterhead_postal_code'])), {{ $settings['letterhead_postal_code'] }}@endif
+                    </p>
+
+                    {{-- Kontak --}}
+                    <p>
+                        @if(!empty($settings['letterhead_phone']))
+                            Telp: {{ $settings['letterhead_phone'] }}
+                        @elseif(!empty($settings['site_phone']))
+                            Telp: {{ $settings['site_phone'] }}
+                        @endif
+
+                        @if(!empty($settings['letterhead_fax']))
+                            | Fax: {{ $settings['letterhead_fax'] }}
+                        @endif
+
+                        @if(!empty($settings['letterhead_email']))
+                            | Email: {{ $settings['letterhead_email'] }}
+                        @elseif(!empty($settings['site_email']))
+                            | Email: {{ $settings['site_email'] }}
+                        @endif
+
+                        @if(!empty($settings['letterhead_website']))
+                            | Web: {{ $settings['letterhead_website'] }}
+                        @endif
                     </p>
                 </td>
             </tr>
@@ -140,7 +170,7 @@
                 <td style="width: 60%;"></td>
                 <td class="ttd-box">
                     <p>
-                        {{ $settings['site_city'] ?? 'Kota' }}, {{ date('d F Y') }}
+                        {{ $settings['letterhead_city'] ?? $settings['site_city'] ?? 'Kota' }}, {{ date('d F Y') }}
                     </p>
                     <p>{{ $settings['leader_title'] ?? 'Pimpinan' }}</p> 
                     

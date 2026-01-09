@@ -21,6 +21,7 @@ class SettingsController extends Controller
             'appearance' => SiteSetting::getByGroup('appearance'),
             'security' => SiteSetting::getByGroup('security'),
             'media' => SiteSetting::getByGroup('media'),
+            'letterhead' => SiteSetting::getByGroup('letterhead'),
         ];
 
         // Get raw settings for easy access
