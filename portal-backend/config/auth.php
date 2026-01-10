@@ -112,4 +112,17 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Remember Me Expiration
+    |--------------------------------------------------------------------------
+    |
+    | This value controls how long the "remember me" token will be valid.
+    | The default Laravel value is 5 years (2628000 minutes), but for
+    | government portal security, we set it to 30 days (43200 minutes).
+    |
+    */
+
+    'remember_me_expiration' => env('AUTH_REMEMBER_ME_EXPIRATION', 43200), // 30 days in minutes
+
 ];

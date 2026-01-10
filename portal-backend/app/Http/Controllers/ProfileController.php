@@ -238,6 +238,72 @@ class ProfileController extends Controller
     }
 
     /**
+     * Logout from all devices by resetting remember token and clearing sessions
+     */
+    public function logoutAllDevices(Request $request)
+    {
+        $user = auth()->user();
+        
+        if (!$user) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User tidak ditemukan'
+                ], 404);
+            }
+            return back()->with('error', 'User tidak ditemukan');
+        }
+
+        // Validate current password for security
+        $request->validate([
+            'current_password' => ['required'],
+        ]);
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Password tidak sesuai'
+                ], 422);
+            }
+            return back()->with('error', 'Password tidak sesuai');
+        }
+
+        // Reset remember token to invalidate all "remember me" cookies on other devices
+        $user->setRememberToken(\Illuminate\Support\Str::random(60));
+        $user->save();
+
+        // Delete all sessions for this user from database (if using database session driver)
+        if (config('session.driver') === 'database') {
+            \Illuminate\Support\Facades\DB::table(config('session.table', 'sessions'))
+                ->where('user_id', $user->id)
+                ->where('id', '!=', session()->getId())
+                ->delete();
+        }
+
+        // Log activity
+        ActivityLog::create([
+            'user_id' => $user->id,
+            'action' => 'security',
+            'model_type' => 'User',
+            'model_id' => $user->id,
+            'description' => 'Keluar dari semua perangkat lain',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'level' => 'warning',
+        ]);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Berhasil keluar dari semua perangkat lain. Anda mungkin perlu login ulang di perangkat lain.'
+            ]);
+        }
+
+        return back()->with('success', 'Berhasil keluar dari semua perangkat lain.');
+    }
+
+    /**
      * Delete photo file from storage completely
      */
     private function deletePhotoFile(string $photoPath): void

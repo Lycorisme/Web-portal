@@ -178,4 +178,126 @@
             </div>
         </form>
     </div>
+
+    {{-- Logout All Devices Section --}}
+    <div class="border-t border-surface-200 dark:border-surface-700 pt-6 mt-6">
+        <div class="flex flex-col sm:flex-row sm:items-start gap-4">
+            <div class="flex-1">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                        <i data-lucide="log-out" class="w-5 h-5 text-amber-600 dark:text-amber-400"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-surface-900 dark:text-white">Keluar dari Semua Perangkat</h3>
+                        <p class="text-xs text-surface-500 dark:text-surface-400">Logout dari semua sesi di perangkat lain</p>
+                    </div>
+                </div>
+                <p class="text-xs text-surface-500 dark:text-surface-400 mt-2">
+                    Jika Anda merasa ada aktivitas mencurigakan atau ingin mengamankan akun, gunakan fitur ini untuk mengeluarkan semua sesi login di perangkat lain. Cookie "Ingat Saya" pada perangkat lain akan menjadi tidak valid.
+                </p>
+            </div>
+            <button type="button" 
+                    @click="showLogoutAllModal = true"
+                    class="flex items-center justify-center gap-2 px-4 py-2.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-xl font-medium hover:bg-amber-200 dark:hover:bg-amber-800/40 transition-all duration-200 flex-shrink-0">
+                <i data-lucide="shield-alert" class="w-4 h-4"></i>
+                <span>Keluar dari Semua</span>
+            </button>
+        </div>
+    </div>
+
+    {{-- Logout All Devices Modal --}}
+    <div x-show="showLogoutAllModal" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         x-cloak
+         class="fixed inset-0 z-50 overflow-y-auto"
+         @keydown.escape.window="showLogoutAllModal = false">
+        
+        {{-- Backdrop --}}
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" @click="showLogoutAllModal = false"></div>
+        
+        {{-- Modal Content --}}
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="relative bg-white dark:bg-surface-900 rounded-2xl shadow-2xl w-full max-w-md mx-auto"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 @click.stop>
+                
+                {{-- Modal Header --}}
+                <div class="p-6 border-b border-surface-200 dark:border-surface-700">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                            <i data-lucide="shield-alert" class="w-6 h-6 text-amber-600 dark:text-amber-400"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-surface-900 dark:text-white">Konfirmasi Keamanan</h3>
+                            <p class="text-sm text-surface-500 dark:text-surface-400">Keluar dari semua perangkat lain</p>
+                        </div>
+                    </div>
+                </div>
+                
+                {{-- Modal Body --}}
+                <form @submit.prevent="logoutAllDevices()">
+                    <div class="p-6">
+                        <div class="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl mb-4">
+                            <p class="text-sm text-amber-700 dark:text-amber-300">
+                                <i data-lucide="info" class="w-4 h-4 inline mr-1"></i>
+                                Tindakan ini akan mengeluarkan Anda dari semua perangkat lain dan membatalkan semua token "Ingat Saya".
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+                                Masukkan Password untuk Konfirmasi <span class="text-accent-rose">*</span>
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <i data-lucide="lock" class="w-5 h-5 text-surface-400"></i>
+                                </div>
+                                <input :type="showLogoutPassword ? 'text' : 'password'" 
+                                       x-model="logoutAllPassword"
+                                       class="w-full pl-12 pr-12 py-3 bg-surface-50 dark:bg-surface-800/50 border border-surface-200 dark:border-surface-700 rounded-xl text-surface-900 dark:text-white placeholder-surface-400 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200"
+                                       placeholder="••••••••"
+                                       required>
+                                <button type="button" 
+                                        @click="showLogoutPassword = !showLogoutPassword"
+                                        class="absolute inset-y-0 right-0 pr-4 flex items-center text-surface-400 hover:text-surface-600">
+                                    <i :data-lucide="showLogoutPassword ? 'eye-off' : 'eye'" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {{-- Modal Footer --}}
+                    <div class="p-6 border-t border-surface-200 dark:border-surface-700 flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
+                        <button type="button" 
+                                @click="showLogoutAllModal = false; logoutAllPassword = ''"
+                                class="w-full sm:w-auto px-5 py-2.5 bg-surface-100 dark:bg-surface-800 text-surface-700 dark:text-surface-300 rounded-xl font-medium hover:bg-surface-200 dark:hover:bg-surface-700 transition-all duration-200">
+                            Batal
+                        </button>
+                        <button type="submit"
+                                :disabled="isLoggingOutAll"
+                                class="w-full sm:w-auto px-6 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-semibold shadow-lg shadow-amber-500/30 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                            <span x-show="!isLoggingOutAll" class="flex items-center gap-2">
+                                <i data-lucide="log-out" class="w-4 h-4"></i>
+                                Keluar dari Semua
+                            </span>
+                            <span x-show="isLoggingOutAll" class="flex items-center gap-2">
+                                <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                                Memproses...
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>

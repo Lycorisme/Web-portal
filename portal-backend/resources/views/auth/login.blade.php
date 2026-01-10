@@ -1,6 +1,7 @@
 @php
-    $siteName = $siteName ?? 'BTIKP Portal';
-    $logoUrl = $logoUrl ?? '';
+    $siteName = \App\Models\SiteSetting::get('site_name', 'BTIKP Portal');
+    $logoUrl = \App\Models\SiteSetting::get('logo_url');
+    $faviconUrl = \App\Models\SiteSetting::get('favicon_url');
 @endphp
 <!DOCTYPE html>
 <html lang="id" class="h-full">
@@ -8,6 +9,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $siteName }} - Access Point</title>
+    @if($faviconUrl)
+        <link rel="icon" href="{{ $faviconUrl }}" type="image/x-icon">
+        <link rel="shortcut icon" href="{{ $faviconUrl }}" type="image/x-icon">
+    @endif
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -137,9 +142,13 @@
             <!-- Header: Logo/Brand -->
             <div class="relative z-10">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center shadow-lg shadow-brand-500/20">
-                        <i data-lucide="layers" class="text-white w-7 h-7"></i>
-                    </div>
+                    @if($logoUrl)
+                        <img src="{{ $logoUrl }}" alt="{{ $siteName }}" class="h-12 w-auto rounded-xl shadow-lg shadow-brand-500/20">
+                    @else
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center shadow-lg shadow-brand-500/20">
+                            <i data-lucide="layers" class="text-white w-7 h-7"></i>
+                        </div>
+                    @endif
                     <span class="text-xl font-bold tracking-tight text-white">{{ $siteName }}</span>
                 </div>
             </div>
@@ -163,7 +172,7 @@
                         <span class="text-[10px] font-bold tracking-widest uppercase text-slate-300 group-hover:text-white transition-colors">Secure Access</span>
                     </div>
                     <div class="px-5 py-2.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm flex items-center gap-3 group hover:bg-white/10 transition-colors cursor-default">
-                        <div class="w-2 h-2 rounded-full bg-accent-400 shadow-[0_0_10px_theme(colors.accent.400)]"></div>
+                        <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-accent-400"></i>
                         <span class="text-[10px] font-bold tracking-widest uppercase text-slate-300 group-hover:text-white transition-colors">Real-time Sync</span>
                     </div>
                 </div>
@@ -209,33 +218,56 @@
                         <p class="text-slate-400">Masuk untuk mengakses dashboard Anda.</p>
                     </div>
 
-                    <form action="#" class="space-y-6">
+                    <form action="{{ route('login') }}" method="POST" class="space-y-6">
+                        @csrf
                         <div class="space-y-2">
-                            <label class="text-xs font-semibold text-slate-300 uppercase tracking-wider ml-1">Identity</label>
+                            <label for="email" class="text-xs font-semibold text-slate-300 uppercase tracking-wider ml-1">Identity</label>
                             <input type="email" 
-                                   class="w-full px-5 py-4 rounded-xl modern-input text-white placeholder-slate-500 text-sm font-medium" 
+                                   id="email"
+                                   name="email"
+                                   value="{{ old('email') }}"
+                                   required
+                                   autofocus
+                                   class="w-full px-5 py-4 rounded-xl modern-input text-white placeholder-slate-500 text-sm font-medium @error('email') border-red-500 @enderror" 
                                    placeholder="username@btikp.id">
+                            @error('email')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <div class="space-y-2">
-                            <label class="text-xs font-semibold text-slate-300 uppercase tracking-wider ml-1">Security Code</label>
+                            <label for="password" class="text-xs font-semibold text-slate-300 uppercase tracking-wider ml-1">Security Code</label>
                             <input type="password" 
-                                   class="w-full px-5 py-4 rounded-xl modern-input text-white placeholder-slate-500 text-sm font-medium tracking-widest" 
+                                   id="password"
+                                   name="password"
+                                   required
+                                   class="w-full px-5 py-4 rounded-xl modern-input text-white placeholder-slate-500 text-sm font-medium tracking-widest @error('password') border-red-500 @enderror" 
                                    placeholder="••••••••">
+                            @error('password')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <div class="flex items-center justify-between pt-2">
-                            <label class="flex items-center gap-3 cursor-pointer group">
-                                <div class="w-5 h-5 rounded border border-slate-600 bg-slate-800 flex items-center justify-center transition-colors group-hover:border-brand-500 relative">
-                                    <input type="checkbox" class="absolute inset-0 opacity-0 cursor-pointer peer">
-                                    <i data-lucide="check" class="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity"></i>
+                            <label class="flex items-center gap-3 cursor-pointer group" for="remember" x-data="{ checked: {{ old('remember') ? 'true' : 'false' }} }">
+                                <div class="w-5 h-5 rounded border flex items-center justify-center transition-all duration-200 relative"
+                                     :class="checked ? 'border-brand-500 bg-brand-500' : 'border-slate-600 bg-slate-800 group-hover:border-brand-500'">
+                                    <input type="checkbox" 
+                                           name="remember" 
+                                           id="remember" 
+                                           value="1"
+                                           class="absolute inset-0 opacity-0 cursor-pointer z-10" 
+                                           x-model="checked">
+                                    <svg x-show="checked" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                    </svg>
                                 </div>
                                 <span class="text-sm text-slate-400 group-hover:text-slate-300">Ingat Saya</span>
                             </label>
                             <a href="#" class="text-sm font-medium text-brand-400 hover:text-brand-300 transition-colors">Lupa Password?</a>
                         </div>
 
-                        <button class="w-full py-4 rounded-xl bg-gradient-to-r from-brand-600 to-accent-600 text-white font-bold text-sm tracking-widest shadow-lg shadow-brand-500/25 hover:shadow-brand-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-3 uppercase mt-4">
+                        <button type="submit" class="w-full py-4 rounded-xl bg-gradient-to-r from-brand-600 to-accent-600 text-white font-bold text-sm tracking-widest shadow-lg shadow-brand-500/25 hover:shadow-brand-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-3 uppercase mt-4">
                             Masuk Portal
                         </button>
                     </form>
@@ -287,7 +319,7 @@
                                     <i data-lucide="check" class="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity"></i>
                                 </div>
                                 <span class="text-xs text-slate-400 leading-relaxed group-hover:text-slate-300">
-                                    Saya menyetujui seluruh kebijakan privasi dan aturan keamanan data yang berlaku di BTIKP Portal.
+                                    Saya menyetujui seluruh kebijakan privasi dan aturan keamanan data yang berlaku di {{ $siteName }}.
                                 </span>
                             </label>
                         </div>

@@ -46,6 +46,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile/photo', [ProfileController::class, 'updatePhoto'])->name('profile.photo.update');
     Route::delete('/profile/photo', [ProfileController::class, 'deletePhoto'])->name('profile.photo.delete');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
+    Route::post('/profile/logout-all-devices', [ProfileController::class, 'logoutAllDevices'])->name('profile.logout-all-devices');
 
     // Article Routes - All authenticated users (with role-based filtering in controller)
     Route::get('/articles', [ArticleController::class, 'index'])->name('articles');

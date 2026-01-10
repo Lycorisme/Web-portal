@@ -7,6 +7,12 @@ function profilePage() {
         showNewPassword: false,
         showConfirmPassword: false,
         
+        // Logout All Devices State
+        showLogoutAllModal: false,
+        showLogoutPassword: false,
+        logoutAllPassword: '',
+        isLoggingOutAll: false,
+        
         // Photo Upload State
         isUploading: false,
         pendingPhotoFile: null,      // File yang dipilih tapi belum diupload
@@ -348,6 +354,49 @@ function profilePage() {
             this.showCurrentPassword = false;
             this.showNewPassword = false;
             this.showConfirmPassword = false;
+        },
+        
+        // Logout from all devices
+        async logoutAllDevices() {
+            if (!this.logoutAllPassword) {
+                showError('Validasi Gagal', 'Password harus diisi untuk konfirmasi');
+                return;
+            }
+            
+            this.isLoggingOutAll = true;
+            
+            try {
+                const response = await fetch('{{ route("profile.logout-all-devices") }}', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        current_password: this.logoutAllPassword
+                    }),
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    this.showLogoutAllModal = false;
+                    this.logoutAllPassword = '';
+                    showSuccess('Berhasil!', data.message);
+                    
+                    // Refresh icons
+                    this.$nextTick(() => lucide.createIcons());
+                } else {
+                    throw new Error(data.message || 'Gagal keluar dari semua perangkat');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Gagal!', error.message || 'Terjadi kesalahan');
+            } finally {
+                this.isLoggingOutAll = false;
+            }
         }
     };
 }
