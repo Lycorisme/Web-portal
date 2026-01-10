@@ -74,26 +74,31 @@ class ReportController extends Controller
 
     /**
      * Parse date range from request.
+     * Returns [startDate|null, endDate|null, hasDateFilter].
      */
     private function parseDateRange(Request $request): array
     {
-        $startDate = $request->input('start_date') 
-            ? Carbon::parse($request->input('start_date'))->startOfDay() 
-            : Carbon::now()->startOfDay();
-        
-        $endDate = $request->input('end_date') 
-            ? Carbon::parse($request->input('end_date'))->endOfDay() 
-            : Carbon::now()->endOfDay();
+        $hasStartDate = $request->filled('start_date');
+        $hasEndDate = $request->filled('end_date');
+        $hasDateFilter = $hasStartDate || $hasEndDate;
 
-        return [$startDate, $endDate];
+        $startDate = $hasStartDate 
+            ? Carbon::parse($request->input('start_date'))->startOfDay() 
+            : null;
+        
+        $endDate = $hasEndDate 
+            ? Carbon::parse($request->input('end_date'))->endOfDay() 
+            : null;
+
+        return [$startDate, $endDate, $hasDateFilter];
     }
 
     /**
-     * Format date range for display.
+     * Format date for display.
      */
-    private function formatDateRange(Carbon $startDate, Carbon $endDate): string
+    private function formatDate(?Carbon $date): string
     {
-        return $startDate->locale('id')->isoFormat('D MMMM Y') . ' - ' . $endDate->locale('id')->isoFormat('D MMMM Y');
+        return $date ? $date->locale('id')->isoFormat('D MMMM Y') : '';
     }
 
     /**
@@ -101,10 +106,20 @@ class ReportController extends Controller
      */
     public function generateArticleReport(Request $request)
     {
-        [$startDate, $endDate] = $this->parseDateRange($request);
+        [$startDate, $endDate, $hasDateFilter] = $this->parseDateRange($request);
         
-        $query = Article::with(['author', 'categoryRelation'])
-            ->whereBetween('created_at', [$startDate, $endDate]);
+        $query = Article::with(['author', 'categoryRelation']);
+
+        // Apply date filter only if provided
+        if ($hasDateFilter) {
+            if ($startDate && $endDate) {
+                $query->whereBetween('created_at', [$startDate, $endDate]);
+            } elseif ($startDate) {
+                $query->where('created_at', '>=', $startDate);
+            } elseif ($endDate) {
+                $query->where('created_at', '<=', $endDate);
+            }
+        }
 
         // Filter by status if provided
         if ($request->filled('status')) {
@@ -126,7 +141,9 @@ class ReportController extends Controller
         $data = [
             'settings' => $this->getReportSettings(),
             'title' => 'Laporan Data Artikel',
-            'period' => $this->formatDateRange($startDate, $endDate),
+            'date_from' => $this->formatDate($startDate),
+            'date_to' => $this->formatDate($endDate),
+            'has_date_filter' => $hasDateFilter,
             'items' => $articles,
             'columns' => ['No', 'Judul', 'Kategori', 'Penulis', 'Status', 'Tanggal Publish'],
         ];
@@ -134,7 +151,7 @@ class ReportController extends Controller
         $pdf = Pdf::loadView('reports.pdf.articles', $data);
         $pdf->setPaper('A4', 'portrait');
         
-        $filename = 'laporan-artikel-' . $startDate->format('Ymd') . '-' . $endDate->format('Ymd') . '.pdf';
+        $filename = 'laporan-artikel-' . ($startDate ? $startDate->format('Ymd') : 'all') . '-' . ($endDate ? $endDate->format('Ymd') : 'now') . '.pdf';
         
         return $pdf->download($filename);
     }
@@ -144,10 +161,20 @@ class ReportController extends Controller
      */
     public function generateCategoryReport(Request $request)
     {
-        [$startDate, $endDate] = $this->parseDateRange($request);
+        [$startDate, $endDate, $hasDateFilter] = $this->parseDateRange($request);
         
-        $query = Category::withCount('articles')
-            ->whereBetween('created_at', [$startDate, $endDate]);
+        $query = Category::withCount('articles');
+
+        // Apply date filter only if provided
+        if ($hasDateFilter) {
+            if ($startDate && $endDate) {
+                $query->whereBetween('created_at', [$startDate, $endDate]);
+            } elseif ($startDate) {
+                $query->where('created_at', '>=', $startDate);
+            } elseif ($endDate) {
+                $query->where('created_at', '<=', $endDate);
+            }
+        }
 
         // Filter by status if provided
         if ($request->filled('is_active')) {
@@ -159,7 +186,9 @@ class ReportController extends Controller
         $data = [
             'settings' => $this->getReportSettings(),
             'title' => 'Laporan Data Kategori',
-            'period' => $this->formatDateRange($startDate, $endDate),
+            'date_from' => $this->formatDate($startDate),
+            'date_to' => $this->formatDate($endDate),
+            'has_date_filter' => $hasDateFilter,
             'items' => $categories,
             'columns' => ['No', 'Nama Kategori', 'Slug', 'Jumlah Artikel', 'Status', 'Dibuat'],
         ];
@@ -167,7 +196,7 @@ class ReportController extends Controller
         $pdf = Pdf::loadView('reports.pdf.categories', $data);
         $pdf->setPaper('A4', 'portrait');
         
-        $filename = 'laporan-kategori-' . $startDate->format('Ymd') . '-' . $endDate->format('Ymd') . '.pdf';
+        $filename = 'laporan-kategori-' . ($startDate ? $startDate->format('Ymd') : 'all') . '-' . ($endDate ? $endDate->format('Ymd') : 'now') . '.pdf';
         
         return $pdf->download($filename);
     }
@@ -177,9 +206,20 @@ class ReportController extends Controller
      */
     public function generateUserReport(Request $request)
     {
-        [$startDate, $endDate] = $this->parseDateRange($request);
+        [$startDate, $endDate, $hasDateFilter] = $this->parseDateRange($request);
         
-        $query = User::whereBetween('created_at', [$startDate, $endDate]);
+        $query = User::query();
+
+        // Apply date filter only if provided
+        if ($hasDateFilter) {
+            if ($startDate && $endDate) {
+                $query->whereBetween('created_at', [$startDate, $endDate]);
+            } elseif ($startDate) {
+                $query->where('created_at', '>=', $startDate);
+            } elseif ($endDate) {
+                $query->where('created_at', '<=', $endDate);
+            }
+        }
 
         // Filter by role if provided
         if ($request->filled('role')) {
@@ -191,7 +231,9 @@ class ReportController extends Controller
         $data = [
             'settings' => $this->getReportSettings(),
             'title' => 'Laporan Data Pengguna',
-            'period' => $this->formatDateRange($startDate, $endDate),
+            'date_from' => $this->formatDate($startDate),
+            'date_to' => $this->formatDate($endDate),
+            'has_date_filter' => $hasDateFilter,
             'items' => $users,
             'columns' => ['No', 'Nama', 'Email', 'Role', 'Status', 'Login Terakhir'],
         ];
@@ -199,7 +241,7 @@ class ReportController extends Controller
         $pdf = Pdf::loadView('reports.pdf.users', $data);
         $pdf->setPaper('A4', 'portrait');
         
-        $filename = 'laporan-pengguna-' . $startDate->format('Ymd') . '-' . $endDate->format('Ymd') . '.pdf';
+        $filename = 'laporan-pengguna-' . ($startDate ? $startDate->format('Ymd') : 'all') . '-' . ($endDate ? $endDate->format('Ymd') : 'now') . '.pdf';
         
         return $pdf->download($filename);
     }
@@ -209,10 +251,20 @@ class ReportController extends Controller
      */
     public function generateActivityLogReport(Request $request)
     {
-        [$startDate, $endDate] = $this->parseDateRange($request);
+        [$startDate, $endDate, $hasDateFilter] = $this->parseDateRange($request);
         
-        $query = ActivityLog::with('user')
-            ->whereBetween('created_at', [$startDate, $endDate]);
+        $query = ActivityLog::with('user');
+
+        // Apply date filter only if provided
+        if ($hasDateFilter) {
+            if ($startDate && $endDate) {
+                $query->whereBetween('created_at', [$startDate, $endDate]);
+            } elseif ($startDate) {
+                $query->where('created_at', '>=', $startDate);
+            } elseif ($endDate) {
+                $query->where('created_at', '<=', $endDate);
+            }
+        }
 
         // Filter by action if provided
         if ($request->filled('action')) {
@@ -234,7 +286,9 @@ class ReportController extends Controller
         $data = [
             'settings' => $this->getReportSettings(),
             'title' => 'Laporan Activity Log',
-            'period' => $this->formatDateRange($startDate, $endDate),
+            'date_from' => $this->formatDate($startDate),
+            'date_to' => $this->formatDate($endDate),
+            'has_date_filter' => $hasDateFilter,
             'items' => $activityLogs,
             'columns' => ['No', 'Tanggal', 'User', 'Action', 'Deskripsi', 'IP Address'],
         ];
@@ -242,7 +296,7 @@ class ReportController extends Controller
         $pdf = Pdf::loadView('reports.pdf.activity-logs', $data);
         $pdf->setPaper('A4', 'portrait');
         
-        $filename = 'laporan-activity-log-' . $startDate->format('Ymd') . '-' . $endDate->format('Ymd') . '.pdf';
+        $filename = 'laporan-activity-log-' . ($startDate ? $startDate->format('Ymd') : 'all') . '-' . ($endDate ? $endDate->format('Ymd') : 'now') . '.pdf';
         
         return $pdf->download($filename);
     }
@@ -252,9 +306,20 @@ class ReportController extends Controller
      */
     public function generateBlockedClientReport(Request $request)
     {
-        [$startDate, $endDate] = $this->parseDateRange($request);
+        [$startDate, $endDate, $hasDateFilter] = $this->parseDateRange($request);
         
-        $query = BlockedClient::whereBetween('created_at', [$startDate, $endDate]);
+        $query = BlockedClient::query();
+
+        // Apply date filter only if provided
+        if ($hasDateFilter) {
+            if ($startDate && $endDate) {
+                $query->whereBetween('created_at', [$startDate, $endDate]);
+            } elseif ($startDate) {
+                $query->where('created_at', '>=', $startDate);
+            } elseif ($endDate) {
+                $query->where('created_at', '<=', $endDate);
+            }
+        }
 
         // Filter by status if provided
         if ($request->filled('is_blocked')) {
@@ -266,7 +331,9 @@ class ReportController extends Controller
         $data = [
             'settings' => $this->getReportSettings(),
             'title' => 'Laporan IP Terblokir',
-            'period' => $this->formatDateRange($startDate, $endDate),
+            'date_from' => $this->formatDate($startDate),
+            'date_to' => $this->formatDate($endDate),
+            'has_date_filter' => $hasDateFilter,
             'items' => $blockedClients,
             'columns' => ['No', 'IP Address', 'Alasan', 'Diblokir Sampai', 'Status', 'User Agent'],
         ];
@@ -274,7 +341,7 @@ class ReportController extends Controller
         $pdf = Pdf::loadView('reports.pdf.blocked-clients', $data);
         $pdf->setPaper('A4', 'portrait');
         
-        $filename = 'laporan-ip-terblokir-' . $startDate->format('Ymd') . '-' . $endDate->format('Ymd') . '.pdf';
+        $filename = 'laporan-ip-terblokir-' . ($startDate ? $startDate->format('Ymd') : 'all') . '-' . ($endDate ? $endDate->format('Ymd') : 'now') . '.pdf';
         
         return $pdf->download($filename);
     }
@@ -284,10 +351,20 @@ class ReportController extends Controller
      */
     public function generateGalleryReport(Request $request)
     {
-        [$startDate, $endDate] = $this->parseDateRange($request);
+        [$startDate, $endDate, $hasDateFilter] = $this->parseDateRange($request);
         
-        $query = Gallery::with('uploader')
-            ->whereBetween('created_at', [$startDate, $endDate]);
+        $query = Gallery::with('uploader');
+
+        // Apply date filter only if provided
+        if ($hasDateFilter) {
+            if ($startDate && $endDate) {
+                $query->whereBetween('created_at', [$startDate, $endDate]);
+            } elseif ($startDate) {
+                $query->where('created_at', '>=', $startDate);
+            } elseif ($endDate) {
+                $query->where('created_at', '<=', $endDate);
+            }
+        }
 
         // Filter by media type if provided
         if ($request->filled('media_type')) {
@@ -309,7 +386,9 @@ class ReportController extends Controller
         $data = [
             'settings' => $this->getReportSettings(),
             'title' => 'Laporan Data Gallery',
-            'period' => $this->formatDateRange($startDate, $endDate),
+            'date_from' => $this->formatDate($startDate),
+            'date_to' => $this->formatDate($endDate),
+            'has_date_filter' => $hasDateFilter,
             'items' => $galleries,
             'columns' => ['No', 'Judul', 'Album', 'Tipe Media', 'Uploader', 'Tanggal Upload'],
         ];
@@ -317,7 +396,7 @@ class ReportController extends Controller
         $pdf = Pdf::loadView('reports.pdf.galleries', $data);
         $pdf->setPaper('A4', 'portrait');
         
-        $filename = 'laporan-gallery-' . $startDate->format('Ymd') . '-' . $endDate->format('Ymd') . '.pdf';
+        $filename = 'laporan-gallery-' . ($startDate ? $startDate->format('Ymd') : 'all') . '-' . ($endDate ? $endDate->format('Ymd') : 'now') . '.pdf';
         
         return $pdf->download($filename);
     }

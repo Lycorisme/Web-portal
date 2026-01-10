@@ -16,7 +16,13 @@
             <tr>
                 <td style="width: 18%; border: none; padding: 1px;"><strong>Periode Data</strong></td>
                 <td style="width: 2%; border: none; padding: 1px;">:</td>
-                <td style="border: none; padding: 1px;">{{ $date_from ?? '-' }} s/d {{ $date_to ?? '-' }}</td>
+                <td style="border: none; padding: 1px;">
+                    @if($has_date_filter ?? false)
+                        {{ $date_from ?: '-' }} s/d {{ $date_to ?: '-' }}
+                    @else
+                        Semua Data
+                    @endif
+                </td>
             </tr>
             <tr>
                 <td style="width: 18%; border: none; padding: 1px;"><strong>Petugas Penarik Data</strong></td>

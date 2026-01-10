@@ -3,7 +3,7 @@
 @section('content')
     <div class="judul">
         <h3>LAPORAN DATA IP TERBLOKIR</h3>
-        <p>Periode: {{ $date_from ?? '-' }} s/d {{ $date_to ?? '-' }}</p>
+        <p>Periode: @if($has_date_filter ?? false){{ $date_from ?: '-' }} s/d {{ $date_to ?: '-' }}@else Semua Data @endif</p>
     </div>
 
     <table class="data-table">
