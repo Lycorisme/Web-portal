@@ -1,10 +1,14 @@
 <div class="bg-white dark:bg-surface-900 rounded-2xl border border-surface-200 dark:border-surface-800 shadow-sm overflow-hidden flex flex-col">
     <div class="p-5 border-b border-surface-200 dark:border-surface-800 flex items-center justify-between">
         <div>
-            <h2 class="font-bold text-lg text-surface-900 dark:text-white">Berita Terbaru</h2>
-            <p class="text-sm text-surface-500 dark:text-surface-400">Update publikasi terakhir</p>
+            <h2 class="font-bold text-lg text-surface-900 dark:text-white">
+                {{ $stats['is_author'] ?? false ? 'Berita Saya' : 'Berita Terbaru' }}
+            </h2>
+            <p class="text-sm text-surface-500 dark:text-surface-400">
+                {{ $stats['is_author'] ?? false ? 'Artikel yang Anda tulis' : 'Update publikasi terakhir' }}
+            </p>
         </div>
-        <a href="#" class="group inline-flex items-center gap-1 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700">
+        <a href="{{ route('articles') }}" class="group inline-flex items-center gap-1 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700">
             Semua Berita
             <i data-lucide="arrow-right" class="w-4 h-4 transition-transform group-hover:translate-x-1"></i>
         </a>

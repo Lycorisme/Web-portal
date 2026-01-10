@@ -30,19 +30,45 @@
             </h1>
             
             <p class="text-sm text-surface-500 dark:text-surface-400 font-medium max-w-xl mx-auto md:mx-0">
-                @if($stats['draft_articles'] > 0)
-                    You have <span class="text-surface-900 dark:text-white font-semibold">{{ $stats['draft_articles'] }} drafts</span> pending review.
+                @if($stats['is_author'])
+                    {{-- Author: Personal progress message --}}
+                    @if($stats['pending_articles'] > 0)
+                        Anda memiliki <span class="text-amber-600 dark:text-amber-400 font-semibold">{{ $stats['pending_articles'] }} artikel</span> yang menunggu persetujuan editor.
+                    @elseif($stats['draft_articles'] > 0)
+                        Anda memiliki <span class="text-blue-600 dark:text-blue-400 font-semibold">{{ $stats['draft_articles'] }} draft</span> yang perlu diselesaikan.
+                    @else
+                        Semua artikel Anda sudah dipublikasikan. Tetap produktif! 🎉
+                    @endif
+                @elseif($stats['is_editor'])
+                    {{-- Editor: Review queue message --}}
+                    @if($stats['pending_articles'] > 0)
+                        Ada <span class="text-amber-600 dark:text-amber-400 font-semibold">{{ $stats['pending_articles'] }} artikel</span> yang perlu Anda review dari para kontributor.
+                    @else
+                        Semua artikel sudah direview. Antrean kosong! ✨
+                    @endif
                 @else
-                    Everything is up to date. Have a productive day!
+                    {{-- Admin: Global status message --}}
+                    @if($stats['pending_articles'] > 0)
+                        Ada <span class="text-surface-900 dark:text-white font-semibold">{{ $stats['pending_articles'] }} artikel pending</span> menunggu review tim.
+                    @else
+                        Semua sistem berjalan normal. Have a productive day! 🚀
+                    @endif
                 @endif
             </p>
 
             {{-- Compact Actions --}}
-            @if($stats['draft_articles'] > 0)
+            @if($stats['is_author'] && $stats['draft_articles'] > 0)
             <div class="flex items-center justify-center md:justify-start gap-3 mt-5">
-                <a href="#" class="px-5 py-2.5 bg-surface-900 dark:bg-surface-800 text-white border border-surface-700 rounded-lg text-sm font-semibold hover:bg-surface-800 dark:hover:bg-surface-700 transition-colors flex items-center gap-2">
+                <a href="{{ route('articles') }}" class="px-5 py-2.5 bg-surface-900 dark:bg-surface-800 text-white border border-surface-700 rounded-lg text-sm font-semibold hover:bg-surface-800 dark:hover:bg-surface-700 transition-colors flex items-center gap-2">
+                    <i data-lucide="file-edit" class="w-4 h-4 text-theme-400"></i>
+                    <span>Lanjutkan Draft</span>
+                </a>
+            </div>
+            @elseif(($stats['is_editor'] || $stats['is_admin']) && $stats['pending_articles'] > 0)
+            <div class="flex items-center justify-center md:justify-start gap-3 mt-5">
+                <a href="{{ route('articles') }}?status=pending" class="px-5 py-2.5 bg-surface-900 dark:bg-surface-800 text-white border border-surface-700 rounded-lg text-sm font-semibold hover:bg-surface-800 dark:hover:bg-surface-700 transition-colors flex items-center gap-2">
                     <i data-lucide="file-check" class="w-4 h-4 text-theme-400"></i>
-                    <span>Review Draft</span>
+                    <span>Review Artikel</span>
                 </a>
             </div>
             @endif

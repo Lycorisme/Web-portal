@@ -35,8 +35,10 @@
                 {{-- Quick Actions --}}
                 @include('dashboard.partials.quick-actions')
 
-                {{-- Security Widget --}}
-                @include('dashboard.partials.security-widget')
+                {{-- Security Widget - Admin Only --}}
+                @if($stats['is_admin'] ?? false)
+                    @include('dashboard.partials.security-widget')
+                @endif
 
                 {{-- Activity Log --}}
                 @include('dashboard.partials.activity-log')

@@ -10,58 +10,82 @@ use App\Models\BlockedClient;
 use App\Models\Category;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
     /**
      * Display the dashboard page.
+     * Dashboard content is dynamically filtered based on user role:
+     * - Super Admin/Admin: Global view (all data, security stats)
+     * - Editor: Task-based view (all pending articles for review)
+     * - Author: Personal view (only their own articles/stats)
      *
      * @return \Illuminate\View\View
      */
     public function index()
     {
-        // Statistics from database
-        $totalArticles = Article::count();
-        $publishedArticles = Article::published()->count();
-        $draftArticles = Article::draft()->count();
-        $pendingArticles = Article::pending()->count();
+        $user = Auth::user();
+        $isAuthor = $user->isAuthor();
+        $isEditor = $user->isEditor();
+        $isAdmin = $user->isSuperAdmin() || in_array($user->role, ['admin']);
         
-        // Total views from all articles
-        $totalViews = Article::sum('views');
+        // Build base query based on role
+        $articleQuery = $this->getArticleQueryByRole($user);
+        
+        // Statistics from database (role-filtered)
+        $totalArticles = (clone $articleQuery)->count();
+        $publishedArticles = (clone $articleQuery)->where('status', 'published')->count();
+        $draftArticles = (clone $articleQuery)->where('status', 'draft')->count();
+        $pendingArticles = $this->getPendingCount($user);
+        
+        // Total views (role-filtered)
+        $totalViews = (clone $articleQuery)->sum('views');
         $formattedViews = $this->formatNumber($totalViews);
         
-        // Active admins (users who logged in within last 30 days)
-        $activeAdmins = User::whereNotNull('last_login_at')
-            ->where('last_login_at', '>=', now()->subDays(30))
-            ->count();
-        $totalAdmins = User::count();
+        // Active admins (users who logged in within last 30 days) - Admin/Editor only
+        $activeAdmins = 0;
+        $totalAdmins = 0;
+        if (!$isAuthor) {
+            $activeAdmins = User::whereNotNull('last_login_at')
+                ->where('last_login_at', '>=', now()->subDays(30))
+                ->count();
+            $totalAdmins = User::count();
+        }
         
-        // Blocked IPs count
-        $blockedIps = BlockedClient::activeBlocks()->count();
+        // Blocked IPs count - Admin only (security feature)
+        $blockedIps = 0;
+        if ($isAdmin) {
+            $blockedIps = BlockedClient::activeBlocks()->count();
+        }
         
-        // Calculate growth percentages (compare with previous period)
-        $articlesThisMonth = Article::whereMonth('created_at', now()->month)
+        // Calculate growth percentages (role-filtered)
+        $articlesThisMonth = (clone $articleQuery)
+            ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->count();
-        $articlesLastMonth = Article::whereMonth('created_at', now()->subMonth()->month)
+        $articlesLastMonth = (clone $articleQuery)
+            ->whereMonth('created_at', now()->subMonth()->month)
             ->whereYear('created_at', now()->subMonth()->year)
             ->count();
         $articleGrowth = $articlesLastMonth > 0 
             ? round((($articlesThisMonth - $articlesLastMonth) / $articlesLastMonth) * 100) 
-            : 0;
+            : ($articlesThisMonth > 0 ? 100 : 0);
         
-        // Views growth
-        $viewsThisMonth = Article::whereMonth('created_at', now()->month)
+        // Views growth (role-filtered)
+        $viewsThisMonth = (clone $articleQuery)
+            ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->sum('views');
-        $viewsLastMonth = Article::whereMonth('created_at', now()->subMonth()->month)
+        $viewsLastMonth = (clone $articleQuery)
+            ->whereMonth('created_at', now()->subMonth()->month)
             ->whereYear('created_at', now()->subMonth()->year)
             ->sum('views');
         $viewsGrowth = $viewsLastMonth > 0 
             ? round((($viewsThisMonth - $viewsLastMonth) / $viewsLastMonth) * 100) 
-            : 0;
+            : ($viewsThisMonth > 0 ? 100 : 0);
         
-        // Stats array
+        // Stats array with role context
         $stats = [
             'total_articles' => $totalArticles,
             'published_articles' => $publishedArticles,
@@ -74,25 +98,50 @@ class DashboardController extends Controller
             'blocked_ips' => $blockedIps,
             'article_growth' => $articleGrowth,
             'views_growth' => $viewsGrowth,
+            // Role context for view labels
+            'is_author' => $isAuthor,
+            'is_editor' => $isEditor,
+            'is_admin' => $isAdmin,
         ];
 
-        // Recent articles from database
-        $recentArticles = Article::with(['author', 'categoryRelation'])
+        // Recent articles (role-filtered)
+        $recentArticles = (clone $articleQuery)
+            ->with(['author', 'categoryRelation'])
             ->latest('updated_at')
             ->take(5)
             ->get();
 
-        // Recent activity logs from database
-        $activityLogs = ActivityLog::with('user')
-            ->orderBy('created_at', 'desc')
-            ->take(10)
-            ->get();
+        // Recent activity logs - Admin only, or own activities for others
+        if ($isAdmin) {
+            $activityLogs = ActivityLog::with('user')
+                ->orderBy('created_at', 'desc')
+                ->take(10)
+                ->get();
+        } else {
+            // Non-admins see only their own activity
+            $activityLogs = ActivityLog::with('user')
+                ->where('user_id', $user->id)
+                ->orderBy('created_at', 'desc')
+                ->take(10)
+                ->get();
+        }
 
-        // Category distribution for chart
-        $categories = Category::withCount('articles')
-            ->orderBy('articles_count', 'desc')
-            ->take(5)
-            ->get();
+        // Category distribution for chart (role-filtered for authors)
+        if ($isAuthor) {
+            // Authors see distribution of their own articles
+            $categories = Category::withCount(['articles' => function ($query) use ($user) {
+                    $query->where('author_id', $user->id);
+                }])
+                ->having('articles_count', '>', 0)
+                ->orderBy('articles_count', 'desc')
+                ->take(5)
+                ->get();
+        } else {
+            $categories = Category::withCount('articles')
+                ->orderBy('articles_count', 'desc')
+                ->take(5)
+                ->get();
+        }
         
         // Calculate category percentages
         $totalCategoryArticles = $categories->sum('articles_count');
@@ -108,16 +157,15 @@ class DashboardController extends Controller
             ];
         });
 
-        // Visit statistics for the last 7 days (using article views as proxy)
-        // In a real app, you'd have a separate page_views or analytics table
+        // Visit statistics for the last 7 days (role-filtered)
         $visitStats = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i);
             $dayName = $this->getDayName($date->dayOfWeek);
             
-            // Get articles created/updated on this day and their views
-            $dayViews = Article::whereDate('updated_at', $date->toDateString())
-                ->sum('views');
+            // Get views based on role
+            $dayQuery = (clone $articleQuery)->whereDate('updated_at', $date->toDateString());
+            $dayViews = $dayQuery->sum('views');
             
             $visitStats[] = [
                 'day' => $dayName,
@@ -134,8 +182,8 @@ class DashboardController extends Controller
             return $stat;
         }, $visitStats);
 
-        // Security score calculation
-        $securityScore = $this->calculateSecurityScore($blockedIps);
+        // Security score calculation - Admin only
+        $securityScore = $isAdmin ? $this->calculateSecurityScore($blockedIps) : null;
 
         return view('dashboard', compact(
             'stats',
@@ -146,6 +194,38 @@ class DashboardController extends Controller
             'totalCategoryArticles',
             'securityScore'
         ));
+    }
+    
+    /**
+     * Get article query filtered by user role.
+     * Authors only see their own articles.
+     * Editors/Admins see all articles.
+     */
+    private function getArticleQueryByRole(User $user)
+    {
+        if ($user->isAuthor()) {
+            return Article::where('author_id', $user->id);
+        }
+        
+        return Article::query();
+    }
+    
+    /**
+     * Get pending articles count based on role.
+     * - Authors: Only their own pending articles (personal progress)
+     * - Editors/Admins: All pending articles (review queue)
+     */
+    private function getPendingCount(User $user): int
+    {
+        if ($user->isAuthor()) {
+            // Authors see their own pending count
+            return Article::where('author_id', $user->id)
+                ->where('status', 'pending')
+                ->count();
+        }
+        
+        // Editors/Admins see total review queue
+        return Article::where('status', 'pending')->count();
     }
 
     /**
