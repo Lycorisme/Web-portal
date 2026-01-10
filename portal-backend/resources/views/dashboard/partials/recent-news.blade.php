@@ -16,11 +16,25 @@
 
     <div class="divide-y divide-surface-100 dark:divide-surface-800/50">
         @forelse($recentArticles as $article)
-        <div class="group p-4 hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors flex gap-4 items-start">
+        <div 
+            class="group p-4 hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors flex gap-4 items-start cursor-pointer"
+            @click="openArticleModal({{ $article->id }})"
+        >
              {{-- Thumbnail --}}
              <div class="shrink-0 w-20 h-16 sm:w-24 sm:h-20 bg-surface-100 dark:bg-surface-800 rounded-lg overflow-hidden relative">
                 @if($article->thumbnail)
-                    <img src="{{ asset('storage/' . $article->thumbnail) }}" alt="" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                    @php
+                        $thumbUrl = $article->thumbnail;
+                        if (str_starts_with($thumbUrl, '/storage/') || str_starts_with($thumbUrl, 'storage/')) {
+                            $thumbUrl = asset($thumbUrl);
+                        } elseif (!str_starts_with($thumbUrl, 'http')) {
+                            $thumbUrl = asset('storage/' . $thumbUrl);
+                        }
+                    @endphp
+                    <img src="{{ $thumbUrl }}" alt="" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="hidden items-center justify-center w-full h-full text-surface-300 absolute inset-0">
+                        <i data-lucide="image" class="w-8 h-8"></i>
+                    </div>
                 @else
                     <div class="flex items-center justify-center w-full h-full text-surface-300">
                         <i data-lucide="image" class="w-8 h-8"></i>

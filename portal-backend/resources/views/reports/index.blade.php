@@ -18,7 +18,7 @@
                     </div>
                     <div>
                         <h3 class="font-semibold text-surface-900 dark:text-white">Laporan Artikel</h3>
-                        <p class="text-sm text-surface-500 dark:text-surface-400">Data artikel berdasarkan periode</p>
+                        <p class="text-sm text-surface-500 dark:text-surface-400">Data artikel</p>
                     </div>
                 </div>
                 
@@ -69,7 +69,7 @@
                     </div>
                     <div>
                         <h3 class="font-semibold text-surface-900 dark:text-white">Laporan Kategori</h3>
-                        <p class="text-sm text-surface-500 dark:text-surface-400">Data kategori dan jumlah artikel</p>
+                        <p class="text-sm text-surface-500 dark:text-surface-400">Data kategori</p>
                     </div>
                 </div>
                 

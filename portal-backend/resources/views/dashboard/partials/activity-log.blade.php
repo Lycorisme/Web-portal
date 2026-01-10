@@ -7,8 +7,11 @@
     </div>
     <div class="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
         @forelse($activityLogs as $log)
-        <div class="flex gap-3 relative pl-2">
-            <div class="absolute left-0 top-1.5 w-1.5 h-1.5 rounded-full {{ $loop->first ? 'bg-primary-500' : 'bg-surface-300 dark:bg-surface-600' }}"></div>
+        <div 
+            class="flex gap-3 relative pl-2 cursor-pointer hover:bg-surface-50 dark:hover:bg-surface-800/30 rounded-lg p-2 -mx-2 transition-colors"
+            @click="openActivityModal({{ $log->id }})"
+        >
+            <div class="absolute left-0 top-3.5 w-1.5 h-1.5 rounded-full {{ $loop->first ? 'bg-primary-500' : 'bg-surface-300 dark:bg-surface-600' }}"></div>
             <div class="flex-1">
                 <p class="text-xs text-surface-500 dark:text-surface-400 mb-0.5">{{ $log->created_at->diffForHumans() }}</p>
                 <p class="text-sm text-surface-800 dark:text-surface-200 leading-snug">

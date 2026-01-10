@@ -85,6 +85,14 @@ class DashboardController extends Controller
             ? round((($viewsThisMonth - $viewsLastMonth) / $viewsLastMonth) * 100) 
             : ($viewsThisMonth > 0 ? 100 : 0);
         
+        // Failed logins in last 24 hours - Admin only
+        $failedLogins = 0;
+        if ($isAdmin) {
+            $failedLogins = ActivityLog::where('action', ActivityLog::ACTION_LOGIN_FAILED)
+                ->where('created_at', '>=', now()->subHours(24))
+                ->count();
+        }
+        
         // Stats array with role context
         $stats = [
             'total_articles' => $totalArticles,
@@ -96,6 +104,7 @@ class DashboardController extends Controller
             'active_admins' => $activeAdmins,
             'total_admins' => $totalAdmins,
             'blocked_ips' => $blockedIps,
+            'failed_logins' => $failedLogins,
             'article_growth' => $articleGrowth,
             'views_growth' => $viewsGrowth,
             // Role context for view labels
@@ -185,6 +194,78 @@ class DashboardController extends Controller
         // Security score calculation - Admin only
         $securityScore = $isAdmin ? $this->calculateSecurityScore($blockedIps) : null;
 
+        // Prepare article data for modal JS
+        $articlesForModal = [];
+        foreach ($recentArticles as $article) {
+            // Handle thumbnail path - may be stored with /storage/ prefix or without
+            $thumbnailUrl = null;
+            if ($article->thumbnail) {
+                if (str_starts_with($article->thumbnail, '/storage/') || str_starts_with($article->thumbnail, 'storage/')) {
+                    $thumbnailUrl = asset($article->thumbnail);
+                } elseif (str_starts_with($article->thumbnail, 'http')) {
+                    $thumbnailUrl = $article->thumbnail;
+                } else {
+                    $thumbnailUrl = asset('storage/' . $article->thumbnail);
+                }
+            }
+            
+            $articlesForModal[$article->id] = [
+                'id' => $article->id,
+                'title' => $article->title,
+                'slug' => $article->slug,
+                'excerpt' => $article->excerpt,
+                'content' => $article->content,
+                'thumbnail' => $thumbnailUrl,
+                'status' => $article->status,
+                'views' => $article->views,
+                'read_time' => $article->read_time ?? 1,
+                'author_name' => $article->author->name ?? 'Admin',
+                'author_avatar' => $article->author && $article->author->avatar ? asset('storage/' . $article->author->avatar) : null,
+                'category_name' => $article->categoryRelation->name ?? $article->category ?? null,
+                'category_color' => $article->categoryRelation->color ?? '#6366f1',
+                'category_icon' => $article->categoryRelation->icon ?? 'folder',
+                'meta_title' => $article->meta_title,
+                'meta_description' => $article->meta_description,
+                'published_at' => $article->published_at ? $article->published_at->format('d M Y, H:i') : null,
+                'created_at' => $article->created_at->format('d M Y, H:i'),
+                'updated_at' => $article->updated_at->format('d M Y, H:i'),
+            ];
+        }
+
+        // Prepare activity log data for modal JS
+        $actionLabels = [
+            'CREATE' => 'Membuat',
+            'UPDATE' => 'Mengubah',
+            'DELETE' => 'Menghapus',
+            'LOGIN' => 'Login',
+            'LOGOUT' => 'Logout',
+            'LOGIN_FAILED' => 'Login Gagal',
+            'RESTORE' => 'Memulihkan',
+            'FORCE_DELETE' => 'Hapus Permanen',
+        ];
+        
+        $activityLogsForModal = [];
+        foreach ($activityLogs as $log) {
+            $activityLogsForModal[$log->id] = [
+                'id' => $log->id,
+                'action' => $log->action,
+                'action_label' => $actionLabels[$log->action] ?? $log->action,
+                'level' => $log->level ?? 'info',
+                'description' => $log->description,
+                'subject_type' => $log->subject_type ? class_basename($log->subject_type) : null,
+                'subject_id' => $log->subject_id,
+                'old_values' => $log->old_values,
+                'new_values' => $log->new_values,
+                'user_name' => $log->user->name ?? 'System',
+                'user_avatar' => $log->user && $log->user->avatar ? asset('storage/' . $log->user->avatar) : null,
+                'ip_address' => $log->ip_address,
+                'user_agent' => $log->user_agent,
+                'url' => $log->url,
+                'created_at' => $log->created_at->format('d M Y, H:i:s'),
+                'created_at_human' => $log->created_at->diffForHumans(),
+            ];
+        }
+
         return view('dashboard', compact(
             'stats',
             'recentArticles',
@@ -192,7 +273,9 @@ class DashboardController extends Controller
             'categoryData',
             'visitStats',
             'totalCategoryArticles',
-            'securityScore'
+            'securityScore',
+            'articlesForModal',
+            'activityLogsForModal'
         ));
     }
     

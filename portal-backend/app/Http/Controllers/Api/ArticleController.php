@@ -136,12 +136,32 @@ class ArticleController extends Controller
      */
     public function show(Article $article)
     {
-        $article->load('author:id,name,email');
+        $article->load(['author:id,name,email,avatar', 'categoryRelation']);
 
-        return response()->json([
-            'success' => true,
-            'data' => $article,
-        ]);
+        // Format data for modal display
+        $data = [
+            'id' => $article->id,
+            'title' => $article->title,
+            'slug' => $article->slug,
+            'excerpt' => $article->excerpt,
+            'content' => $article->content,
+            'thumbnail' => $article->thumbnail ? asset('storage/' . $article->thumbnail) : null,
+            'status' => $article->status,
+            'views' => $article->views,
+            'read_time' => $article->read_time,
+            'author_name' => $article->author->name ?? 'Admin',
+            'author_avatar' => $article->author && $article->author->avatar ? asset('storage/' . $article->author->avatar) : null,
+            'category_name' => $article->categoryRelation->name ?? $article->category ?? null,
+            'category_color' => $article->categoryRelation->color ?? '#6366f1',
+            'category_icon' => $article->categoryRelation->icon ?? 'folder',
+            'meta_title' => $article->meta_title,
+            'meta_description' => $article->meta_description,
+            'published_at' => $article->published_at ? $article->published_at->format('d M Y, H:i') : null,
+            'created_at' => $article->created_at->format('d M Y, H:i'),
+            'updated_at' => $article->updated_at->format('d M Y, H:i'),
+        ];
+
+        return response()->json($data);
     }
 
     /**

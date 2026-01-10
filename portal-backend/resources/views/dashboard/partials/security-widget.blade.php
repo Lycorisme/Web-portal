@@ -22,7 +22,7 @@
         </div>
         <div class="flex items-center justify-between text-sm border-b border-white/10 pb-2">
              <span class="text-slate-300">Failed Logins</span>
-             <span class="font-mono text-slate-200">0</span>
+             <span class="font-mono {{ ($stats['failed_logins'] ?? 0) > 0 ? 'text-amber-400' : 'text-emerald-400' }}">{{ $stats['failed_logins'] ?? 0 }}</span>
         </div>
          <div class="flex items-center justify-between text-sm">
              <span class="text-slate-300">Firewall</span>
