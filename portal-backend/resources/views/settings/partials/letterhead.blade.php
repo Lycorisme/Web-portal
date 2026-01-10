@@ -75,7 +75,7 @@
                 {{-- Organization Name --}}
                 <div class="space-y-2">
                     <label for="letterhead_org_name" class="block text-sm font-medium text-surface-700 dark:text-surface-300">
-                        Nama Organisasi/Instansi Utama <span class="text-accent-rose">*</span>
+                        Nama Organisasi/Instansi Utama
                     </label>
                     <input type="text" name="letterhead_org_name" id="letterhead_org_name"
                         x-model="letterhead_org_name"
