@@ -27,36 +27,39 @@
         .kop-surat img { width: 80px; height: auto; }
         
         /* Hierarki Teks Kop Surat */
+        /* Hierarki Teks Kop Surat */
         .kop-row-1 { 
-            font-family: Arial, sans-serif;
-            font-size: 12pt; 
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 14pt; 
             font-weight: bold; 
             text-transform: uppercase; 
             letter-spacing: 0.5px;
-            line-height: 1.2;
+            line-height: 1.1;
             color: #000;
+            margin-bottom: 2px;
         }
         .kop-row-main { 
-            font-family: Arial, sans-serif; /* Or rely on body font if desired, but headers usually consistent */
-            font-size: 15pt; 
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 17pt; 
             font-weight: 900; /* Extra Bold */
             text-transform: uppercase; 
-            letter-spacing: 0.5px;
-            margin-top: 2px;
-            line-height: 1.1;
+            letter-spacing: 1px;
+            margin-top: 5px;
+            margin-bottom: 5px;
+            line-height: 1;
             color: #000;
         }
         
         .kop-address { 
             margin-top: 5px; 
-            font-size: 9pt; 
+            font-size: 10pt; 
             font-weight: normal; 
-            line-height: 1.3;
+            line-height: 1.2;
         }
         
         /* Garis Penutup Ganda (Tebal - Tipis) */
         .kop-separator {
-            margin-top: 15px;
+            margin-top: 10px;
             border-top: 4px solid #000; /* Outer Thick */
             border-bottom: 1px solid #000; /* Inner Thin */
             height: 2px; /* Gap between */

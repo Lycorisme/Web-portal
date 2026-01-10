@@ -225,60 +225,62 @@
                 <i data-lucide="eye" class="w-4 h-4 text-indigo-500"></i>
                 <span class="bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent italic">Live Preview</span> Kop Surat
             </h3>
-            <div class="bg-white dark:bg-surface-900 border border-surface-300 dark:border-surface-600 rounded-lg p-6 shadow-sm">
+            <div class="bg-white dark:bg-surface-900 border border-surface-300 dark:border-surface-600 rounded-lg p-6 shadow-sm overflow-hidden">
                 {{-- Letterhead Preview --}}
-                <div class="text-center border-b-4 border-double border-surface-800 dark:border-surface-200 pb-4">
-                    <div class="flex items-center justify-center gap-4">
+                <div class="w-full bg-white text-black p-4" style="font-family: 'Times New Roman', Times, serif;">
+                    <div class="flex items-center gap-4 pb-4">
                         {{-- Logo Placeholder --}}
-                        <div class="w-16 h-16 bg-surface-200 dark:bg-surface-700 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <div class="w-[90px] flex-shrink-0 flex items-center justify-center">
                             @if(!empty($rawSettings['logo_url']))
-                                <img src="{{ asset($rawSettings['logo_url']) }}" alt="Logo" class="w-14 h-14 object-contain">
+                                <img src="{{ asset($rawSettings['logo_url']) }}" alt="Logo" class="w-[80px] h-auto object-contain">
                             @else
-                                <i data-lucide="image" class="w-8 h-8 text-surface-400"></i>
+                                <div class="w-[80px] h-[80px] border border-dashed border-gray-400 flex items-center justify-center bg-gray-50">
+                                    <span class="text-xs text-gray-400">Logo</span>
+                                </div>
                             @endif
                         </div>
-                        <div class="text-left">
+                        
+                        {{-- Text Content --}}
+                        <div class="flex-grow text-center">
                             
                             {{-- Parent Org 1 --}}
-                            <p x-show="letterhead_parent_org_1" x-text="letterhead_parent_org_1" class="text-xs font-medium text-surface-700 dark:text-surface-300 uppercase tracking-wide"></p>
-                            <p x-show="!letterhead_parent_org_1" class="text-xs font-medium text-surface-400 uppercase tracking-wide italic">PEMERINTAH PROVINSI [NAMA]</p>
+                            <div x-show="letterhead_parent_org_1" x-text="letterhead_parent_org_1" class="font-bold uppercase leading-tight text-black" style="font-size: 14pt;"></div>
+                            <div x-show="!letterhead_parent_org_1" class="font-bold uppercase leading-tight text-gray-300 border border-dashed border-gray-300 p-1 mb-1 inline-block" style="font-size: 14pt;">[PEMERINTAH PROVINSI ...]</div>
 
                             {{-- Parent Org 2 --}}
-                            <p x-show="letterhead_parent_org_2" x-text="letterhead_parent_org_2" class="text-sm font-semibold text-surface-800 dark:text-surface-200 uppercase"></p>
-                            <p x-show="!letterhead_parent_org_2" class="text-sm font-semibold text-surface-400 uppercase italic">DINAS/BADAN [NAMA]</p>
-
+                            <div x-show="letterhead_parent_org_2" x-text="letterhead_parent_org_2" class="font-bold uppercase leading-tight text-black" style="font-size: 14pt;"></div>
+                            
                             {{-- Org Name --}}
-                            <p x-show="letterhead_org_name" x-text="letterhead_org_name" class="text-base font-bold text-surface-900 dark:text-white uppercase"></p>
-                            <p x-show="!letterhead_org_name" class="text-base font-bold text-surface-400 uppercase italic">NAMA INSTANSI UTAMA</p>
+                            <div x-show="letterhead_org_name" x-text="letterhead_org_name" class="font-black uppercase leading-none mt-1 text-black" style="font-size: 17pt;"></div>
+                            <div x-show="!letterhead_org_name" class="font-black uppercase leading-none mt-1 text-gray-300 border border-dashed border-gray-300 p-1 inline-block" style="font-size: 17pt;">[NAMA INSTANSI UTAMA]</div>
 
-                            <p class="text-xs text-surface-600 dark:text-surface-400 mt-1">
+                            {{-- Address & Contacts --}}
+                            <div class="mt-2 text-black leading-snug" style="font-size: 10pt;">
                                 <span x-show="letterhead_street" x-text="letterhead_street"></span>
-                                <span x-show="!letterhead_street" class="italic text-surface-400">Jalan Raya Utama No. 123</span>
+                                <span x-show="!letterhead_street" class="text-gray-300">[Alamat Jalan...]</span>
 
                                 <span x-show="letterhead_district" x-text="', ' + letterhead_district"></span>
-
                                 <span x-show="letterhead_city" x-text="', ' + letterhead_city"></span>
-                                <span x-show="!letterhead_city" class="italic text-surface-400">, Kota</span>
+                                <span x-show="!letterhead_city" class="text-gray-300">, [Kota...]</span>
 
-                                <span x-show="letterhead_postal_code" x-text="', ' + letterhead_postal_code"></span>
-                                <span x-show="!letterhead_postal_code" class="italic text-surface-400">, 12345</span>
-                            </p>
-                            <p class="text-xs text-surface-600 dark:text-surface-400">
+                                <span x-show="letterhead_postal_code" x-text="' ' + letterhead_postal_code"></span>
+                                <br>
+                                
                                 <span x-show="letterhead_phone" x-text="'Telp: ' + letterhead_phone"></span>
-                                <span x-show="!letterhead_phone" class="italic text-surface-400">Telp: (021) 1234567</span>
+                                <span x-show="!letterhead_phone" class="text-gray-300">[Telp...]</span>
 
                                 <span x-show="letterhead_fax" x-text="' | Fax: ' + letterhead_fax"></span>
 
                                 <span x-show="letterhead_email" x-text="' | Email: ' + letterhead_email"></span>
-                                <span x-show="!letterhead_email" class="italic text-surface-400"> | Email: admin@instansi.go.id</span>
+                                <span x-show="!letterhead_email" class="text-gray-300"> | [Email...]</span>
 
                                 <span x-show="letterhead_website" x-text="' | Web: ' + letterhead_website"></span>
-                                <span x-show="!letterhead_website" class="italic text-surface-400"> | Web: www.instansi.go.id</span>
-                            </p>
+                            </div>
                         </div>
                     </div>
+                    {{-- Separator --}}
+                    <div style="border-top: 4px solid #000; border-bottom: 1px solid #000; height: 2px; width: 100%;"></div>
                 </div>
-                <p class="text-center text-xs text-surface-400 mt-4 italic">Contoh preview kop surat - tampilan sebenarnya pada PDF mungkin sedikit berbeda</p>
             </div>
         </div>
 
