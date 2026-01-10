@@ -22,6 +22,7 @@ use App\Http\Controllers\ReportController;
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/register', [AuthController::class, 'register'])->name('register');
 });
 
 // Logout (Authenticated Only)

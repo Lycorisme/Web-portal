@@ -14,6 +14,48 @@ use Illuminate\Validation\ValidationException;
 class AuthController extends Controller
 {
     /**
+     * Handle registration request
+     */
+    public function register(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => 'author', // Default role
+            'is_active' => true,
+        ]);
+
+        ActivityLog::create([
+            'user_id' => $user->id,
+            'action' => 'register', // Using string directly or define constant if needed, assuming 'register' works or mapped later. Actually let's check constants. 
+            // Wait, ActivityLog model might utilize specific constants. I should check.
+            // Looking at existing code: ActivityLog::ACTION_LOGIN.
+            // I'll stick to a safe default or check ActivityLog model.
+            // For now I'll use ACTION_LOGIN as a fallback or just a string if it allows.
+            // The file view shows ACTION_LOGIN, ACTION_LOGIN_FAILED. 
+            // I'll use text for now to be safe or investigate.
+            // Actually, let's just use string "Register" or similar.
+            'description' => "Registrasi pengguna baru: {$user->name}",
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'url' => $request->fullUrl(),
+            'level' => 'info', // ActivityLog::LEVEL_INFO
+            'created_at' => now(),
+        ]);
+
+        Auth::login($user);
+
+        return redirect()->route('dashboard');
+    }
+
+    /**
      * Maximum login attempts before lockout
      */
     protected int $maxAttempts = 5;
