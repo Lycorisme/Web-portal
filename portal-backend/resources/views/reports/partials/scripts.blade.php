@@ -43,17 +43,6 @@ function reportsPage() {
         },
 
         init() {
-            // Set default date range (last 30 days)
-            const today = new Date();
-            const lastMonth = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
-            
-            const formatDate = (date) => date.toISOString().split('T')[0];
-            
-            Object.keys(this.forms).forEach(key => {
-                this.forms[key].start_date = formatDate(lastMonth);
-                this.forms[key].end_date = formatDate(today);
-            });
-
             // Reinitialize Lucide icons
             this.$nextTick(() => {
                 if (typeof lucide !== 'undefined') {

@@ -41,10 +41,5 @@
         </tbody>
     </table>
 
-    <div class="summary">
-        <div class="summary-item"><strong>Total Kategori:</strong> {{ $items->count() }}</div>
-        <div class="summary-item"><strong>Aktif:</strong> {{ $items->where('is_active', true)->count() }}</div>
-        <div class="summary-item"><strong>Nonaktif:</strong> {{ $items->where('is_active', false)->count() }}</div>
-        <div class="summary-item"><strong>Total Artikel:</strong> {{ $items->sum('articles_count') }}</div>
-    </div>
+    </table>
 @endsection

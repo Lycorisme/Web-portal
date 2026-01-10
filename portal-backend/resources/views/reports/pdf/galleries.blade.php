@@ -43,11 +43,5 @@
         </tbody>
     </table>
 
-    <div class="summary">
-        <div class="summary-item"><strong>Total Media:</strong> {{ $items->count() }}</div>
-        <div class="summary-item"><strong>Gambar:</strong> {{ $items->where('media_type', 'image')->count() }}</div>
-        <div class="summary-item"><strong>Video:</strong> {{ $items->where('media_type', 'video')->count() }}</div>
-        <div class="summary-item"><strong>Published:</strong> {{ $items->where('is_published', true)->count() }}</div>
-        <div class="summary-item"><strong>Featured:</strong> {{ $items->where('is_featured', true)->count() }}</div>
-    </div>
+    </table>
 @endsection

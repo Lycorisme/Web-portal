@@ -11,7 +11,7 @@
             <tr>
                 <td style="width: 18%; border: none; padding: 1px;"><strong>Nomor Dokumen</strong></td>
                 <td style="width: 2%; border: none; padding: 1px;">:</td>
-                <td style="border: none; padding: 1px;">005/BTIKP/I/2026</td> 
+                <td style="border: none; padding: 1px;">005/{{ strtoupper(str_replace(' ', '-', $settings['site_name'] ?? 'INSTANSI')) }}/I/{{ date('Y') }}</td> 
             </tr>
             <tr>
                 <td style="width: 18%; border: none; padding: 1px;"><strong>Periode Data</strong></td>
@@ -67,10 +67,4 @@
             @endforelse
         </tbody>
     </table>
-
-    <div class="summary">
-        <div class="summary-item"><strong>Total Artikel:</strong> {{ $items->count() }}</div>
-        <div class="summary-item"><strong>Published:</strong> {{ $items->where('status', 'published')->count() }}</div>
-        <div class="summary-item"><strong>Pending:</strong> {{ $items->where('status', 'pending')->count() }}</div>
-    </div>
 @endsection

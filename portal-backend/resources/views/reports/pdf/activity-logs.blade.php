@@ -58,11 +58,5 @@
         </tbody>
     </table>
 
-    <div class="summary">
-        <div class="summary-item"><strong>Total Log:</strong> {{ $items->count() }}</div>
-        <div class="summary-item"><strong>CREATE:</strong> {{ $items->where('action', 'CREATE')->count() }}</div>
-        <div class="summary-item"><strong>UPDATE:</strong> {{ $items->where('action', 'UPDATE')->count() }}</div>
-        <div class="summary-item"><strong>DELETE:</strong> {{ $items->where('action', 'DELETE')->count() }}</div>
-        <div class="summary-item"><strong>LOGIN:</strong> {{ $items->where('action', 'LOGIN')->count() }}</div>
-    </div>
+    </table>
 @endsection

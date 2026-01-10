@@ -79,7 +79,7 @@ class ReportController extends Controller
     {
         $startDate = $request->input('start_date') 
             ? Carbon::parse($request->input('start_date'))->startOfDay() 
-            : Carbon::now()->subMonth()->startOfDay();
+            : Carbon::now()->startOfDay();
         
         $endDate = $request->input('end_date') 
             ? Carbon::parse($request->input('end_date'))->endOfDay() 
@@ -240,7 +240,7 @@ class ReportController extends Controller
         ];
 
         $pdf = Pdf::loadView('reports.pdf.activity-logs', $data);
-        $pdf->setPaper('A4', 'landscape');
+        $pdf->setPaper('A4', 'portrait');
         
         $filename = 'laporan-activity-log-' . $startDate->format('Ymd') . '-' . $endDate->format('Ymd') . '.pdf';
         
@@ -272,7 +272,7 @@ class ReportController extends Controller
         ];
 
         $pdf = Pdf::loadView('reports.pdf.blocked-clients', $data);
-        $pdf->setPaper('A4', 'landscape');
+        $pdf->setPaper('A4', 'portrait');
         
         $filename = 'laporan-ip-terblokir-' . $startDate->format('Ymd') . '-' . $endDate->format('Ymd') . '.pdf';
         

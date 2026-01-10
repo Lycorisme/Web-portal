@@ -53,10 +53,5 @@
         </tbody>
     </table>
 
-    <div class="summary">
-        <div class="summary-item"><strong>Total Record:</strong> {{ $items->count() }}</div>
-        <div class="summary-item"><strong>Terblokir Aktif:</strong> {{ $items->where('is_blocked', true)->filter(fn($c) => !$c->isExpired())->count() }}</div>
-        <div class="summary-item"><strong>Expired:</strong> {{ $items->filter(fn($c) => $c->is_blocked && $c->isExpired())->count() }}</div>
-        <div class="summary-item"><strong>Blokir Permanen:</strong> {{ $items->where('is_blocked', true)->whereNull('blocked_until')->count() }}</div>
-    </div>
+    </table>
 @endsection

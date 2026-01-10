@@ -21,45 +21,45 @@
         }
         .kop-surat table { width: 100%; border-collapse: collapse; border: none; }
         .kop-surat td { border: none; }
-        .kop-surat .logo-cell { width: 90px; text-align: center; vertical-align: middle; padding-right: 15px; }
+        .kop-surat .logo-cell { width: 90px; text-align: center; vertical-align: middle; padding-right: 16px; }
         .kop-surat .text-cell { text-align: center; vertical-align: middle; }
         
         .kop-surat img { width: 80px; height: auto; }
         
         /* Hierarki Teks Kop Surat */
-        /* Hierarki Teks Kop Surat */
+
         .kop-row-1 { 
             font-family: 'Times New Roman', Times, serif;
             font-size: 14pt; 
             font-weight: bold; 
             text-transform: uppercase; 
-            letter-spacing: 0.5px;
-            line-height: 1.1;
+            /* letter-spacing: normal; Default */
+            line-height: 1.25; /* leading-tight */
             color: #000;
-            margin-bottom: 2px;
+            margin-bottom: 0;
         }
         .kop-row-main { 
             font-family: 'Times New Roman', Times, serif;
-            font-size: 17pt; 
+            font-size: 17pt; /* Match Live Preview */
             font-weight: 900; /* Extra Bold */
             text-transform: uppercase; 
-            letter-spacing: 1px;
-            margin-top: 5px;
-            margin-bottom: 5px;
-            line-height: 1;
+            /* letter-spacing: normal; Default */
+            margin-top: 4px; /* mt-1 */
+            margin-bottom: 0;
+            line-height: 1; /* leading-none */
             color: #000;
         }
         
         .kop-address { 
-            margin-top: 5px; 
+            margin-top: 8px; /* mt-2 */
             font-size: 10pt; 
             font-weight: normal; 
-            line-height: 1.2;
+            line-height: 1.375; /* leading-snug */
         }
         
         /* Garis Penutup Ganda (Tebal - Tipis) */
         .kop-separator {
-            margin-top: 10px;
+            margin-top: 16px; /* Live Preview has pb-4 (16px) on the content above */
             border-top: 4px solid #000; /* Outer Thick */
             border-bottom: 1px solid #000; /* Inner Thin */
             height: 2px; /* Gap between */
@@ -212,11 +212,11 @@
 
                     {{-- Alamat dan Kontak --}}
                     <div class="kop-address">
-                        {{ $settings['letterhead_street'] ?? $settings['site_address'] ?? '' }}
+                        {{ $settings['letterhead_street'] ?? '' }}
                         
-                        @if(!empty($settings['letterhead_district'])) {{ $settings['letterhead_district'] }}, @endif
-                        @if(!empty($settings['letterhead_city'])) {{ $settings['letterhead_city'] }} @endif
-                        @if(!empty($settings['letterhead_postal_code'])) {{ $settings['letterhead_postal_code'] }} @endif
+                        @if(!empty($settings['letterhead_district'])), {{ $settings['letterhead_district'] }}@endif
+                        @if(!empty($settings['letterhead_city'])), {{ $settings['letterhead_city'] }}@endif
+                        @if(!empty($settings['letterhead_postal_code'])) {{ $settings['letterhead_postal_code'] }}@endif
 
                         <br>
                         {{-- Kontak dengan separator pipe --}}

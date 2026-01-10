@@ -60,11 +60,5 @@
         </tbody>
     </table>
 
-    <div class="summary">
-        <div class="summary-item"><strong>Total Pengguna:</strong> {{ $items->count() }}</div>
-        <div class="summary-item"><strong>Super Admin:</strong> {{ $items->where('role', 'super_admin')->count() }}</div>
-        <div class="summary-item"><strong>Admin:</strong> {{ $items->where('role', 'admin')->count() }}</div>
-        <div class="summary-item"><strong>Editor:</strong> {{ $items->where('role', 'editor')->count() }}</div>
-        <div class="summary-item"><strong>Author:</strong> {{ $items->where('role', 'author')->count() }}</div>
-    </div>
+    </table>
 @endsection
