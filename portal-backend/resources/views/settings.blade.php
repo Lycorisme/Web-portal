@@ -106,18 +106,18 @@
                     <span>Umum</span>
                 </button>
                 
+                <button @click="activeTab = 'contact'"
+                    :class="activeTab === 'contact' ? 'bg-gradient-to-r from-teal-500 to-cyan-600 text-white shadow-lg shadow-teal-500/30' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800'"
+                    class="flex-shrink-0 sm:flex-1 flex items-center justify-center gap-2 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl font-medium transition-all duration-200 text-sm whitespace-nowrap">
+                    <i data-lucide="map-pin" class="w-4 h-4"></i>
+                    <span>Kontak</span>
+                </button>
+
                 <button @click="activeTab = 'seo'"
                     :class="activeTab === 'seo' ? 'bg-gradient-to-r from-accent-cyan to-accent-emerald text-white shadow-lg shadow-accent-cyan/30' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800'"
                     class="flex-shrink-0 sm:flex-1 flex items-center justify-center gap-2 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl font-medium transition-all duration-200 text-sm whitespace-nowrap">
                     <i data-lucide="search" class="w-4 h-4"></i>
                     <span>SEO</span>
-                </button>
-
-                <button @click="activeTab = 'social'"
-                    :class="activeTab === 'social' ? 'bg-gradient-to-r from-accent-violet to-pink-500 text-white shadow-lg shadow-accent-violet/30' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800'"
-                    class="flex-shrink-0 sm:flex-1 flex items-center justify-center gap-2 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl font-medium transition-all duration-200 text-sm whitespace-nowrap">
-                    <i data-lucide="share-2" class="w-4 h-4"></i>
-                    <span>Sosial</span>
                 </button>
 
                 <button @click="activeTab = 'appearance'"
@@ -126,8 +126,6 @@
                     <i data-lucide="palette" class="w-4 h-4"></i>
                     <span>Tampilan</span>
                 </button>
-
-
 
                 <button @click="activeTab = 'letterhead'"
                     :class="activeTab === 'letterhead' ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-lg shadow-indigo-500/30' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800'"
@@ -166,11 +164,11 @@
             {{-- General Settings Tab --}}
             @include('settings.partials.general')
 
+            {{-- Contact & Social Media Settings Tab --}}
+            @include('settings.partials.contact')
+
             {{-- SEO Settings Tab --}}
             @include('settings.partials.seo')
-
-            {{-- Social Media Settings Tab --}}
-            @include('settings.partials.social')
 
             {{-- Appearance Settings Tab --}}
             @include('settings.partials.appearance')

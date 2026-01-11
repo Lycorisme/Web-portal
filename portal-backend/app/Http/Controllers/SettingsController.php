@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\SiteSetting;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
@@ -18,6 +19,7 @@ class SettingsController extends Controller
         // Get all settings grouped by category
         $settings = [
             'general' => SiteSetting::getByGroup('general'),
+            'contact' => SiteSetting::getByGroup('contact'),
             'seo' => SiteSetting::getByGroup('seo'),
             'social' => SiteSetting::getByGroup('social'),
             'appearance' => SiteSetting::getByGroup('appearance'),
@@ -41,6 +43,29 @@ class SettingsController extends Controller
     {
         $data = $request->except(['_token', '_method']);
 
+        // Get old values for audit trail
+        $oldSettings = SiteSetting::getAll();
+        
+        // Fields that need XSS sanitization (text content that could contain HTML)
+        $textFieldsToSanitize = [
+            'site_history',
+            'site_vision_mission',
+            'site_description',
+            'site_address',
+        ];
+        
+        // Sanitize text fields to prevent XSS attacks
+        foreach ($textFieldsToSanitize as $field) {
+            if (isset($data[$field])) {
+                $data[$field] = $this->sanitizeInput($data[$field]);
+            }
+        }
+        
+        // Special handling for Google Maps embed code - only allow iframe from google.com
+        if (isset($data['site_map_code'])) {
+            $data['site_map_code'] = $this->sanitizeMapCode($data['site_map_code']);
+        }
+
         // Handle file uploads
         $fileFields = ['logo_url', 'favicon_url', 'letterhead_url', 'signature_url', 'stamp_url'];
         
@@ -62,8 +87,35 @@ class SettingsController extends Controller
         // Clear cache
         SiteSetting::clearCache();
 
-        // Get updated settings for response
+        // Get updated settings for response and audit trail
         $updatedSettings = SiteSetting::getAll();
+        
+        // Identify what changed for the audit trail
+        $changedFields = [];
+        foreach ($data as $key => $newValue) {
+            // Skip file current fields and empty comparisons
+            if (str_ends_with($key, '_current')) continue;
+            
+            $oldValue = $oldSettings[$key] ?? null;
+            if ($oldValue !== $newValue && !($oldValue === '' && $newValue === null)) {
+                $changedFields[$key] = [
+                    'old' => is_string($oldValue) && strlen($oldValue) > 100 ? substr($oldValue, 0, 100) . '...' : $oldValue,
+                    'new' => is_string($newValue) && strlen($newValue) > 100 ? substr($newValue, 0, 100) . '...' : $newValue,
+                ];
+            }
+        }
+        
+        // Log to activity_logs if there are changes
+        if (!empty($changedFields)) {
+            ActivityLog::log(
+                ActivityLog::ACTION_SETTINGS_UPDATE,
+                'Mengubah Pengaturan Situs (' . count($changedFields) . ' field diubah)',
+                null,
+                ['changed_fields' => array_keys($changedFields)],
+                $changedFields,
+                ActivityLog::LEVEL_INFO
+            );
+        }
 
         // Check if request wants JSON response (AJAX)
         if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
@@ -221,6 +273,69 @@ class SettingsController extends Controller
                 'message' => 'Gagal mengirim email: ' . $e->getMessage()
             ]);
         }
+    }
+
+    /**
+     * Sanitize text input to prevent XSS attacks
+     * Removes dangerous HTML tags while preserving safe formatting
+     */
+    protected function sanitizeInput(string $input): string
+    {
+        // First, decode any HTML entities to catch encoded attacks
+        $input = html_entity_decode($input, ENT_QUOTES, 'UTF-8');
+        
+        // Remove any script tags and their contents
+        $input = preg_replace('/<script\b[^>]*>(.*?)<\/script>/is', '', $input);
+        
+        // Remove any style tags and their contents
+        $input = preg_replace('/<style\b[^>]*>(.*?)<\/style>/is', '', $input);
+        
+        // Remove all HTML tags except safe ones (if needed for future use)
+        // For now, we strip all HTML for text content
+        $input = strip_tags($input);
+        
+        // Encode special HTML characters to prevent XSS
+        $input = htmlspecialchars($input, ENT_QUOTES, 'UTF-8', false);
+        
+        // Decode back to allow normal text display (but now safe)
+        $input = htmlspecialchars_decode($input, ENT_QUOTES);
+        
+        // Trim whitespace
+        return trim($input);
+    }
+
+    /**
+     * Sanitize Google Maps embed code
+     * Only allows iframe from google.com/maps domains
+     */
+    protected function sanitizeMapCode(string $code): string
+    {
+        // If empty, return as is
+        if (empty(trim($code))) {
+            return '';
+        }
+        
+        // Check if it's a valid Google Maps iframe
+        // Pattern matches: <iframe src="https://www.google.com/maps/embed?..." ...></iframe>
+        $pattern = '/<iframe[^>]*src=["\']https?:\/\/(www\.)?google\.com\/maps\/embed[^"\']*["\'][^>]*>\s*<\/iframe>/i';
+        
+        if (preg_match($pattern, $code, $matches)) {
+            // Return the matched iframe (sanitized)
+            $iframe = $matches[0];
+            
+            // Additional safety: ensure no onclick, onerror, or other event handlers
+            $iframe = preg_replace('/\s+on\w+\s*=\s*["\'][^"\']*["\']/i', '', $iframe);
+            
+            return $iframe;
+        }
+        
+        // If not a valid Google Maps iframe, log warning and return empty
+        \Log::warning('Invalid Google Maps embed code rejected', [
+            'user_id' => auth()->id(),
+            'code_preview' => substr($code, 0, 200)
+        ]);
+        
+        return '';
     }
 }
 

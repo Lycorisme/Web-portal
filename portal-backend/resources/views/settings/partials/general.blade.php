@@ -34,44 +34,6 @@
                     placeholder="Contoh: Informasi Terkini dan Terpercaya">
             </div>
 
-            {{-- Email --}}
-            <div class="space-y-2">
-                <label for="site_email" class="block text-sm font-medium text-surface-700 dark:text-surface-300">
-                    Email Redaksi
-                </label>
-                <div class="relative">
-                    <i data-lucide="mail" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-surface-400"></i>
-                    <input type="email" name="site_email" id="site_email"
-                        value="{{ $rawSettings['site_email'] ?? '' }}"
-                        class="w-full pl-12 pr-4 py-3 bg-surface-50 dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-xl text-surface-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
-                        placeholder="redaksi@example.com">
-                </div>
-            </div>
-
-            {{-- Phone --}}
-            <div class="space-y-2">
-                <label for="site_phone" class="block text-sm font-medium text-surface-700 dark:text-surface-300">
-                    Nomor Telepon
-                </label>
-                <div class="relative">
-                    <i data-lucide="phone" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-surface-400"></i>
-                    <input type="text" name="site_phone" id="site_phone"
-                        value="{{ $rawSettings['site_phone'] ?? '' }}"
-                        class="w-full pl-12 pr-4 py-3 bg-surface-50 dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-xl text-surface-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
-                        placeholder="+62 xxx xxxx xxxx">
-                </div>
-            </div>
-
-            {{-- Address --}}
-            <div class="md:col-span-2 space-y-2">
-                <label for="site_address" class="block text-sm font-medium text-surface-700 dark:text-surface-300">
-                    Alamat Redaksi
-                </label>
-                <textarea name="site_address" id="site_address" rows="3"
-                    class="w-full px-4 py-3 bg-surface-50 dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-xl text-surface-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200 resize-none"
-                    placeholder="Jl. Contoh No. 123, Kota, Provinsi">{{ $rawSettings['site_address'] ?? '' }}</textarea>
-            </div>
-
             {{-- Description --}}
             <div class="md:col-span-2 space-y-2">
                 <label for="site_description" class="block text-sm font-medium text-surface-700 dark:text-surface-300">
@@ -80,6 +42,7 @@
                 <textarea name="site_description" id="site_description" rows="4"
                     class="w-full px-4 py-3 bg-surface-50 dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-xl text-surface-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200 resize-y"
                     placeholder="Deskripsi singkat tentang portal berita Anda...">{{ $rawSettings['site_description'] ?? '' }}</textarea>
+                <p class="text-xs text-surface-400">Deskripsi ini akan digunakan untuk SEO dan meta description</p>
             </div>
 
             {{-- Logo --}}
