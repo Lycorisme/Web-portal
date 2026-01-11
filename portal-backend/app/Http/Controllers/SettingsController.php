@@ -157,18 +157,53 @@ class SettingsController extends Controller
             Config::set('mail.from.address', $fromAddress);
             Config::set('mail.from.name', $fromName);
 
-            // Send test email
-            Mail::raw(
-                "Ini adalah email test dari " . SiteSetting::get('site_name', 'Portal') . ".\n\n" .
-                "Jika Anda menerima email ini, konfigurasi SMTP Anda sudah benar.\n\n" .
-                "Waktu pengiriman: " . now()->format('d M Y, H:i:s') . "\n" .
-                "IP Server: " . $request->ip(),
-                function ($message) use ($testEmail, $fromAddress, $fromName) {
-                    $message->to($testEmail)
-                            ->from($fromAddress, $fromName)
-                            ->subject('Test Email - ' . SiteSetting::get('site_name', 'Portal'));
+            // Prepare email data
+            $siteName = SiteSetting::get('site_name', 'Portal');
+            $logoUrl = SiteSetting::get('logo_url');
+            $logoBase64 = null;
+            
+            // Convert logo to base64 for email embedding
+            if ($logoUrl) {
+                try {
+                    // Remove leading slash if present and check if it's a storage path
+                    $logoPath = ltrim($logoUrl, '/');
+                    
+                    // Try to get the file from public storage
+                    if (str_starts_with($logoPath, 'storage/')) {
+                        $storagePath = str_replace('storage/', '', $logoPath);
+                        if (Storage::disk('public')->exists($storagePath)) {
+                            $fileContents = Storage::disk('public')->get($storagePath);
+                            $mimeType = Storage::disk('public')->mimeType($storagePath);
+                            $logoBase64 = 'data:' . $mimeType . ';base64,' . base64_encode($fileContents);
+                        }
+                    } else {
+                        // Try public path directly
+                        $publicPath = public_path($logoPath);
+                        if (file_exists($publicPath)) {
+                            $fileContents = file_get_contents($publicPath);
+                            $mimeType = mime_content_type($publicPath);
+                            $logoBase64 = 'data:' . $mimeType . ';base64,' . base64_encode($fileContents);
+                        }
+                    }
+                } catch (\Exception $e) {
+                    // If conversion fails, logo will show fallback icon
+                    \Log::warning('Failed to convert logo to base64', ['error' => $e->getMessage()]);
                 }
-            );
+            }
+            
+            $emailData = [
+                'siteName' => $siteName,
+                'logoBase64' => $logoBase64,
+                'sentAt' => now()->format('d M Y, H:i:s'),
+                'serverIp' => $request->ip() ?: '127.0.0.1',
+            ];
+
+            // Send test email with HTML template
+            Mail::send('emails.test-email', $emailData, function ($message) use ($testEmail, $fromAddress, $fromName, $siteName) {
+                $message->to($testEmail)
+                        ->from($fromAddress, $fromName)
+                        ->subject('Test Email - ' . $siteName);
+            });
 
             return response()->json([
                 'success' => true,

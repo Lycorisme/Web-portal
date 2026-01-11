@@ -144,8 +144,8 @@
     <div class="email-wrapper">
         <!-- Header -->
         <div class="header">
-            @if($logoUrl)
-                <img src="{{ url($logoUrl) }}" alt="{{ $siteName }}">
+            @if($logoBase64)
+                <img src="{{ $logoBase64 }}" alt="{{ $siteName }}">
             @endif
             <h1>{{ $siteName }}</h1>
         </div>
