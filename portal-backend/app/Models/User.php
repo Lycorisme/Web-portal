@@ -244,4 +244,48 @@ class User extends Authenticatable
 
         return asset('storage/' . $path);
     }
+
+    /**
+     * Check if user is a member (public user).
+     */
+    public function isMember(): bool
+    {
+        return $this->role === 'member';
+    }
+
+    /**
+     * Check if user can access admin dashboard.
+     * Members cannot access dashboard.
+     */
+    public function canAccessDashboard(): bool
+    {
+        return in_array($this->role, ['super_admin', 'admin', 'editor', 'author']);
+    }
+
+    /**
+     * Check if user has liked an article.
+     */
+    public function hasLiked(\App\Models\Article $article): bool
+    {
+        return \App\Models\ArticleLike::where('user_id', $this->id)
+            ->where('article_id', $article->id)
+            ->exists();
+    }
+
+    /**
+     * Get all article likes by this user.
+     */
+    public function articleLikes()
+    {
+        return $this->hasMany(\App\Models\ArticleLike::class);
+    }
+
+    /**
+     * Get all comments by this user.
+     */
+    public function comments()
+    {
+        return $this->hasMany(\App\Models\ArticleComment::class);
+    }
 }
+

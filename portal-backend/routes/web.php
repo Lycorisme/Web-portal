@@ -34,10 +34,30 @@ Route::middleware('guest')->group(function () {
 // Logout (Authenticated Only)
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
-// Redirect root to dashboard
+// Redirect root to public home
 Route::get('/', function () {
-    return redirect()->route('dashboard');
+    return redirect()->route('public.home');
 });
+
+// =============================================
+// Public Routes (No Auth Required for Reading)
+// =============================================
+Route::prefix('p')->name('public.')->group(function () {
+    // Read-only content
+    Route::get('/', [\App\Http\Controllers\PublicController::class, 'index'])->name('home');
+    Route::get('/artikel', [\App\Http\Controllers\PublicController::class, 'listArticles'])->name('articles');
+    Route::get('/artikel/{slug}', [\App\Http\Controllers\PublicController::class, 'showArticle'])->name('article.show');
+    Route::get('/galeri', [\App\Http\Controllers\PublicController::class, 'showGallery'])->name('gallery');
+
+    // Authenticated interactions (Like, Comment)
+    Route::middleware('auth')->group(function () {
+        Route::post('/artikel/{article}/like', [\App\Http\Controllers\PublicInteractionController::class, 'toggleLike'])->name('article.like');
+        Route::post('/artikel/{article}/comment', [\App\Http\Controllers\PublicInteractionController::class, 'storeComment'])->name('article.comment');
+        Route::post('/comment/{comment}/reply', [\App\Http\Controllers\PublicInteractionController::class, 'storeReply'])->name('comment.reply');
+    });
+});
+
+
 
 // =============================================
 // Protected Routes (Auth Required)

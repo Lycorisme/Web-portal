@@ -215,6 +215,30 @@ class Article extends Model
     }
 
     /**
+     * Get the full URL for the thumbnail image.
+     */
+    public function getImageUrlAttribute(): ?string
+    {
+        if (!$this->thumbnail) {
+            return null;
+        }
+        
+        if (str_starts_with($this->thumbnail, 'http')) {
+            return $this->thumbnail;
+        }
+
+        // Clean the path
+        $path = ltrim($this->thumbnail, '/');
+
+        // If path already starts with storage, don't prepend it
+        if (str_starts_with($path, 'storage/')) {
+            return asset($path);
+        }
+
+        return asset('storage/' . $path);
+    }
+
+    /**
      * Get all tags for this article.
      */
     public function tags(): BelongsToMany

@@ -28,8 +28,7 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'author', // Default role
-            'is_active' => true,
+            'role' => 'member', // Public registration = member role
         ]);
 
         ActivityLog::create([
@@ -52,7 +51,8 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        return redirect()->route('dashboard');
+        // Member redirect to public home, not dashboard
+        return redirect()->route('public.home')->with('success', 'Selamat datang di Portal BTIKP!');
     }
 
     /**
@@ -217,6 +217,16 @@ class AuthController extends Controller
             'level' => ActivityLog::LEVEL_INFO,
             'created_at' => now(),
         ]);
+
+        // Redirect based on role
+        if ($user->isMember()) {
+            // Members cannot access dashboard
+            $intended = session()->pull('url.intended');
+            if ($intended && !str_contains($intended, '/dashboard') && !str_contains($intended, '/articles') && !str_contains($intended, '/settings')) {
+                return redirect()->to($intended);
+            }
+            return redirect()->route('public.home');
+        }
 
         return redirect()->intended(route('dashboard'));
     }
