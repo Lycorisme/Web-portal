@@ -82,15 +82,33 @@
         
         <!-- Main Feed -->
         <div class="lg:col-span-8 space-y-12">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-4">
-                <h3 class="text-2xl font-black text-white tracking-tight flex items-center gap-3">
+            <style>
+                .hide-scrollbar::-webkit-scrollbar {
+                    display: none;
+                }
+                .hide-scrollbar {
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
+                }
+            </style>
+            <div class="flex items-center justify-between gap-6 border-b border-slate-800 pb-4 overflow-hidden">
+                <h3 class="text-2xl font-black text-white tracking-tight flex items-center gap-3 shrink-0">
                     <span class="w-8 h-8 bg-emerald-500/10 rounded-lg flex items-center justify-center">
                         <span class="w-3 h-3 bg-emerald-500 rounded-full animate-ping"></span>
                     </span>
                     JELAJAHI BERITA
                 </h3>
-                <div class="flex gap-2 text-xs font-bold text-slate-500">
-                    <a href="{{ route('public.articles') }}" class="text-white bg-slate-800 px-4 py-1.5 rounded-full border border-slate-700 hover:bg-slate-700 transition">Semua</a>
+                
+                <div class="flex-1 overflow-x-auto hide-scrollbar">
+                    <div class="flex items-center gap-2 text-xs font-bold text-slate-500 whitespace-nowrap min-w-max px-2">
+                        <a href="{{ route('public.articles') }}" class="text-white bg-slate-800 px-4 py-1.5 rounded-full border border-slate-700 hover:bg-slate-700 transition">Semua</a>
+                        @foreach($categories as $category)
+                             <a href="{{ route('public.articles', ['kategori' => $category->slug]) }}" 
+                                class="text-slate-400 bg-slate-900/50 hover:bg-slate-800 hover:text-white px-4 py-1.5 rounded-full border border-slate-800 hover:border-slate-700 transition">
+                                {{ $category->name }}
+                             </a>
+                        @endforeach
+                    </div>
                 </div>
             </div>
 

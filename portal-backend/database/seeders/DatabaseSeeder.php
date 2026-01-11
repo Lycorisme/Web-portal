@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
         // Run other seeders
         $this->call([
             CategorySeeder::class,
+            TagSeeder::class,
             PageSeeder::class,
             ArticleSeeder::class,
             ActivityLogSeeder::class,

@@ -91,11 +91,13 @@ class ArticleSeeder extends Seeder
             ],
         ];
 
+        $tags = \App\Models\Tag::all();
+
         foreach ($articles as $index => $article) {
             // Assign random category
             $category = $categories->count() > 0 ? $categories->random() : null;
             
-            Article::updateOrCreate(
+            $createdArticle = Article::updateOrCreate(
                 ['title' => $article['title']],
                 array_merge($article, [
                     'author_id' => $user->id,
@@ -107,6 +109,12 @@ class ArticleSeeder extends Seeder
                     'updated_at' => now()->subDays($index),
                 ])
             );
+
+            // Attach random tags (2-4 tags)
+            if ($tags->count() > 0) {
+                $randomTags = $tags->random(rand(2, min(4, $tags->count())))->pluck('id');
+                $createdArticle->tags()->sync($randomTags);
+            }
         }
 
         $this->command->info('Articles seeded successfully!');
