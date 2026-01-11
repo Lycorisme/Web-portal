@@ -1,12 +1,12 @@
-@extends('layouts.public-layout')
+@extends('public.layouts.public')
 
 @section('meta_title', 'Berita')
 
 @section('content')
     <!-- Header / Banner -->
-    <div class="pt-8 md:pt-12 pb-6 md:pb-8 relative overflow-hidden">
+    <div class="pt-32 md:pt-40 pb-6 md:pb-8 relative overflow-hidden">
         <div class="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
-            <h1 class="text-2xl md:text-3xl lg:text-5xl font-extrabold text-white mb-3 md:mb-4 tracking-tight">
+            <h1 class="text-4xl md:text-5xl lg:text-7xl font-display font-bold text-white mb-6 tracking-tight leading-tight">
                 @if(request('kategori'))
                     Kategori: <span class="text-emerald-500">{{ ucwords(str_replace('-', ' ', request('kategori'))) }}</span>
                 @elseif(request('tag'))

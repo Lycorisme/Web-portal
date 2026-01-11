@@ -1,4 +1,4 @@
-@extends('layouts.public-layout')
+@extends('public.layouts.public')
 
 @section('meta_title', $article->title)
 @section('meta_description', $article->excerpt ?? Str::limit(strip_tags($article->content), 160))
@@ -77,7 +77,7 @@
             </div>
         @else
             {{-- Without Featured Image --}}
-            <div class="pt-8 sm:pt-10 lg:pt-16 pb-6 sm:pb-8">
+            <div class="pt-32 md:pt-40 pb-8">
                 <div class="max-w-5xl mx-auto px-4 sm:px-6">
                     <div class="max-w-3xl space-y-4 sm:space-y-5">
                         <div class="flex flex-wrap items-center gap-2 sm:gap-3">
