@@ -4,9 +4,9 @@
 
 @section('content')
     <!-- Header / Banner -->
-    <div class="pt-12 pb-8 relative overflow-hidden">
-        <div class="max-w-7xl mx-auto px-6 relative z-10">
-            <h1 class="text-3xl lg:text-5xl font-extrabold text-white mb-4 tracking-tight">
+    <div class="pt-8 md:pt-12 pb-6 md:pb-8 relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
+            <h1 class="text-2xl md:text-3xl lg:text-5xl font-extrabold text-white mb-3 md:mb-4 tracking-tight">
                 @if(request('kategori'))
                     Kategori: <span class="text-emerald-500">{{ ucwords(str_replace('-', ' ', request('kategori'))) }}</span>
                 @elseif(request('tag'))
@@ -23,13 +23,13 @@
         </div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-6 py-12">
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-12">
+    <div class="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12 overflow-x-hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 lg:gap-12">
             
-            <!-- Sidebar (Filter & Search) -->
-            <div class="lg:col-span-1 space-y-8">
+            <!-- Sidebar (Filter & Search) - appears at bottom on mobile -->
+            <div class="order-2 lg:order-1 lg:col-span-1 space-y-6 lg:space-y-8">
                 <!-- Search Widget -->
-                <div class="bg-slate-900/50 rounded-[32px] border border-slate-800 p-6 backdrop-blur-sm">
+                <div class="bg-slate-900/50 rounded-2xl md:rounded-[32px] border border-slate-800 p-4 md:p-6 backdrop-blur-sm">
                     <h3 class="text-sm font-black text-white uppercase tracking-widest mb-4">Cari Berita</h3>
                     <form action="{{ route('public.articles') }}" method="GET">
                         @if(request('kategori'))
@@ -48,7 +48,7 @@
                 </div>
 
                 <!-- Categories Widget -->
-                <div class="bg-slate-900/50 rounded-[32px] border border-slate-800 p-6 backdrop-blur-sm">
+                <div class="bg-slate-900/50 rounded-2xl md:rounded-[32px] border border-slate-800 p-4 md:p-6 backdrop-blur-sm">
                     <h3 class="text-sm font-black text-white uppercase tracking-widest mb-4">Kategori</h3>
                     <div class="flex flex-col space-y-2">
                         <a href="{{ route('public.articles') }}" class="flex justify-between items-center px-4 py-3 rounded-xl transition-all {{ !request('kategori') ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white border border-transparent' }}">
@@ -64,58 +64,89 @@
                 </div>
             </div>
 
-            <!-- Main Listing -->
-            <div class="lg:col-span-3">
+            <!-- Main Listing - appears first on mobile -->
+            <div class="order-1 lg:order-2 lg:col-span-3">
                 @if($articles->count() > 0)
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-4 md:gap-6">
                         @foreach($articles as $article)
-                            <article class="flex flex-col bg-slate-900/30 rounded-[32px] border border-slate-800 overflow-hidden hover:border-emerald-500/30 transition-all duration-300 group">
-                                <div class="relative aspect-video overflow-hidden">
-                                    <a href="{{ route('public.article.show', $article->slug) }}">
-                                        @if($article->image_url)
-                                            <img src="{{ $article->image_url }}" alt="{{ $article->title }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
-                                        @else
-                                            <div class="w-full h-full bg-slate-900 flex items-center justify-center text-slate-700 font-bold uppercase text-xs">No Image</div>
-                                        @endif
-                                    </a>
-                                    <div class="absolute top-4 left-4">
-                                        @if($article->categoryRelation)
-                                            <a href="{{ route('public.articles', ['kategori' => $article->categoryRelation->slug]) }}" class="px-3 py-1 bg-slate-950/80 backdrop-blur text-[10px] font-black uppercase tracking-widest text-white rounded-full border border-slate-800 hover:bg-emerald-600 hover:border-emerald-500 transition-colors">
-                                                {{ $article->categoryRelation->name }}
-                                            </a>
-                                        @else
-                                            <span class="px-3 py-1 bg-slate-950/80 backdrop-blur text-[10px] font-black uppercase tracking-widest text-slate-400 rounded-full border border-slate-800">
-                                                Uncategorized
-                                            </span>
-                                        @endif
-                                    </div>
+                            @php
+                                $idx = $loop->index;
+                                $mod = $idx % 8; // Cycle pattern every 8 items
+                                
+                                // Default classes - mobile first approach
+                                $colClass = 'sm:col-span-1 md:col-span-2'; 
+                                $heightClass = 'min-h-[280px] md:min-h-[320px]';
+                                $showExcerpt = false;
+                                $titleSize = 'text-base md:text-lg';
+                                
+                                if ($mod == 0) {
+                                    $colClass = 'sm:col-span-2 md:col-span-6'; // Full width featured
+                                    $heightClass = 'min-h-[320px] md:min-h-[450px]';
+                                    $showExcerpt = true;
+                                    $titleSize = 'text-xl md:text-3xl lg:text-4xl';
+                                } elseif ($mod == 1 || $mod == 2) {
+                                    $colClass = 'sm:col-span-1 md:col-span-3'; // Half width
+                                    $heightClass = 'min-h-[280px] md:min-h-[380px]';
+                                    $titleSize = 'text-lg md:text-2xl';
+                                    $showExcerpt = true;
+                                } elseif ($mod == 6) {
+                                    $colClass = 'sm:col-span-2 md:col-span-4'; // 2/3 width
+                                    $heightClass = 'min-h-[280px] md:min-h-[350px]';
+                                    $titleSize = 'text-lg md:text-2xl';
+                                    $showExcerpt = true;
+                                } elseif ($mod == 7) {
+                                    $colClass = 'sm:col-span-2 md:col-span-2'; // 1/3 width
+                                    $heightClass = 'min-h-[280px] md:min-h-[350px]';
+                                }
+                                // Items 3, 4, 5 are defaults (span 2, small)
+                            @endphp
+
+                            <article class="{{ $colClass }} {{ $heightClass }} relative group rounded-2xl md:rounded-[32px] overflow-hidden border border-slate-800 bg-slate-900 shadow-xl md:shadow-2xl hover:shadow-emerald-900/20 transition-all duration-500 hover:-translate-y-1">
+                                <!-- Background Image -->
+                                <div class="absolute inset-0">
+                                    @if($article->image_url)
+                                        <img src="{{ $article->image_url }}" alt="{{ $article->title }}" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110">
+                                    @else
+                                        <div class="w-full h-full bg-slate-800 flex items-center justify-center">
+                                            <span class="text-slate-700 font-bold uppercase tracking-widest text-xs">No Image</span>
+                                        </div>
+                                    @endif
+                                    <!-- Gradient Overlay -->
+                                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent opacity-90 transition-opacity duration-500 group-hover:opacity-80"></div>
                                 </div>
-                                <div class="p-8 flex-1 flex flex-col">
-                                    <div class="flex items-center text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4 space-x-3">
-                                        <span class="">
-                                            {{ $article->published_at ? \Carbon\Carbon::parse($article->published_at)->format('d M Y') : '-' }}
-                                        </span>
-                                        <span class="w-1 h-1 bg-slate-700 rounded-full"></span>
-                                        @if($article->author)
-                                        <span>
-                                            {{ $article->author->name }}
-                                        </span>
+
+                                <!-- Content -->
+                                <div class="absolute inset-0 p-4 md:p-8 flex flex-col justify-end">
+                                    <div class="transform transition-transform duration-500 translate-y-2 md:translate-y-4 group-hover:translate-y-0">
+                                        <!-- Header: Category & Date -->
+                                        <div class="flex items-center gap-2 md:gap-3 mb-2 md:mb-3 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-500 delay-100">
+                                            <span class="px-2 md:px-3 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest backdrop-blur-md">
+                                                {{ $article->categoryRelation?->name ?? 'News' }}
+                                            </span>
+                                            <span class="text-[9px] md:text-[10px] text-slate-300 font-bold uppercase tracking-widest hidden sm:inline">
+                                                 {{ $article->published_at ? \Carbon\Carbon::parse($article->published_at)->format('d M Y') : '' }}
+                                            </span>
+                                        </div>
+
+                                        <!-- Title -->
+                                        <h2 class="{{ $titleSize }} font-extrabold text-white leading-tight mb-2 group-hover:text-emerald-400 transition-colors">
+                                            <a href="{{ route('public.article.show', $article->slug) }}" class="focus:outline-none">
+                                                <span class="absolute inset-0 z-10"></span>
+                                                {{ $article->title }}
+                                            </a>
+                                        </h2>
+
+                                        <!-- Excerpt (Conditional) -->
+                                        @if($showExcerpt)
+                                            <p class="text-slate-300/80 text-sm font-medium leading-relaxed line-clamp-2 mb-4 hidden md:block opacity-80">
+                                                {{ Str::limit(strip_tags($article->content), 100) }}
+                                            </p>
                                         @endif
-                                    </div>
-                                    <h2 class="text-xl font-extrabold text-white mb-4 leading-tight group-hover:text-emerald-400 transition-colors">
-                                        <a href="{{ route('public.article.show', $article->slug) }}">
-                                            {{ $article->title }}
-                                        </a>
-                                    </h2>
-                                    <p class="text-slate-400 text-sm leading-relaxed mb-6 line-clamp-3 font-medium">
-                                        {{ Str::limit(strip_tags($article->content), 120) }}
-                                    </p>
-                                    
-                                    <div class="mt-auto pt-6 border-t border-slate-800 flex items-center justify-between">
-                                        <a href="{{ route('public.article.show', $article->slug) }}" class="text-xs font-black text-emerald-500 hover:text-emerald-400 uppercase tracking-widest flex items-center gap-2">
-                                            Baca Selengkapnya
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-                                        </a>
+
+                                        <!-- Action -->
+                                        <div class="flex items-center gap-2 text-emerald-500 text-xs font-black uppercase tracking-widest opacity-100 md:opacity-0 transform translate-y-0 md:translate-y-4 md:group-hover:opacity-100 md:group-hover:translate-y-0 transition-all duration-500 delay-200">
+                                            Baca Selengkapnya <i class="fas fa-arrow-right"></i>
+                                        </div>
                                     </div>
                                 </div>
                             </article>
@@ -127,8 +158,8 @@
                         {{ $articles->appends(request()->query())->links() }} {{-- Styling pagination might require customizing the view or just accepting default --}}
                     </div>
                 @else
-                    <div class="text-center py-20 bg-slate-900/50 rounded-[32px] border border-dashed border-slate-800">
-                        <h3 class="text-lg font-bold text-white uppercase tracking-widest">Tidak ada artikel</h3>
+                    <div class="text-center py-12 md:py-20 bg-slate-900/50 rounded-2xl md:rounded-[32px] border border-dashed border-slate-800">
+                        <h3 class="text-base md:text-lg font-bold text-white uppercase tracking-widest">Tidak ada artikel</h3>
                         <div class="mt-6">
                             <a href="{{ route('public.articles') }}" class="inline-flex items-center px-6 py-2 border border-slate-700 shadow-sm text-xs font-bold uppercase tracking-widest rounded-xl text-white hover:bg-slate-800 transition-all">
                                 Reset Filter
