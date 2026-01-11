@@ -184,29 +184,63 @@
              RIGHT COLUMN (Dynamic)
              Strict width: 50%, Flex-none
         ======================== -->
-        <div x-data="{ mode: 'login' }" class="flex-1 md:flex-none w-full md:w-[50%] relative bg-[#0b1120]/80 flex flex-col h-full">
+        <div x-data="authPanel()" class="flex-1 md:flex-none w-full md:w-[50%] relative bg-[#0b1120]/80 flex flex-col h-full">
             
             <!-- Navbar / Tabs -->
             <nav class="flex-none flex w-full border-b border-white/5">
-                <button @click="mode = 'login'" 
+                <button @click="switchMode('login')" 
                         class="flex-1 h-20 flex items-center justify-center text-sm font-semibold tracking-wide transition-all relative group"
-                        :class="mode === 'login' ? 'text-white bg-white/[0.02]' : 'text-slate-500 hover:text-slate-300'">
+                        :class="mode === 'login' ? 'text-white bg-white/[0.02]' : 'text-slate-500 hover:text-slate-300'"
+                        x-show="mode !== 'reset'">
                     Login Area
                     <div class="absolute bottom-0 w-full h-[2px] bg-brand-500 scale-x-0 transition-transform duration-300 origin-center"
                          :class="mode === 'login' ? 'scale-x-100' : 'scale-x-0'"></div>
                 </button>
-                <button @click="mode = 'register'" 
+                <button @click="switchMode('register')" 
                         class="flex-1 h-20 flex items-center justify-center text-sm font-semibold tracking-wide transition-all relative group"
-                        :class="mode === 'register' ? 'text-white bg-white/[0.02]' : 'text-slate-500 hover:text-slate-300'">
+                        :class="mode === 'register' ? 'text-white bg-white/[0.02]' : 'text-slate-500 hover:text-slate-300'"
+                        x-show="mode !== 'reset'">
                     Registrasi
                     <div class="absolute bottom-0 w-full h-[2px] bg-brand-500 scale-x-0 transition-transform duration-300 origin-center"
                          :class="mode === 'register' ? 'scale-x-100' : 'scale-x-0'"></div>
+                </button>
+                <!-- Reset Password Tab (only shown when in reset mode) -->
+                <div class="flex-1 h-20 flex items-center justify-center text-sm font-semibold tracking-wide text-white bg-white/[0.02] relative"
+                     x-show="mode === 'reset'" x-cloak>
+                    <i data-lucide="key-round" class="w-4 h-4 mr-2"></i>
+                    Reset Password
+                    <div class="absolute bottom-0 w-full h-[2px] bg-amber-500"></div>
+                </div>
+                <button @click="switchMode('login')" 
+                        class="w-20 h-20 flex items-center justify-center text-slate-500 hover:text-white hover:bg-white/5 transition-all"
+                        x-show="mode === 'reset'" x-cloak
+                        title="Kembali ke Login">
+                    <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </nav>
 
             <!-- Content Area: Independent Scroll -->
             <div class="flex-1 overflow-y-auto custom-scrollbar p-8 md:p-14 relative">
                 
+                <!-- Alert Messages -->
+                <div x-show="errorMessage" x-cloak
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0 -translate-y-2"
+                     x-transition:enter-end="opacity-100 translate-y-0"
+                     class="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 flex items-start gap-3">
+                    <i data-lucide="alert-circle" class="w-5 h-5 text-red-400 shrink-0 mt-0.5"></i>
+                    <p class="text-sm text-red-300" x-text="errorMessage"></p>
+                </div>
+
+                <div x-show="successMessage" x-cloak
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0 -translate-y-2"
+                     x-transition:enter-end="opacity-100 translate-y-0"
+                     class="mb-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-start gap-3">
+                    <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400 shrink-0 mt-0.5"></i>
+                    <p class="text-sm text-emerald-300" x-text="successMessage"></p>
+                </div>
+
                 <!-- Login View -->
                 <div x-show="mode === 'login'"
                      x-transition:enter="transition ease-out duration-300"
@@ -264,7 +298,7 @@
                                 </div>
                                 <span class="text-sm text-slate-400 group-hover:text-slate-300">Ingat Saya</span>
                             </label>
-                            <a href="#" class="text-sm font-medium text-brand-400 hover:text-brand-300 transition-colors">Lupa Password?</a>
+                            <button type="button" @click="switchMode('reset')" class="text-sm font-medium text-brand-400 hover:text-brand-300 transition-colors">Lupa Password?</button>
                         </div>
 
                         <button type="submit" class="w-full py-4 rounded-xl bg-gradient-to-r from-brand-600 to-accent-600 text-white font-bold text-sm tracking-widest shadow-lg shadow-brand-500/25 hover:shadow-brand-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-3 uppercase mt-4">
@@ -330,6 +364,192 @@
                     </form>
                 </div>
 
+                <!-- Reset Password View -->
+                <div x-show="mode === 'reset'" 
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0 translate-y-4"
+                     x-transition:enter-end="opacity-100 translate-y-0"
+                     x-cloak>
+
+                    <!-- Step 1: Email Verification -->
+                    <div x-show="resetStep === 1">
+                        <div class="mb-8">
+                            <div class="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center mb-6">
+                                <i data-lucide="mail" class="w-7 h-7 text-amber-400"></i>
+                            </div>
+                            <h2 class="text-3xl font-bold text-white mb-2 tracking-tight">Lupa Password?</h2>
+                            <p class="text-slate-400">Masukkan email terdaftar Anda. Kami akan mengirimkan kode OTP untuk verifikasi.</p>
+                        </div>
+
+                        <form @submit.prevent="sendOtp()" class="space-y-6">
+                            <div class="space-y-2">
+                                <label class="text-xs font-semibold text-slate-300 uppercase tracking-wider ml-1">Email Terdaftar</label>
+                                <input type="email" 
+                                       x-model="resetEmail"
+                                       required
+                                       class="w-full px-5 py-4 rounded-xl modern-input text-white placeholder-slate-500 text-sm font-medium" 
+                                       placeholder="masukkan email anda">
+                            </div>
+
+                            <button type="submit" 
+                                    :disabled="isLoading"
+                                    class="w-full py-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-sm tracking-widest shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-3 uppercase disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
+                                <template x-if="isLoading">
+                                    <svg class="animate-spin w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </template>
+                                <span x-text="isLoading ? 'Mengirim...' : 'Kirim Kode OTP'"></span>
+                            </button>
+
+                            <p class="text-center text-sm text-slate-500 mt-4">
+                                Ingat password? 
+                                <button type="button" @click="switchMode('login')" class="text-brand-400 hover:text-brand-300 font-medium">Kembali ke Login</button>
+                            </p>
+                        </form>
+                    </div>
+
+                    <!-- Step 2: OTP Verification -->
+                    <div x-show="resetStep === 2">
+                        <div class="mb-8">
+                            <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center mb-6">
+                                <i data-lucide="smartphone" class="w-7 h-7 text-emerald-400"></i>
+                            </div>
+                            <h2 class="text-3xl font-bold text-white mb-2 tracking-tight">Verifikasi OTP</h2>
+                            <p class="text-slate-400">
+                                Masukkan kode 6 digit yang telah dikirim ke 
+                                <span class="text-brand-400 font-medium" x-text="maskedEmail"></span>
+                            </p>
+                        </div>
+
+                        <form @submit.prevent="verifyOtp()" class="space-y-6">
+                            <!-- OTP Input Boxes -->
+                            <div class="flex justify-center gap-3">
+                                <template x-for="(digit, index) in otpDigits" :key="index">
+                                    <input type="text" 
+                                           maxlength="1"
+                                           x-model="otpDigits[index]"
+                                           @input="handleOtpInput($event, index)"
+                                           @keydown.backspace="handleOtpBackspace($event, index)"
+                                           @paste="handleOtpPaste($event)"
+                                           :id="'otp-' + index"
+                                           class="w-12 h-14 text-center text-2xl font-bold rounded-xl modern-input text-white focus:border-emerald-500 focus:ring-emerald-500/20"
+                                           pattern="[0-9]"
+                                           inputmode="numeric">
+                                </template>
+                            </div>
+
+                            <!-- Countdown Timer -->
+                            <div class="text-center">
+                                <p class="text-sm text-slate-500" x-show="countdown > 0">
+                                    Kode berlaku dalam <span class="text-amber-400 font-mono font-bold" x-text="formatCountdown()"></span>
+                                </p>
+                                <p class="text-sm text-red-400" x-show="countdown <= 0">
+                                    Kode OTP sudah kadaluarsa
+                                </p>
+                            </div>
+
+                            <button type="submit" 
+                                    :disabled="isLoading || otpDigits.join('').length !== 6"
+                                    class="w-full py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-sm tracking-widest shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-3 uppercase disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
+                                <template x-if="isLoading">
+                                    <svg class="animate-spin w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </template>
+                                <span x-text="isLoading ? 'Memverifikasi...' : 'Verifikasi Kode'"></span>
+                            </button>
+
+                            <div class="text-center space-y-2">
+                                <p class="text-sm text-slate-500">
+                                    Tidak menerima kode? 
+                                    <button type="button" 
+                                            @click="resendOtp()"
+                                            :disabled="resendCooldown > 0 || isLoading"
+                                            class="text-brand-400 hover:text-brand-300 font-medium disabled:text-slate-600 disabled:cursor-not-allowed">
+                                        <span x-show="resendCooldown <= 0">Kirim Ulang</span>
+                                        <span x-show="resendCooldown > 0" x-text="'Tunggu ' + resendCooldown + 's'"></span>
+                                    </button>
+                                </p>
+                                <button type="button" @click="resetStep = 1" class="text-sm text-slate-500 hover:text-slate-300">
+                                    ← Ubah email
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Step 3: New Password -->
+                    <div x-show="resetStep === 3">
+                        <div class="mb-8">
+                            <div class="w-14 h-14 rounded-2xl bg-brand-500/10 flex items-center justify-center mb-6">
+                                <i data-lucide="lock" class="w-7 h-7 text-brand-400"></i>
+                            </div>
+                            <h2 class="text-3xl font-bold text-white mb-2 tracking-tight">Password Baru</h2>
+                            <p class="text-slate-400">Buat password baru yang kuat untuk akun Anda.</p>
+                        </div>
+
+                        <form @submit.prevent="resetPassword()" class="space-y-5">
+                            <div class="space-y-2">
+                                <label class="text-xs font-semibold text-slate-300 uppercase tracking-wider ml-1">Password Baru</label>
+                                <div class="relative">
+                                    <input :type="showPassword ? 'text' : 'password'" 
+                                           x-model="newPassword"
+                                           required
+                                           minlength="8"
+                                           class="w-full px-5 py-4 rounded-xl modern-input text-white placeholder-slate-500 text-sm font-medium pr-12" 
+                                           placeholder="Minimal 8 karakter">
+                                    <button type="button" @click="showPassword = !showPassword" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
+                                        <i data-lucide="eye" class="w-5 h-5" x-show="!showPassword"></i>
+                                        <i data-lucide="eye-off" class="w-5 h-5" x-show="showPassword" x-cloak></i>
+                                    </button>
+                                </div>
+                                <!-- Password Strength Indicator -->
+                                <div class="flex gap-1 mt-2">
+                                    <div class="h-1 flex-1 rounded-full transition-colors" :class="passwordStrength >= 1 ? 'bg-red-500' : 'bg-slate-700'"></div>
+                                    <div class="h-1 flex-1 rounded-full transition-colors" :class="passwordStrength >= 2 ? 'bg-amber-500' : 'bg-slate-700'"></div>
+                                    <div class="h-1 flex-1 rounded-full transition-colors" :class="passwordStrength >= 3 ? 'bg-emerald-500' : 'bg-slate-700'"></div>
+                                    <div class="h-1 flex-1 rounded-full transition-colors" :class="passwordStrength >= 4 ? 'bg-brand-500' : 'bg-slate-700'"></div>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-1">
+                                    <span x-show="passwordStrength === 0">Masukkan password</span>
+                                    <span x-show="passwordStrength === 1" class="text-red-400">Lemah</span>
+                                    <span x-show="passwordStrength === 2" class="text-amber-400">Cukup</span>
+                                    <span x-show="passwordStrength === 3" class="text-emerald-400">Kuat</span>
+                                    <span x-show="passwordStrength === 4" class="text-brand-400">Sangat Kuat</span>
+                                </p>
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="text-xs font-semibold text-slate-300 uppercase tracking-wider ml-1">Konfirmasi Password</label>
+                                <input type="password" 
+                                       x-model="confirmPassword"
+                                       required
+                                       class="w-full px-5 py-4 rounded-xl modern-input text-white placeholder-slate-500 text-sm font-medium" 
+                                       :class="confirmPassword && confirmPassword !== newPassword ? 'border-red-500' : ''"
+                                       placeholder="Ulangi password baru">
+                                <p class="text-xs text-red-400 mt-1" x-show="confirmPassword && confirmPassword !== newPassword">
+                                    Password tidak cocok
+                                </p>
+                            </div>
+
+                            <button type="submit" 
+                                    :disabled="isLoading || !newPassword || newPassword !== confirmPassword || passwordStrength < 2"
+                                    class="w-full py-4 rounded-xl bg-gradient-to-r from-brand-600 to-accent-600 text-white font-bold text-sm tracking-widest shadow-lg shadow-brand-500/25 hover:shadow-brand-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-3 uppercase mt-4 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
+                                <template x-if="isLoading">
+                                    <svg class="animate-spin w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </template>
+                                <span x-text="isLoading ? 'Menyimpan...' : 'Simpan Password Baru'"></span>
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+
             </div>
             
             <!-- Bottom decorative line -->
@@ -339,6 +559,323 @@
     </div>
 
     <script>
+        // Alpine.js component for authentication panel
+        function authPanel() {
+            return {
+                // Mode: login, register, reset
+                mode: 'login',
+                
+                // Reset password flow
+                resetStep: 1,
+                resetEmail: '',
+                maskedEmail: '',
+                otpDigits: ['', '', '', '', '', ''],
+                resetToken: '',
+                newPassword: '',
+                confirmPassword: '',
+                showPassword: false,
+                
+                // State
+                isLoading: false,
+                errorMessage: '',
+                successMessage: '',
+                countdown: 0,
+                resendCooldown: 0,
+                countdownInterval: null,
+                resendInterval: null,
+                
+                // Computed password strength (0-4)
+                get passwordStrength() {
+                    const password = this.newPassword;
+                    if (!password) return 0;
+                    
+                    let strength = 0;
+                    if (password.length >= 8) strength++;
+                    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+                    if (/[0-9]/.test(password)) strength++;
+                    if (/[^a-zA-Z0-9]/.test(password)) strength++;
+                    
+                    return strength;
+                },
+                
+                // Switch between modes
+                switchMode(newMode) {
+                    this.errorMessage = '';
+                    this.successMessage = '';
+                    
+                    if (newMode === 'login' || newMode === 'register') {
+                        // Reset all reset-related state
+                        this.resetStep = 1;
+                        this.resetEmail = '';
+                        this.otpDigits = ['', '', '', '', '', ''];
+                        this.resetToken = '';
+                        this.newPassword = '';
+                        this.confirmPassword = '';
+                        this.clearCountdown();
+                    }
+                    
+                    this.mode = newMode;
+                    
+                    // Reinitialize icons after view change
+                    this.$nextTick(() => {
+                        lucide.createIcons();
+                    });
+                },
+                
+                // Send OTP to email
+                async sendOtp() {
+                    if (!this.resetEmail) {
+                        this.errorMessage = 'Email wajib diisi.';
+                        return;
+                    }
+                    
+                    this.isLoading = true;
+                    this.errorMessage = '';
+                    this.successMessage = '';
+                    
+                    try {
+                        const response = await fetch('{{ route("password.send-otp") }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                email: this.resetEmail
+                            })
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            this.successMessage = data.message;
+                            this.maskedEmail = data.email_masked;
+                            this.countdown = data.expires_in || 600;
+                            this.startCountdown();
+                            this.startResendCooldown(60);
+                            this.resetStep = 2;
+                            
+                            // Focus first OTP input
+                            this.$nextTick(() => {
+                                document.getElementById('otp-0')?.focus();
+                                lucide.createIcons();
+                            });
+                        } else {
+                            this.errorMessage = data.message;
+                        }
+                    } catch (error) {
+                        this.errorMessage = 'Terjadi kesalahan. Silakan coba lagi.';
+                        console.error('Send OTP error:', error);
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+                
+                // Verify OTP code
+                async verifyOtp() {
+                    const otp = this.otpDigits.join('');
+                    
+                    if (otp.length !== 6) {
+                        this.errorMessage = 'Masukkan kode OTP 6 digit.';
+                        return;
+                    }
+                    
+                    this.isLoading = true;
+                    this.errorMessage = '';
+                    this.successMessage = '';
+                    
+                    try {
+                        const response = await fetch('{{ route("password.verify-otp") }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                email: this.resetEmail,
+                                otp: otp
+                            })
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            this.successMessage = data.message;
+                            this.resetToken = data.reset_token;
+                            this.clearCountdown();
+                            this.resetStep = 3;
+                            
+                            this.$nextTick(() => {
+                                lucide.createIcons();
+                            });
+                        } else {
+                            this.errorMessage = data.message;
+                            // Clear OTP on error
+                            this.otpDigits = ['', '', '', '', '', ''];
+                            this.$nextTick(() => {
+                                document.getElementById('otp-0')?.focus();
+                            });
+                        }
+                    } catch (error) {
+                        this.errorMessage = 'Terjadi kesalahan. Silakan coba lagi.';
+                        console.error('Verify OTP error:', error);
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+                
+                // Reset password
+                async resetPassword() {
+                    if (!this.newPassword || this.newPassword !== this.confirmPassword) {
+                        this.errorMessage = 'Password tidak valid atau tidak cocok.';
+                        return;
+                    }
+                    
+                    if (this.passwordStrength < 2) {
+                        this.errorMessage = 'Password terlalu lemah. Gunakan kombinasi huruf besar, huruf kecil, dan angka.';
+                        return;
+                    }
+                    
+                    this.isLoading = true;
+                    this.errorMessage = '';
+                    this.successMessage = '';
+                    
+                    try {
+                        const response = await fetch('{{ route("password.reset") }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                email: this.resetEmail,
+                                reset_token: this.resetToken,
+                                password: this.newPassword,
+                                password_confirmation: this.confirmPassword
+                            })
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            this.successMessage = data.message;
+                            
+                            // Reset all state and switch to login after 2 seconds
+                            setTimeout(() => {
+                                this.switchMode('login');
+                                this.successMessage = 'Password berhasil diperbarui. Silakan login dengan password baru.';
+                            }, 2000);
+                        } else {
+                            this.errorMessage = data.message;
+                        }
+                    } catch (error) {
+                        this.errorMessage = 'Terjadi kesalahan. Silakan coba lagi.';
+                        console.error('Reset password error:', error);
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+                
+                // Resend OTP
+                async resendOtp() {
+                    if (this.resendCooldown > 0) return;
+                    
+                    await this.sendOtp();
+                },
+                
+                // OTP input handlers
+                handleOtpInput(event, index) {
+                    const value = event.target.value;
+                    
+                    // Only allow digits
+                    if (!/^\d*$/.test(value)) {
+                        this.otpDigits[index] = '';
+                        return;
+                    }
+                    
+                    // Move to next input
+                    if (value && index < 5) {
+                        document.getElementById('otp-' + (index + 1))?.focus();
+                    }
+                },
+                
+                handleOtpBackspace(event, index) {
+                    // If current input is empty and backspace pressed, move to previous
+                    if (!this.otpDigits[index] && index > 0) {
+                        document.getElementById('otp-' + (index - 1))?.focus();
+                    }
+                },
+                
+                handleOtpPaste(event) {
+                    event.preventDefault();
+                    const pastedData = event.clipboardData.getData('text').trim();
+                    
+                    if (/^\d{6}$/.test(pastedData)) {
+                        for (let i = 0; i < 6; i++) {
+                            this.otpDigits[i] = pastedData[i];
+                        }
+                        document.getElementById('otp-5')?.focus();
+                    }
+                },
+                
+                // Countdown timer
+                startCountdown() {
+                    this.clearCountdown();
+                    
+                    this.countdownInterval = setInterval(() => {
+                        if (this.countdown > 0) {
+                            this.countdown--;
+                        } else {
+                            this.clearCountdown();
+                        }
+                    }, 1000);
+                },
+                
+                clearCountdown() {
+                    if (this.countdownInterval) {
+                        clearInterval(this.countdownInterval);
+                        this.countdownInterval = null;
+                    }
+                },
+                
+                formatCountdown() {
+                    const minutes = Math.floor(this.countdown / 60);
+                    const seconds = this.countdown % 60;
+                    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                },
+                
+                // Resend cooldown
+                startResendCooldown(seconds) {
+                    this.resendCooldown = seconds;
+                    
+                    if (this.resendInterval) {
+                        clearInterval(this.resendInterval);
+                    }
+                    
+                    this.resendInterval = setInterval(() => {
+                        if (this.resendCooldown > 0) {
+                            this.resendCooldown--;
+                        } else {
+                            clearInterval(this.resendInterval);
+                            this.resendInterval = null;
+                        }
+                    }, 1000);
+                },
+                
+                // Cleanup on destroy
+                destroy() {
+                    this.clearCountdown();
+                    if (this.resendInterval) {
+                        clearInterval(this.resendInterval);
+                    }
+                }
+            };
+        }
+        
+        // Initialize Lucide icons
         lucide.createIcons();
     </script>
 </body>

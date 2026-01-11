@@ -149,6 +149,13 @@
                     <i data-lucide="shield" class="w-4 h-4"></i>
                     <span>Keamanan</span>
                 </button>
+
+                <button @click="activeTab = 'email'"
+                    :class="activeTab === 'email' ? 'bg-gradient-to-r from-rose-500 to-pink-600 text-white shadow-lg shadow-rose-500/30' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800'"
+                    class="flex-shrink-0 sm:flex-1 flex items-center justify-center gap-2 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl font-medium transition-all duration-200 text-sm whitespace-nowrap">
+                    <i data-lucide="mail" class="w-4 h-4"></i>
+                    <span>Email</span>
+                </button>
             </div>
         </div>
 
@@ -177,6 +184,9 @@
 
             {{-- Security Settings Tab --}}
             @include('settings.partials.security')
+
+            {{-- Email Settings Tab --}}
+            @include('settings.partials.email')
 
             {{-- Save Button --}}
             <div class="mt-6 sm:mt-8 flex flex-col-reverse sm:flex-row gap-3 sm:gap-4 sm:justify-end">

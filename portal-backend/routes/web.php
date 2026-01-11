@@ -23,6 +23,12 @@ Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/register', [AuthController::class, 'register'])->name('register');
+
+    // Password Reset Routes (OTP based)
+    Route::post('/password/send-otp', [\App\Http\Controllers\PasswordResetController::class, 'sendOtp'])->name('password.send-otp');
+    Route::post('/password/verify-otp', [\App\Http\Controllers\PasswordResetController::class, 'verifyOtp'])->name('password.verify-otp');
+    Route::post('/password/reset', [\App\Http\Controllers\PasswordResetController::class, 'resetPassword'])->name('password.reset');
+    Route::post('/password/resend-otp', [\App\Http\Controllers\PasswordResetController::class, 'resendOtp'])->name('password.resend-otp');
 });
 
 // Logout (Authenticated Only)
