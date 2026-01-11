@@ -12,8 +12,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        html, body { overflow-x: hidden; width: 100%; max-width: 100vw; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .glass-card { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(51, 65, 85, 0.5); }
+        img, video, iframe, embed, object { max-width: 100%; height: auto; }
+        pre, code { overflow-x: auto; max-width: 100%; }
+        table { display: block; overflow-x: auto; max-width: 100%; }
+        p, h1, h2, h3, h4, h5, h6, li, span, a { word-wrap: break-word; overflow-wrap: break-word; }
     </style>
 </head>
 <body class="bg-[#020617] text-slate-200 overflow-x-hidden" x-data="{ mobileMenu: false }">
@@ -26,7 +32,7 @@
 
     <!-- Navigation -->
     <nav class="sticky top-0 z-50 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
             <div class="flex items-center gap-4">
                 <a href="{{ route('public.home') }}">
                     @if(isset($siteSettings['logo_url']) && $siteSettings['logo_url'])

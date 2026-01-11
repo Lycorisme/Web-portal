@@ -176,12 +176,6 @@
 
         <!-- Sidebar -->
         <div class="lg:col-span-4 space-y-12">
-            <!-- Widget 1: Keamanan -->
-            <div class="p-8 rounded-[40px] bg-gradient-to-br from-emerald-600 to-teal-700 border border-emerald-400/30 shadow-2xl shadow-emerald-500/20">
-                <svg class="w-12 h-12 text-white mb-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z"></path></svg>
-                <h4 class="text-2xl font-black text-white leading-tight mb-3 italic">KEAMANAN<br>TERJAMIN</h4>
-                <p class="text-emerald-100 text-xs leading-relaxed font-medium">Setiap interaksi dan konten di portal ini telah divalidasi oleh sistem keamanan berlapis BTIKP.</p>
-            </div>
 
             <!-- Widget 2: Paling Disukai -->
             <div class="space-y-6">
