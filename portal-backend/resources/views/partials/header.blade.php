@@ -90,10 +90,10 @@
                             <i data-lucide="settings" class="w-4 h-4 text-surface-500"></i>
                             <span class="text-sm text-surface-700 dark:text-surface-300">Pengaturan</span>
                         </a>
-                        <a href="#"
+                        <a href="{{ route('public.home') }}" target="_blank"
                             class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors">
-                            <i data-lucide="help-circle" class="w-4 h-4 text-surface-500"></i>
-                            <span class="text-sm text-surface-700 dark:text-surface-300">Bantuan</span>
+                            <i data-lucide="globe" class="w-4 h-4 text-surface-500"></i>
+                            <span class="text-sm text-surface-700 dark:text-surface-300">Halaman Publik</span>
                         </a>
                     </div>
                     <div class="p-2 border-t border-surface-200 dark:border-surface-800">

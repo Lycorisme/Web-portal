@@ -34,7 +34,7 @@
                 {{ $stats['is_author'] ? 'Views Berita Saya' : 'Total Views' }}
             </p>
             <div class="flex items-end justify-between gap-2">
-                <h3 class="text-3xl font-bold text-surface-900 dark:text-white">{{ number_format($stats['total_views']) }}</h3>
+                <h3 class="text-3xl font-bold text-surface-900 dark:text-white">{{ $stats['total_views'] }}</h3>
                 <span class="inline-flex items-center gap-x-1 text-xs font-semibold {{ $stats['views_growth'] >= 0 ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10' : 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10' }} px-2 py-1 rounded-full mb-1">
                     <i data-lucide="{{ $stats['views_growth'] >= 0 ? 'trending-up' : 'trending-down' }}" class="w-3 h-3"></i>
                     {{ abs($stats['views_growth']) }}%

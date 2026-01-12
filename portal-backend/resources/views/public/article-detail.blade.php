@@ -18,7 +18,7 @@
     <header class="relative w-full max-w-full overflow-hidden">
         {{-- Floating Back Button --}}
         <button onclick="history.back()" 
-                class="absolute top-4 left-4 sm:top-6 sm:left-6 z-20 inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-slate-900/70 backdrop-blur-md rounded-xl border border-white/10 hover:border-emerald-500/50 text-white/80 hover:text-emerald-400 transition-all group shadow-lg">
+                class="absolute top-24 left-4 sm:top-28 sm:left-6 z-20 inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-slate-900/70 backdrop-blur-md rounded-xl border border-white/10 hover:border-emerald-500/50 text-white/80 hover:text-emerald-400 transition-all group shadow-lg">
             <svg class="w-4 h-4 sm:w-5 sm:h-5 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
             </svg>

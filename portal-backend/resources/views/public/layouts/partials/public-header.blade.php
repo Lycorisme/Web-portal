@@ -7,9 +7,18 @@
     $instagramUrl = \App\Models\SiteSetting::get('instagram_url', '');
     $twitterUrl = \App\Models\SiteSetting::get('twitter_url', '');
     $youtubeUrl = \App\Models\SiteSetting::get('youtube_url', '');
+    $siteName = \App\Models\SiteSetting::get('site_name', 'BTIKP');
+    $siteLogo = \App\Models\SiteSetting::get('logo_url');
+    if (empty($siteLogo)) {
+        $siteLogo = \App\Models\SiteSetting::get('site_logo', '');
+    }
+    // Fallback if both are empty? Maybe not needed if logic handles empty checks.
+
+    $siteTagline = \App\Models\SiteSetting::get('site_tagline', 'Portal Berita');
 @endphp
 
 <header x-data="{ mobileMenuOpen: false, searchOpen: false, scrolled: false }"
+        x-init="$watch('mobileMenuOpen', value => value ? document.body.classList.add('overflow-hidden') : document.body.classList.remove('overflow-hidden')); $watch('searchOpen', value => value ? document.body.classList.add('overflow-hidden') : document.body.classList.remove('overflow-hidden'))"
         @scroll.window="scrolled = (window.pageYOffset > 10)"
         class="fixed top-0 w-full z-50 transition-all duration-300"
         :class="{ 'bg-slate-900/80 backdrop-blur-md shadow-lg shadow-black/5 border-b border-white/5 py-3': scrolled, 'bg-transparent py-5': !scrolled }">
@@ -18,15 +27,16 @@
         <div class="flex justify-between items-center">
             {{-- Logo --}}
             <a href="{{ route('public.home') }}" class="flex items-center gap-3 group">
-                @if(!empty($siteSettings['logo_url']))
-                    <img src="{{ $siteSettings['logo_url'] }}" alt="{{ $siteSettings['site_name'] ?? 'Logo' }}" class="h-10 w-auto group-hover:scale-105 transition-transform duration-300">
+                @if(!empty($siteLogo))
+                    <img src="{{ asset($siteLogo) }}" alt="{{ $siteName }}" class="h-10 w-auto group-hover:scale-105 transition-transform duration-300">
                 @endif
+
                 <div class="flex flex-col">
                     <span class="font-display font-bold text-xl md:text-2xl text-white leading-none tracking-tight group-hover:text-emerald-400 transition-colors">
-                        {{ $siteSettings['site_name'] ?? 'BTIKP' }}
+                        {{ $siteName }}
                     </span>
                     <span class="text-[0.6rem] md:text-xs font-bold text-slate-400 uppercase tracking-[0.2em] group-hover:text-slate-300 transition-colors">
-                        Portal Berita
+                        {{ $siteTagline }}
                     </span>
                 </div>
             </a>
@@ -50,28 +60,10 @@
             {{-- Right Actions --}}
             <div class="flex items-center gap-4">
                 {{-- Search Toggle --}}
-                <div class="relative">
-                    <button @click="searchOpen = !searchOpen" 
-                            class="w-10 h-10 flex items-center justify-center rounded-full text-slate-400 hover:text-white hover:bg-white/10 transition-all border border-transparent hover:border-white/10">
-                        <i class="fas fa-search"></i>
-                    </button>
-                    {{-- Search Dropdown --}}
-                    <div x-show="searchOpen" 
-                         @click.away="searchOpen = false"
-                         x-transition:enter="transition ease-out duration-200"
-                         x-transition:enter-start="opacity-0 scale-95 -translate-y-2"
-                         x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                         x-transition:leave="transition ease-in duration-150"
-                         x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-                         x-transition:leave-end="opacity-0 scale-95 -translate-y-2"
-                         class="absolute right-0 top-full mt-2 w-72 bg-slate-900 border border-slate-700/50 rounded-2xl p-4 shadow-2xl overflow-hidden glass z-50">
-                         <form action="{{ route('public.articles') }}" method="GET" class="relative">
-                            <input type="text" name="search" placeholder="Cari berita..." 
-                                   class="w-full bg-slate-950 border border-slate-700 text-slate-200 text-sm rounded-xl px-4 py-3 pl-10 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all placeholder:text-slate-600">
-                            <i class="fas fa-search absolute left-3.5 top-3.5 text-slate-500"></i>
-                         </form>
-                    </div>
-                </div>
+                <button @click="searchOpen = !searchOpen" 
+                        class="w-10 h-10 flex items-center justify-center rounded-full text-slate-400 hover:text-white hover:bg-white/10 transition-all border border-transparent hover:border-white/10">
+                    <i class="fas fa-search"></i>
+                </button>
 
                 {{-- Auth Buttons --}}
                 <div class="hidden md:flex items-center">
@@ -109,51 +101,121 @@
         </div>
     </div>
 
-    {{-- Mobile Menu --}}
+    {{-- Mobile Menu (Fullscreen) --}}
     <div x-show="mobileMenuOpen"
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 -translate-y-4"
-         x-transition:enter-end="opacity-100 translate-y-0"
-         x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100 translate-y-0"
-         x-transition:leave-end="opacity-0 -translate-y-4"
-         class="md:hidden absolute top-full left-0 w-full bg-slate-900/95 backdrop-blur-lg border-b border-slate-800 shadow-2xl p-6 flex flex-col gap-4">
+         style="display: none;"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 backdrop-blur-none"
+         x-transition:enter-end="opacity-100 backdrop-blur-2xl"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 backdrop-blur-2xl"
+         x-transition:leave-end="opacity-0 backdrop-blur-none"
+         class="fixed inset-0 z-[100] md:hidden bg-slate-950/90 backdrop-blur-2xl flex flex-col justify-center items-center">
         
-        <a href="{{ route('public.home') }}" class="text-lg font-bold text-slate-300 hover:text-emerald-400 transition-colors">Beranda</a>
-        <a href="{{ route('public.articles') }}" class="text-lg font-bold text-slate-300 hover:text-emerald-400 transition-colors">Artikel</a>
-        <a href="{{ route('public.gallery') }}" class="text-lg font-bold text-slate-300 hover:text-emerald-400 transition-colors">Galeri</a>
-        
-        <hr class="border-slate-800 my-2">
-        
-        @auth
-             <div class="flex flex-col gap-3">
-                <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Akun</span>
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-emerald-500 font-bold text-lg">
-                        {{ substr(auth()->user()->name, 0, 1) }}
-                    </div>
-                    <div>
-                        <div class="font-bold text-white">{{ auth()->user()->name }}</div>
-                        <div class="text-xs text-slate-500">{{ auth()->user()->email }}</div>
-                    </div>
-                </div>
-                 @if(auth()->user()->canAccessDashboard())
-                    <a href="{{ route('dashboard') }}" class="mt-2 block w-full py-3 bg-emerald-600 rounded-xl text-center text-white font-bold uppercase tracking-widest text-xs">
-                        Ke Dashboard
-                    </a>
-                @endif
-                 <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="mt-2 w-full py-3 bg-slate-800 rounded-xl text-center text-rose-400 font-bold uppercase tracking-widest text-xs">
-                        Keluar
-                    </button>
-                </form>
-             </div>
-        @else
-            <a href="{{ route('login') }}" class="block w-full py-3 bg-emerald-600 rounded-xl text-center text-white font-bold uppercase tracking-widest text-xs">
-                Masuk / Daftar
+        {{-- Close Button --}}
+        <button @click="mobileMenuOpen = false" class="absolute top-8 right-8 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all border border-white/10">
+            <i class="fas fa-times text-xl"></i>
+        </button>
+
+        {{-- Mobile Nav Items --}}
+
+        <div class="flex flex-col items-center gap-8 w-full max-w-sm px-6">
+            {{-- Logo in Mobile Menu --}}
+            @if(!empty($siteLogo))
+                <img src="{{ asset($siteLogo) }}" alt="{{ $siteName }}" class="h-16 w-auto mb-2">
+            @else
+                 <span class="text-3xl font-bold font-display text-white mb-2">{{ $siteName }}</span>
+            @endif
+
+            <a href="{{ route('public.home') }}" 
+               class="text-3xl font-display font-bold transition-colors tracking-tight {{ request()->routeIs('public.home') ? 'text-emerald-400' : 'text-white hover:text-emerald-400' }}">
+               Beranda
             </a>
-        @endauth
+            <a href="{{ route('public.articles') }}" 
+               class="text-3xl font-display font-bold transition-colors tracking-tight {{ request()->routeIs('public.articles*') ? 'text-emerald-400' : 'text-white hover:text-emerald-400' }}">
+               Artikel
+            </a>
+            <a href="{{ route('public.gallery') }}" 
+               class="text-3xl font-display font-bold transition-colors tracking-tight {{ request()->routeIs('public.gallery') ? 'text-emerald-400' : 'text-white hover:text-emerald-400' }}">
+               Galeri
+            </a>
+            
+            <div class="w-20 h-px bg-slate-700 my-4"></div>
+            
+            @auth
+                 <div class="flex flex-col items-center gap-4 w-full">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-emerald-500 font-bold text-xl border border-emerald-500/20 shadow-lg shadow-emerald-500/10">
+                            {{ substr(auth()->user()->name, 0, 1) }}
+                        </div>
+                        <div class="text-left">
+                            <div class="font-bold text-white text-lg">{{ auth()->user()->name }}</div>
+                            <div class="text-sm text-slate-500">{{ auth()->user()->email }}</div>
+                        </div>
+                    </div>
+                     @if(auth()->user()->canAccessDashboard())
+                        <a href="{{ route('dashboard') }}" class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 rounded-2xl text-center text-white font-bold uppercase tracking-widest text-sm shadow-xl shadow-emerald-600/20 transition-all">
+                            Dashboard
+                        </a>
+                    @endif
+                     <form method="POST" action="{{ route('logout') }}" class="w-full">
+                        @csrf
+                        <button type="submit" class="w-full py-4 bg-slate-800 hover:bg-slate-700 rounded-2xl text-center text-rose-400 font-bold uppercase tracking-widest text-sm border border-slate-700 transition-all">
+                            Keluar
+                        </button>
+                    </form>
+                 </div>
+            @else
+                <a href="{{ route('login') }}" class="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 rounded-2xl text-center text-white font-bold uppercase tracking-widest text-sm shadow-xl shadow-emerald-600/20 transition-all">
+                    Masuk / Daftar
+                </a>
+            @endauth
+        </div>
     </div>
+
+    {{-- Search Overlay (Fullscreen) --}}
+    <div x-show="searchOpen"
+         style="display: none;"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 backdrop-blur-none"
+         x-transition:enter-end="opacity-100 backdrop-blur-2xl"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 backdrop-blur-2xl"
+         x-transition:leave-end="opacity-0 backdrop-blur-none"
+         class="fixed inset-0 z-[100] bg-slate-950/90 backdrop-blur-2xl flex flex-col justify-center items-center p-6">
+        
+        {{-- Close Button --}}
+        <button @click="searchOpen = false" class="absolute top-8 right-8 w-12 h-12 rounded-full bg-slate-800/50 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition-all border border-white/5">
+            <i class="fas fa-times text-xl"></i>
+        </button>
+
+        <div class="w-full max-w-3xl text-center">
+            {{-- Logo in Search Modal --}}
+            @if(!empty($siteLogo))
+                <div class="flex justify-center mb-6">
+                    <img src="{{ asset($siteLogo) }}" alt="{{ $siteName }}" class="h-16 w-auto">
+                </div>
+            @endif
+            <h3 class="text-white font-display font-medium text-2xl mb-8 tracking-tight">Apa yang ingin Anda cari?</h3>
+            
+            <form action="{{ route('public.articles') }}" method="GET" class="relative group">
+                <input type="text" name="q" placeholder="Ketik kata kunci..." 
+                       x-trap="searchOpen"
+                       class="w-full bg-transparent border-b-2 border-slate-700 text-white text-3xl md:text-5xl font-display font-bold py-4 px-2 focus:outline-none focus:border-emerald-500 transition-all placeholder:text-slate-700 text-center">
+                
+                <button type="submit" class="absolute right-0 top-1/2 -translate-y-1/2 w-16 h-16 text-slate-600 hover:text-emerald-500 transition-colors flex items-center justify-center">
+                    <i class="fas fa-arrow-right text-2xl"></i>
+                </button>
+            </form>
+            
+            <div class="mt-8 flex flex-wrap justify-center gap-3">
+                <span class="text-slate-500 text-sm font-semibold uppercase tracking-widest">Populer:</span>
+                <a href="{{ route('public.articles', ['tag' => 'teknologi']) }}" class="text-sm font-bold text-emerald-400 hover:text-emerald-300 transition-colors underline decoration-emerald-500/30 font-display">Teknologi</a>
+                <a href="{{ route('public.articles', ['tag' => 'pendidikan']) }}" class="text-sm font-bold text-emerald-400 hover:text-emerald-300 transition-colors underline decoration-emerald-500/30 font-display">Pendidikan</a>
+                <a href="{{ route('public.articles', ['tag' => 'digital']) }}" class="text-sm font-bold text-emerald-400 hover:text-emerald-300 transition-colors underline decoration-emerald-500/30 font-display">Digital</a>
+            </div>
+        </div>
+    </div>
+
 </header>
-<div class="h-24 md:h-28 hidden"></div> {{-- Spacer if needed, but we are using fixed header --}}
+{{-- No spacer needed --}}
