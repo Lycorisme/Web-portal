@@ -59,6 +59,17 @@ Route::prefix('p')->name('public.')->group(function () {
         Route::post('/artikel/{article}/like', [\App\Http\Controllers\PublicInteractionController::class, 'toggleLike'])->name('article.like');
         Route::post('/artikel/{article}/comment', [\App\Http\Controllers\PublicInteractionController::class, 'storeComment'])->name('article.comment');
         Route::post('/comment/{comment}/reply', [\App\Http\Controllers\PublicInteractionController::class, 'storeReply'])->name('comment.reply');
+        
+        // Public Profile Routes (Member Only)
+        Route::prefix('profil')->name('profile.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\PublicProfileController::class, 'index'])->name('index');
+            Route::put('/info', [\App\Http\Controllers\PublicProfileController::class, 'updateInfo'])->name('info');
+            Route::post('/photo', [\App\Http\Controllers\PublicProfileController::class, 'updatePhoto'])->name('photo');
+            Route::delete('/photo', [\App\Http\Controllers\PublicProfileController::class, 'deletePhoto'])->name('photo.delete');
+            Route::put('/password', [\App\Http\Controllers\PublicProfileController::class, 'updatePassword'])->name('password');
+            Route::post('/logout-all', [\App\Http\Controllers\PublicProfileController::class, 'logoutAllDevices'])->name('logout-all');
+            Route::delete('/delete', [\App\Http\Controllers\PublicProfileController::class, 'deleteAccount'])->name('delete');
+        });
     });
 });
 

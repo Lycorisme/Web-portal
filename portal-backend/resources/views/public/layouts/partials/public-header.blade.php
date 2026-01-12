@@ -191,7 +191,7 @@
                                          <div class="flex-1 min-w-0 relative z-10">
                                              <h4 class="text-white font-bold truncate text-base group-hover/card:text-emerald-400 transition-colors leading-tight">{{ auth()->user()->name }}</h4>
                                              <p class="text-slate-400 text-xs truncate mt-0.5">{{ auth()->user()->email }}</p>
-                                             <a href="#" class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-500 mt-1.5 hover:text-emerald-400 transition-colors uppercase tracking-wider bg-emerald-500/10 hover:bg-emerald-500/20 px-2 py-0.5 rounded-full">
+                                             <a href="{{ route('public.profile.index') }}" wire:navigate class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-500 mt-1.5 hover:text-emerald-400 transition-colors uppercase tracking-wider bg-emerald-500/10 hover:bg-emerald-500/20 px-2 py-0.5 rounded-full">
                                                  Lihat Profil <i class="fas fa-arrow-right text-[8px]"></i>
                                              </a>
                                          </div>
@@ -199,7 +199,7 @@
 
                                      <div class="space-y-1">
                                          {{-- Menu Items --}}
-                                         <a href="#" class="group flex items-center gap-4 px-4 py-3 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-2xl transition-all">
+                                         <a href="{{ route('public.profile.index') }}?tab=activity" wire:navigate class="group flex items-center gap-4 px-4 py-3 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-2xl transition-all">
                                             <div class="w-10 h-10 rounded-xl bg-slate-800/50 border border-white/5 flex items-center justify-center group-hover:border-pink-500/30 group-hover:bg-pink-500/20 transition-all shadow-inner relative overflow-hidden">
                                                 <div class="absolute inset-0 bg-pink-500/20 opacity-0 group-hover:opacity-100 blur-md transition-opacity"></div>
                                                 <i class="fas fa-heart text-slate-400 group-hover:text-pink-400 transition-colors relative z-10"></i>
@@ -210,7 +210,7 @@
                                             </div>
                                          </a>
                                          
-                                         <a href="#" class="group flex items-center gap-4 px-4 py-3 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-2xl transition-all">
+                                         <a href="{{ route('public.profile.index') }}?tab=activity" wire:navigate class="group flex items-center gap-4 px-4 py-3 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-2xl transition-all">
                                             <div class="w-10 h-10 rounded-xl bg-slate-800/50 border border-white/5 flex items-center justify-center group-hover:border-blue-500/30 group-hover:bg-blue-500/20 transition-all shadow-inner relative overflow-hidden">
                                                 <div class="absolute inset-0 bg-blue-500/20 opacity-0 group-hover:opacity-100 blur-md transition-opacity"></div>
                                                 <i class="fas fa-comment-alt text-slate-400 group-hover:text-blue-400 transition-colors relative z-10"></i>
@@ -221,7 +221,7 @@
                                             </div>
                                          </a>
 
-                                         <a href="#" class="group flex items-center gap-4 px-4 py-3 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-2xl transition-all">
+                                         <a href="{{ route('public.profile.index') }}?tab=settings" wire:navigate class="group flex items-center gap-4 px-4 py-3 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-2xl transition-all">
                                             <div class="w-10 h-10 rounded-xl bg-slate-800/50 border border-white/5 flex items-center justify-center group-hover:border-amber-500/30 group-hover:bg-amber-500/20 transition-all shadow-inner relative overflow-hidden">
                                                 <div class="absolute inset-0 bg-amber-500/20 opacity-0 group-hover:opacity-100 blur-md transition-opacity"></div>
                                                 <i class="fas fa-cog text-slate-400 group-hover:text-amber-400 transition-colors relative z-10"></i>
@@ -349,19 +349,19 @@
 
                              {{-- Mobile Profile Links --}}
                              <div class="w-full grid grid-cols-2 gap-3">
-                                 <a href="#" class="flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-800/50 border border-white/5 hover:bg-slate-800 hover:border-pink-500/30 transition-all group">
+                                 <a href="{{ route('public.profile.index') }}?tab=activity" wire:navigate class="flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-800/50 border border-white/5 hover:bg-slate-800 hover:border-pink-500/30 transition-all group">
                                      <div class="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                                         <i class="fas fa-heart text-lg text-slate-400 group-hover:text-pink-400 transition-colors"></i>
                                      </div>
                                      <span class="text-xs font-bold text-slate-300 group-hover:text-white uppercase tracking-wider">Disukai</span>
                                  </a>
-                                 <a href="#" class="flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-800/50 border border-white/5 hover:bg-slate-800 hover:border-blue-500/30 transition-all group">
+                                 <a href="{{ route('public.profile.index') }}?tab=activity" wire:navigate class="flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-800/50 border border-white/5 hover:bg-slate-800 hover:border-blue-500/30 transition-all group">
                                      <div class="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                                         <i class="fas fa-comment-alt text-lg text-slate-400 group-hover:text-blue-400 transition-colors"></i>
                                      </div>
                                      <span class="text-xs font-bold text-slate-300 group-hover:text-white uppercase tracking-wider">Komentar</span>
                                  </a>
-                                 <a href="#" class="col-span-2 flex items-center gap-4 px-4 py-3 rounded-2xl bg-slate-800/50 border border-white/5 hover:bg-slate-800 hover:border-amber-500/30 transition-all group">
+                                 <a href="{{ route('public.profile.index') }}" wire:navigate class="col-span-2 flex items-center gap-4 px-4 py-3 rounded-2xl bg-slate-800/50 border border-white/5 hover:bg-slate-800 hover:border-amber-500/30 transition-all group">
                                      <div class="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center group-hover:scale-110 transition-transform">
                                         <i class="fas fa-cog text-lg text-slate-400 group-hover:text-amber-400 transition-colors"></i>
                                      </div>
