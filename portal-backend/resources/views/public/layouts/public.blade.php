@@ -68,7 +68,7 @@
         @include('public.layouts.partials.public-header')
     
         {{-- Main Content --}}
-        <main class="flex-grow relative z-10 w-full">
+        <main class="flex-grow relative z-10 w-full animate-enter">
             @yield('content')
         </main>
     

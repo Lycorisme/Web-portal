@@ -23,6 +23,22 @@
         animation: float-conserve 5s ease-in-out infinite;
     }
 
+    /* Page Transitions */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .animate-enter {
+        animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
     /* Gradient Text */
     .text-gradient {
         background-clip: text;

@@ -23,9 +23,18 @@
         {{-- Prepare Gallery Items for JS --}}
         @php
             $galleryItems = $galleries->map(function($item) {
+                $source = $item->media_type == 'video' ? $item->video_url : $item->image_url;
+                $isYoutube = false;
+                if ($item->media_type == 'video') {
+                    if (preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i', $source, $matches)) {
+                        $source = 'https://www.youtube.com/embed/' . $matches[1] . '?autoplay=1&rel=0';
+                        $isYoutube = true;
+                    }
+                }
+                
                 return [
-                    'type' => $item->media_type,
-                    'source' => $item->media_type == 'video' ? $item->video_url : $item->image_url,
+                    'type' => $isYoutube ? 'youtube' : $item->media_type,
+                    'source' => $source,
                     'title' => $item->title,
                 ];
             })->values();
@@ -194,6 +203,11 @@
                         <template x-if="activeItem.type === 'video'">
                             <div class="w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl shadow-black/50 border border-white/10">
                                 <video :src="activeItem.source" controls class="w-full h-full" autoplay></video>
+                            </div>
+                        </template>
+                        <template x-if="activeItem.type === 'youtube'">
+                            <div class="w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl shadow-black/50 border border-white/10">
+                                <iframe :src="activeItem.source" class="w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                             </div>
                         </template>
                     </div>
