@@ -141,73 +141,110 @@
                             </a>
                         @else
                             <div class="relative" x-data="{ userMenuOpen: false }">
-                                <button @click="userMenuOpen = !userMenuOpen" @click.outside="userMenuOpen = false" class="flex items-center gap-3 pl-3 pr-2 py-1.5 rounded-full bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 hover:border-slate-600 transition-all group">
-                                     <span class="text-sm font-bold text-slate-300 group-hover:text-white">{{ auth()->user()->name }}</span>
-                                     @if(auth()->user()->profile_photo)
-                                         <img src="{{ auth()->user()->avatar }}" class="w-8 h-8 rounded-full bg-slate-700 object-cover ring-2 ring-slate-800 group-hover:ring-emerald-500/50 transition-all">
-                                     @else
-                                         <div class="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-600 to-teal-600 flex items-center justify-center text-white font-bold text-xs ring-2 ring-slate-800 group-hover:ring-emerald-500/50 transition-all shadow-lg shadow-emerald-900/20">
-                                             {{ substr(auth()->user()->name, 0, 1) }}
-                                         </div>
-                                     @endif
-                                     <i class="fas fa-chevron-down text-slate-500 text-[10px] ml-1 transition-transform duration-300" :class="userMenuOpen ? 'rotate-180' : ''"></i>
+                                <button @click="userMenuOpen = !userMenuOpen" @click.outside="userMenuOpen = false" 
+                                        class="flex items-center gap-3 pl-2 pr-1 py-1 rounded-full transition-all group border border-transparent"
+                                        :class="userMenuOpen ? 'bg-slate-800/80 border-slate-700/80' : 'hover:bg-slate-800/40 hover:border-slate-700/40'">
+                                    
+                                    <div class="text-right hidden xl:block pr-2">
+                                        <span class="block text-sm font-bold text-slate-200 group-hover:text-white transition-colors leading-tight">{{ auth()->user()->name }}</span>
+                                        <span class="block text-[10px] font-medium text-emerald-500 uppercase tracking-wider leading-tight">Member Area</span>
+                                    </div>
+
+                                    <div class="relative">
+                                         @if(auth()->user()->profile_photo)
+                                             <img src="{{ auth()->user()->avatar }}" class="w-10 h-10 rounded-full object-cover ring-2 ring-slate-800 group-hover:ring-emerald-500/50 transition-all">
+                                         @else
+                                             <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-600 to-teal-600 flex items-center justify-center text-white font-bold text-sm ring-2 ring-slate-800 group-hover:ring-emerald-500/50 transition-all shadow-lg shadow-emerald-900/20">
+                                                 {{ substr(auth()->user()->name, 0, 1) }}
+                                             </div>
+                                         @endif
+                                         <div class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-slate-900 rounded-full"></div>
+                                    </div>
+                                    
+                                    <div class="w-6 h-6 flex items-center justify-center rounded-full bg-white/5 group-hover:bg-white/10 transition-colors ml-1">
+                                        <i class="fas fa-chevron-down text-slate-400 text-[10px] transition-transform duration-300" :class="userMenuOpen ? 'rotate-180' : ''"></i>
+                                    </div>
                                 </button>
                             
                                 <div x-show="userMenuOpen" 
-                                     x-transition:enter="transition ease-out duration-200"
-                                     x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+                                     x-transition:enter="transition ease-[cubic-bezier(0.2,0.8,0.2,1)] duration-300"
+                                     x-transition:enter-start="opacity-0 translate-y-4 scale-95"
                                      x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                                     x-transition:leave="transition ease-in duration-150"
+                                     x-transition:leave="transition ease-in duration-200"
                                      x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-                                     x-transition:leave-end="opacity-0 translate-y-2 scale-95"
+                                     x-transition:leave-end="opacity-0 translate-y-4 scale-95"
                                      style="display: none;"
-                                     class="absolute right-0 top-full mt-3 w-60 rounded-2xl bg-[#0b1120] border border-slate-700/50 shadow-2xl shadow-black/50 overflow-hidden py-2 z-50 ring-1 ring-white/5">
+                                     class="absolute right-0 top-full mt-4 w-80 rounded-3xl bg-slate-900/90 backdrop-blur-2xl border border-white/10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8)] overflow-hidden z-50 ring-1 ring-white/5 p-2 origin-top-right">
                                      
-                                     <div class="px-5 py-3 border-b border-white/5 mb-1 bg-white/[0.02]">
-                                         <p class="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Member Area</p>
-                                         <p class="text-xs text-slate-400 mt-0.5 truncate">{{ auth()->user()->email }}</p>
+                                     {{-- User Header --}}
+                                     <div class="p-4 rounded-2xl bg-white/5 border border-white/5 mb-2 flex items-center gap-4 relative overflow-hidden group/card">
+                                         <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-500"></div>
+                                         
+                                         @if(auth()->user()->profile_photo)
+                                             <img src="{{ auth()->user()->avatar }}" class="w-14 h-14 rounded-full object-cover border-2 border-white/10 group-hover/card:border-emerald-500/50 transition-colors shadow-lg relative z-10 box-content">
+                                         @else
+                                             <div class="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-600 to-teal-600 flex items-center justify-center text-white font-bold text-xl border-2 border-white/10 group-hover/card:border-emerald-500/50 transition-colors shadow-lg relative z-10 box-content">
+                                                 {{ substr(auth()->user()->name, 0, 1) }}
+                                             </div>
+                                         @endif
+                                         
+                                         <div class="flex-1 min-w-0 relative z-10">
+                                             <h4 class="text-white font-bold truncate text-base group-hover/card:text-emerald-400 transition-colors leading-tight">{{ auth()->user()->name }}</h4>
+                                             <p class="text-slate-400 text-xs truncate mt-0.5">{{ auth()->user()->email }}</p>
+                                             <a href="#" class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-500 mt-1.5 hover:text-emerald-400 transition-colors uppercase tracking-wider bg-emerald-500/10 hover:bg-emerald-500/20 px-2 py-0.5 rounded-full">
+                                                 Lihat Profil <i class="fas fa-arrow-right text-[8px]"></i>
+                                             </a>
+                                         </div>
                                      </div>
-                            
-                                     <div class="px-2 py-1 space-y-0.5">
-                                         <a href="#" class="group flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-xl transition-all">
-                                            <div class="w-8 h-8 rounded-lg bg-slate-800 border border-white/5 flex items-center justify-center group-hover:border-emerald-500/30 group-hover:bg-emerald-500/10 transition-colors">
-                                                <i class="fas fa-user-circle text-slate-400 group-hover:text-emerald-400"></i>
+
+                                     <div class="space-y-1">
+                                         {{-- Menu Items --}}
+                                         <a href="#" class="group flex items-center gap-4 px-4 py-3 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-2xl transition-all">
+                                            <div class="w-10 h-10 rounded-xl bg-slate-800/50 border border-white/5 flex items-center justify-center group-hover:border-pink-500/30 group-hover:bg-pink-500/20 transition-all shadow-inner relative overflow-hidden">
+                                                <div class="absolute inset-0 bg-pink-500/20 opacity-0 group-hover:opacity-100 blur-md transition-opacity"></div>
+                                                <i class="fas fa-heart text-slate-400 group-hover:text-pink-400 transition-colors relative z-10"></i>
                                             </div>
-                                            Profil Saya
+                                            <div class="flex-1">
+                                                <span class="block text-slate-200 font-bold group-hover:text-pink-300 transition-colors">Berita Disukai</span>
+                                                <span class="block text-xs text-slate-500 group-hover:text-slate-400">Artikel yang Anda simpan</span>
+                                            </div>
                                          </a>
-                                         <a href="#" class="group flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-xl transition-all">
-                                            <div class="w-8 h-8 rounded-lg bg-slate-800 border border-white/5 flex items-center justify-center group-hover:border-pink-500/30 group-hover:bg-pink-500/10 transition-colors">
-                                                <i class="fas fa-heart text-slate-400 group-hover:text-pink-400"></i>
+                                         
+                                         <a href="#" class="group flex items-center gap-4 px-4 py-3 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-2xl transition-all">
+                                            <div class="w-10 h-10 rounded-xl bg-slate-800/50 border border-white/5 flex items-center justify-center group-hover:border-blue-500/30 group-hover:bg-blue-500/20 transition-all shadow-inner relative overflow-hidden">
+                                                <div class="absolute inset-0 bg-blue-500/20 opacity-0 group-hover:opacity-100 blur-md transition-opacity"></div>
+                                                <i class="fas fa-comment-alt text-slate-400 group-hover:text-blue-400 transition-colors relative z-10"></i>
                                             </div>
-                                            Berita Disukai
+                                            <div class="flex-1">
+                                                <span class="block text-slate-200 font-bold group-hover:text-blue-300 transition-colors">Komentar Saya</span>
+                                                <span class="block text-xs text-slate-500 group-hover:text-slate-400">Riwayat diskusi Anda</span>
+                                            </div>
                                          </a>
-                                         <a href="#" class="group flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-xl transition-all">
-                                            <div class="w-8 h-8 rounded-lg bg-slate-800 border border-white/5 flex items-center justify-center group-hover:border-blue-500/30 group-hover:bg-blue-500/10 transition-colors">
-                                                <i class="fas fa-comment-alt text-slate-400 group-hover:text-blue-400"></i>
+
+                                         <a href="#" class="group flex items-center gap-4 px-4 py-3 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-2xl transition-all">
+                                            <div class="w-10 h-10 rounded-xl bg-slate-800/50 border border-white/5 flex items-center justify-center group-hover:border-amber-500/30 group-hover:bg-amber-500/20 transition-all shadow-inner relative overflow-hidden">
+                                                <div class="absolute inset-0 bg-amber-500/20 opacity-0 group-hover:opacity-100 blur-md transition-opacity"></div>
+                                                <i class="fas fa-cog text-slate-400 group-hover:text-amber-400 transition-colors relative z-10"></i>
                                             </div>
-                                            Komentar Saya
-                                         </a>
-                                         <a href="#" class="group flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-xl transition-all">
-                                            <div class="w-8 h-8 rounded-lg bg-slate-800 border border-white/5 flex items-center justify-center group-hover:border-amber-500/30 group-hover:bg-amber-500/10 transition-colors">
-                                                <i class="fas fa-cog text-slate-400 group-hover:text-amber-400"></i>
+                                            <div class="flex-1">
+                                                <span class="block text-slate-200 font-bold group-hover:text-amber-300 transition-colors">Pengaturan</span>
+                                                <span class="block text-xs text-slate-500 group-hover:text-slate-400">Ubah info & keamanan</span>
                                             </div>
-                                            Pengaturan Akun
                                          </a>
                                      </div>
                                      
-                                     <div class="h-px bg-white/5 my-2 mx-4"></div>
+                                     <div class="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent my-2"></div>
                                      
-                                     <div class="px-2 pb-1">
-                                         <form method="POST" action="{{ route('logout') }}">
-                                             @csrf
-                                             <button type="submit" class="w-full group flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 rounded-xl transition-all">
-                                                 <div class="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center group-hover:bg-rose-500/20 transition-colors">
-                                                     <i class="fas fa-sign-out-alt"></i>
-                                                 </div>
-                                                 Keluar
-                                             </button>
-                                         </form>
-                                     </div>
+                                     <form method="POST" action="{{ route('logout') }}" class="p-1">
+                                         @csrf
+                                         <button type="submit" class="w-full group flex items-center gap-3 px-4 py-3 text-sm font-bold text-rose-400 hover:text-rose-300 bg-rose-500/5 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 rounded-2xl transition-all">
+                                             <div class="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                 <i class="fas fa-sign-out-alt"></i>
+                                             </div>
+                                             <span class="flex-1 text-left">Keluar Sesi</span>
+                                             <i class="fas fa-arrow-right text-xs opacity-50 group-hover:translate-x-1 transition-transform"></i>
+                                         </button>
+                                     </form>
                                 </div>
                             </div>
                         @endif
@@ -294,24 +331,52 @@
                      x-transition:enter-end="opacity-100 translate-y-0"
                      class="w-full">
                     @auth
-                         <div class="flex flex-col items-center gap-6 w-full">
-                            <div class="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10">
-                                <div class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-emerald-500 font-bold text-xl border border-emerald-500/20 shadow-lg shadow-emerald-500/10">
-                                    {{ substr(auth()->user()->name, 0, 1) }}
-                                </div>
-                                <div class="text-left">
-                                    <div class="font-bold text-white text-lg">{{ auth()->user()->name }}</div>
-                                    <div class="text-xs text-slate-400">{{ auth()->user()->email }}</div>
+                         <div class="flex flex-col items-center gap-4 w-full">
+                            <div class="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 w-full relative overflow-hidden group">
+                                <div class="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                @if(auth()->user()->profile_photo)
+                                    <img src="{{ auth()->user()->avatar }}" class="w-14 h-14 rounded-full object-cover border-2 border-white/10 shadow-lg relative z-10">
+                                @else
+                                    <div class="w-14 h-14 rounded-full bg-slate-800 flex items-center justify-center text-emerald-500 font-bold text-2xl border-2 border-emerald-500/20 shadow-lg shadow-emerald-500/10 relative z-10">
+                                        {{ substr(auth()->user()->name, 0, 1) }}
+                                    </div>
+                                @endif
+                                <div class="text-left flex-1 min-w-0 relative z-10">
+                                    <div class="font-bold text-white text-lg truncate">{{ auth()->user()->name }}</div>
+                                    <div class="text-xs text-slate-400 truncate">{{ auth()->user()->email }}</div>
                                 </div>
                             </div>
+
+                             {{-- Mobile Profile Links --}}
+                             <div class="w-full grid grid-cols-2 gap-3">
+                                 <a href="#" class="flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-800/50 border border-white/5 hover:bg-slate-800 hover:border-pink-500/30 transition-all group">
+                                     <div class="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                        <i class="fas fa-heart text-lg text-slate-400 group-hover:text-pink-400 transition-colors"></i>
+                                     </div>
+                                     <span class="text-xs font-bold text-slate-300 group-hover:text-white uppercase tracking-wider">Disukai</span>
+                                 </a>
+                                 <a href="#" class="flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-800/50 border border-white/5 hover:bg-slate-800 hover:border-blue-500/30 transition-all group">
+                                     <div class="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                        <i class="fas fa-comment-alt text-lg text-slate-400 group-hover:text-blue-400 transition-colors"></i>
+                                     </div>
+                                     <span class="text-xs font-bold text-slate-300 group-hover:text-white uppercase tracking-wider">Komentar</span>
+                                 </a>
+                                 <a href="#" class="col-span-2 flex items-center gap-4 px-4 py-3 rounded-2xl bg-slate-800/50 border border-white/5 hover:bg-slate-800 hover:border-amber-500/30 transition-all group">
+                                     <div class="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                        <i class="fas fa-cog text-lg text-slate-400 group-hover:text-amber-400 transition-colors"></i>
+                                     </div>
+                                     <span class="text-sm font-bold text-slate-300 group-hover:text-white uppercase tracking-wider">Pengaturan Akun</span>
+                                 </a>
+                             </div>
+
                              @if(auth()->user()->canAccessDashboard())
-                                <a href="{{ route('dashboard') }}" wire:navigate class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 rounded-2xl text-center text-white font-bold uppercase tracking-widest text-sm shadow-xl shadow-emerald-600/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                                <a href="{{ route('dashboard') }}" wire:navigate class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 rounded-2xl text-center text-white font-bold uppercase tracking-widest text-sm shadow-xl shadow-emerald-600/20 transition-all hover:scale-[1.02] active:scale-[0.98] mt-2">
                                     Dashboard
                                 </a>
                             @endif
                              <form method="POST" action="{{ route('logout') }}" class="w-full">
                                 @csrf
-                                <button type="submit" class="w-full py-4 bg-slate-800 hover:bg-slate-700 rounded-2xl text-center text-rose-400 font-bold uppercase tracking-widest text-sm border border-slate-700 transition-all hover:border-rose-500/30">
+                                <button type="submit" class="w-full py-4 bg-slate-800 hover:bg-slate-700/50 rounded-2xl text-center text-rose-400 font-bold uppercase tracking-widest text-sm border border-slate-700/50 transition-all hover:border-rose-500/30 hover:bg-rose-500/5 mt-1">
                                     Keluar
                                 </button>
                             </form>
