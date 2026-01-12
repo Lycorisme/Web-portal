@@ -161,9 +161,7 @@
                                          <div class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-slate-900 rounded-full"></div>
                                     </div>
                                     
-                                    <div class="w-6 h-6 flex items-center justify-center rounded-full bg-white/5 group-hover:bg-white/10 transition-colors ml-1">
-                                        <i class="fas fa-chevron-down text-slate-400 text-[10px] transition-transform duration-300" :class="userMenuOpen ? 'rotate-180' : ''"></i>
-                                    </div>
+
                                 </button>
                             
                                 <div x-show="userMenuOpen" 
