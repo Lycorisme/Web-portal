@@ -21,8 +21,8 @@
         x-init="$watch('mobileMenuOpen', value => { if(value) document.body.classList.add('overflow-hidden'); else setTimeout(() => document.body.classList.remove('overflow-hidden'), 500); }); 
                 $watch('searchOpen', value => { if(value) document.body.classList.add('overflow-hidden'); else setTimeout(() => document.body.classList.remove('overflow-hidden'), 500); })"
         @scroll.window="scrolled = (window.pageYOffset > 10)"
-        class="fixed top-0 w-full z-50 transition-all duration-300"
-        :class="{ 'bg-slate-900/80 backdrop-blur-md shadow-lg shadow-black/5 border-b border-white/5 py-3': scrolled, 'bg-transparent py-5': !scrolled }">
+        class="fixed top-0 w-full z-50 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]"
+        :class="{ 'bg-slate-900/80 backdrop-blur-md shadow-lg shadow-black/5 py-4': scrolled, 'bg-transparent py-6': !scrolled }">
     
     <div class="max-w-7xl mx-auto px-6">
         <div class="flex justify-between items-center">
@@ -136,7 +136,7 @@
                 <div class="hidden md:flex items-center">
                     @auth
                         @if(auth()->user()->canAccessDashboard())
-                            <a href="{{ route('dashboard') }}" wire:navigate class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-xs font-bold uppercase tracking-wider shadow-lg shadow-emerald-500/20 transition-all transform hover:-translate-y-0.5 border border-emerald-400/20">
+                            <a href="{{ route('dashboard') }}" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-xs font-bold uppercase tracking-wider shadow-lg shadow-emerald-500/20 transition-all transform hover:-translate-y-0.5 border border-emerald-400/20">
                                 Dashboard
                             </a>
                         @else
@@ -151,9 +151,9 @@
                             </div>
                         @endif
                     @else
-                        <a href="{{ route('login') }}" wire:navigate class="group relative px-6 py-2.5 rounded-xl overflow-hidden bg-slate-800 border border-slate-700 text-slate-300 font-bold text-xs uppercase tracking-wider hover:text-white hover:border-slate-500 transition-all">
+                        <a href="{{ route('login') }}" class="group relative px-6 py-2.5 rounded-xl overflow-hidden bg-slate-800 border border-slate-700 text-slate-300 font-bold text-xs uppercase tracking-wider hover:text-white hover:border-slate-500 transition-all">
                             <span class="relative z-10 flex items-center gap-2">
-                                Masuk <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                                Masuk / Daftar <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
                             </span>
                             <div class="absolute inset-0 bg-gradient-to-r from-emerald-600/20 to-blue-600/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         </a>
@@ -256,7 +256,7 @@
                             </form>
                          </div>
                     @else
-                        <a href="{{ route('login') }}" wire:navigate class="block w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 rounded-2xl text-center text-white font-bold uppercase tracking-widest text-sm shadow-xl shadow-emerald-600/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                        <a href="{{ route('login') }}" class="block w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 rounded-2xl text-center text-white font-bold uppercase tracking-widest text-sm shadow-xl shadow-emerald-600/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
                             Masuk / Daftar
                         </a>
                     @endauth
