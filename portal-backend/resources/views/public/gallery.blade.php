@@ -20,7 +20,35 @@
             </p>
         </div>
 
-        <div x-data="{ lightboxOpen: false, activeImage: '', activeTitle: '', activeType: '' }">
+        {{-- Prepare Gallery Items for JS --}}
+        @php
+            $galleryItems = $galleries->map(function($item) {
+                return [
+                    'type' => $item->media_type,
+                    'source' => $item->media_type == 'video' ? $item->video_url : $item->image_url,
+                    'title' => $item->title,
+                ];
+            })->values();
+        @endphp
+
+        <div x-data="{ 
+                lightboxOpen: false, 
+                activeIndex: 0, 
+                items: {{ Js::from($galleryItems) }},
+                touchStartX: 0,
+                touchEndX: 0,
+                get activeItem() { return this.items[this.activeIndex] || {} },
+                next() { this.activeIndex = (this.activeIndex + 1) % this.items.length },
+                prev() { this.activeIndex = (this.activeIndex - 1 + this.items.length) % this.items.length },
+                handleSwipe() {
+                    const swipeDistance = this.touchStartX - this.touchEndX;
+                    if (swipeDistance > 50) this.next();
+                    if (swipeDistance < -50) this.prev();
+                }
+            }"
+            @keydown.window.arrow-right="if(lightboxOpen) next()"
+            @keydown.window.arrow-left="if(lightboxOpen) prev()"
+            @keydown.window.escape="lightboxOpen = false">
             
             {{-- Filter Bar --}}
             <div class="mb-16 flex flex-wrap justify-center gap-4 relative z-10">
@@ -71,17 +99,8 @@
                     @foreach($galleries as $gallery)
                         <div class="group relative rounded-[32px] overflow-hidden aspect-[4/5] bg-slate-900 border border-white/5 cursor-pointer shadow-2xl hover:shadow-emerald-500/20 transition-all duration-500 hover:-translate-y-2 hover:border-emerald-500/30"
                              @click="
-                                @if($gallery->media_type == 'image')
-                                    lightboxOpen = true; 
-                                    activeImage = '{{ $gallery->image_url }}'; 
-                                    activeTitle = '{{ $gallery->title }}';
-                                    activeType = 'image';
-                                @else
-                                    lightboxOpen = true; 
-                                    activeImage = '{{ $gallery->video_url }}'; 
-                                    activeTitle = '{{ $gallery->title }}';
-                                    activeType = 'video';
-                                @endif
+                                lightboxOpen = true; 
+                                activeIndex = {{ $loop->index }};
                              ">
                             
                             {{-- Image/Thumbnail --}}
@@ -139,36 +158,47 @@
             @endif
 
             {{-- Lightbox --}}
-            <div x-show="lightboxOpen" 
-                 x-cloak
-                 x-transition:enter="transition ease-out duration-300"
-                 x-transition:enter-start="opacity-0 backdrop-blur-none"
-                 x-transition:enter-end="opacity-100 backdrop-blur-xl"
-                 x-transition:leave="transition ease-in duration-200"
-                 x-transition:leave-start="opacity-100 backdrop-blur-xl"
-                 x-transition:leave-end="opacity-0 backdrop-blur-none"
-                 class="fixed inset-0 z-[100] bg-slate-950/90 flex flex-col items-center justify-center p-4 md:p-10">
-                
-                {{-- Close Button --}}
-                <button @click="lightboxOpen = false" class="absolute top-6 right-6 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all z-20 backdrop-blur-md border border-white/10">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-
-                <div class="relative w-full max-w-6xl max-h-full flex flex-col items-center justify-center" @click.away="lightboxOpen = false">
-                    <template x-if="activeType === 'image'">
-                        <img :src="activeImage" :alt="activeTitle" class="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl shadow-black/50">
-                    </template>
-                    <template x-if="activeType === 'video'">
-                        <div class="w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl shadow-black/50 border border-white/10">
-                            <video :src="activeImage" controls class="w-full h-full" autoplay></video>
-                        </div>
-                    </template>
+            {{-- Lightbox --}}
+            <template x-teleport="body">
+                <div x-show="lightboxOpen" 
+                     x-cloak
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0 backdrop-blur-none"
+                     x-transition:enter-end="opacity-100 backdrop-blur-xl"
+                     x-transition:leave="transition ease-in duration-200"
+                     x-transition:leave-start="opacity-100 backdrop-blur-xl"
+                     x-transition:leave-end="opacity-0 backdrop-blur-none"
+                     class="fixed inset-0 z-[100] bg-slate-950/90 flex flex-col items-center justify-center p-4 md:p-10 select-none"
+                     @touchstart="touchStartX = $event.changedTouches[0].screenX"
+                     @touchend="touchEndX = $event.changedTouches[0].screenX; handleSwipe()">
                     
-                    <div class="mt-8 text-center max-w-2xl px-6">
-                        <h3 x-text="activeTitle" class="text-2xl md:text-3xl font-display font-bold text-white tracking-tight leading-snug"></h3>
+                    {{-- Close Button --}}
+                    <button @click="lightboxOpen = false" class="absolute top-6 right-6 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all z-20 backdrop-blur-md border border-white/10">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+
+                    {{-- Prev Button (Desktop) --}}
+                    <button @click.stop="prev()" class="hidden md:flex absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white items-center justify-center transition-all z-20 backdrop-blur-md border border-white/10 hover:-translate-x-1">
+                        <i class="fas fa-chevron-left text-xl"></i>
+                    </button>
+
+                    {{-- Next Button (Desktop) --}}
+                    <button @click.stop="next()" class="hidden md:flex absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white items-center justify-center transition-all z-20 backdrop-blur-md border border-white/10 hover:translate-x-1">
+                        <i class="fas fa-chevron-right text-xl"></i>
+                    </button>
+
+                    <div class="relative w-full max-w-6xl max-h-full flex flex-col items-center justify-center" @click.away="lightboxOpen = false">
+                        <template x-if="activeItem.type === 'image'">
+                            <img :src="activeItem.source" :alt="activeItem.title" class="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl shadow-black/50">
+                        </template>
+                        <template x-if="activeItem.type === 'video'">
+                            <div class="w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl shadow-black/50 border border-white/10">
+                                <video :src="activeItem.source" controls class="w-full h-full" autoplay></video>
+                            </div>
+                        </template>
                     </div>
                 </div>
-            </div>
+            </template>
         </div>
     </div>
 @endsection
