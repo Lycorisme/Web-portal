@@ -47,6 +47,12 @@ function articleApp() {
         sanitizedPreviewContent: '',
         auditInfo: null,
 
+        // Cropper State
+        showCropModal: false,
+        cropperInstance: null,
+        originalImageFile: null,
+        cropZoom: 1,
+
         // Selection & Trash
         selectedIds: [],
         selectAll: false,
@@ -78,6 +84,11 @@ function articleApp() {
         // FORM MODULE
         // ========================================
         @include('articles.partials.scripts.form')
+
+        // ========================================
+        // CROPPER MODULE (Image Cropping)
+        // ========================================
+        @include('articles.partials.scripts.cropper')
 
         // ========================================
         // CRUD MODULE

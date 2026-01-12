@@ -17,8 +17,8 @@
     {{-- Hero Section --}}
     @include('public.article.partials.hero-section')
 
-    {{-- Main Content (Overlap ~25-30% of Hero) --}}
-    <main class="w-full max-w-5xl mx-auto px-4 sm:px-6 -mt-24 sm:-mt-48 lg:-mt-[25vh] relative z-20 pb-8 sm:pb-10 lg:pb-14">
+    {{-- Main Content (Overlap Hero - Reduced to avoid collision) --}}
+    <main class="w-full max-w-5xl mx-auto px-4 sm:px-6 -mt-8 sm:-mt-12 lg:-mt-16 relative z-20 pb-8 sm:pb-10 lg:pb-14">
         <div class="flex flex-col lg:flex-row gap-6 lg:gap-10">
             
             {{-- Article Content --}}

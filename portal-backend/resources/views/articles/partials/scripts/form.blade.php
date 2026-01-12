@@ -127,6 +127,13 @@ closeFormModal() {
     this.activeTab = 'content';
     this.auditInfo = null;
     this.formErrors = {};
+    
+    // Reset cropper state
+    this.originalImageFile = null;
+    if (this.cropperInstance) {
+        this.cropperInstance.destroy();
+        this.cropperInstance = null;
+    }
 },
 
 async submitForm() {
