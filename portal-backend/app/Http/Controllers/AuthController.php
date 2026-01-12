@@ -16,43 +16,203 @@ class AuthController extends Controller
     /**
      * Handle registration request
      */
+    /**
+     * Handle registration request
+     */
     public function register(Request $request)
     {
+        // IP Rate Limiting for Registration
+        $ipThrottleKey = 'register_ip|'.$request->ip();
+        if (RateLimiter::tooManyAttempts($ipThrottleKey, 5)) { // 5 registrations per hour per IP
+             $seconds = RateLimiter::availableIn($ipThrottleKey);
+             
+             // Manage Blocked Client Entry
+             $blockedClient = \App\Models\BlockedClient::firstOrCreate(
+                 ['ip_address' => $request->ip()],
+                 ['user_agent' => $request->userAgent(), 'blocked_route' => 'register']
+             );
+             $blockedClient->incrementAttempt();
+             
+             // Auto-block if too many specific rate limit hits (e.g., > 10 hits while limited)
+             if ($blockedClient->shouldBlock(10)) {
+                 $blockedClient->block('Excessive registration attempts', 60 * 24); // Block for 24 hours
+             }
+
+             // Log blocked attempt
+             ActivityLog::create([
+                'user_id' => null,
+                'action' => 'register_blocked',
+                'description' => "Registrasi diblokir (rate limit IP) untuk email: {$request->email}. Percobaan: {$blockedClient->attempt_count}",
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'level' => ActivityLog::LEVEL_WARNING,
+             ]);
+
+             throw ValidationException::withMessages([
+                 'email' => ["Terlalu banyak permintaan pendaftaran dari IP Anda. Coba lagi dalam {$seconds} detik."],
+             ]);
+        }
+        RateLimiter::hit($ipThrottleKey, 3600);
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
+        // Security Sanitization
+        $safeName = strip_tags($request->name);
+
         $user = User::create([
-            'name' => $request->name,
+            'name' => $safeName,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'member', // Public registration = member role
+            'role' => 'member', 
+            'email_verified_at' => null, // Wajib verifikasi
         ]);
 
         ActivityLog::create([
             'user_id' => $user->id,
-            'action' => 'register', // Using string directly or define constant if needed, assuming 'register' works or mapped later. Actually let's check constants. 
-            // Wait, ActivityLog model might utilize specific constants. I should check.
-            // Looking at existing code: ActivityLog::ACTION_LOGIN.
-            // I'll stick to a safe default or check ActivityLog model.
-            // For now I'll use ACTION_LOGIN as a fallback or just a string if it allows.
-            // The file view shows ACTION_LOGIN, ACTION_LOGIN_FAILED. 
-            // I'll use text for now to be safe or investigate.
-            // Actually, let's just use string "Register" or similar.
-            'description' => "Registrasi pengguna baru: {$user->name}",
+            'action' => 'register_init',
+            'description' => "Registrasi awal pengguna baru: {$user->name} (Menunggu Verifikasi)",
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
             'url' => $request->fullUrl(),
-            'level' => 'info', // ActivityLog::LEVEL_INFO
-            'created_at' => now(),
+            'level' => ActivityLog::LEVEL_INFO,
         ]);
 
+        // Generate OTP
+        $otp = \App\Models\OtpCode::generate($user->email, \App\Models\OtpCode::TYPE_EMAIL_VERIFICATION);
+        
+        // Send Email
+        $emailSent = true;
+        try {
+            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\OtpVerificationMail(
+                $otp->code, 
+                $user->name, 
+                'email_verification'
+            ));
+        } catch (\Exception $e) {
+            $emailSent = false;
+            \Log::error("Gagal mengirim email OTP ke {$user->email}: " . $e->getMessage());
+        }
+
+        // For Development: Log OTP
+        \Log::info("OTP untuk {$user->email}: {$otp->code}");
+        
+        $message = $emailSent 
+            ? 'Registrasi berhasil. Kode verifikasi telah dikirim ke email Anda.'
+            : 'Registrasi berhasil, tetapi gagal mengirim email kode OTP. Silakan hubungi admin.';
+            
+        $status = $emailSent ? 'success' : 'error';
+
+        // Redirect to verify page
+        return redirect()->route('verification.notice', ['email' => $user->email])
+            ->with($status, $message);
+    }
+
+    /**
+     * Show verification form
+     */
+    public function showVerifyForm(Request $request) 
+    {
+        $email = $request->query('email') ?? session('email');
+        if (!$email) {
+            return redirect()->route('login');
+        }
+        
+        $siteName = SiteSetting::get('site_name', 'BTIKP Portal');
+        $logoUrl = SiteSetting::get('logo_url', '');
+
+        return view('auth.verify-email', compact('email', 'siteName', 'logoUrl'));
+    }
+
+    /**
+     * Handle Email Verification
+     */
+    public function verifyEmail(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+            'otp' => 'required|string|size:6',
+        ]);
+
+        $result = \App\Models\OtpCode::verify(
+            $request->email, 
+            $request->otp, 
+            \App\Models\OtpCode::TYPE_EMAIL_VERIFICATION
+        );
+
+        if (!$result['valid']) {
+            throw ValidationException::withMessages([
+                'otp' => [$result['message']],
+            ]);
+        }
+
+        // Activate User
+        $user = User::where('email', $request->email)->first();
+        $user->email_verified_at = now();
+        $user->save();
+
+        // Delete OTP
+        if (isset($result['otp'])) {
+            $result['otp']->delete();
+        }
+
+        ActivityLog::create([
+            'user_id' => $user->id,
+            'action' => 'register_verified',
+            'description' => "Verifikasi email berhasil: {$user->email}",
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'level' => ActivityLog::LEVEL_INFO,
+        ]);
+        
+        // Auto Login
         Auth::login($user);
 
-        // Member redirect to public home, not dashboard
-        return redirect()->route('public.home')->with('success', 'Selamat datang di Portal BTIKP!');
+        return redirect()->route('public.home')->with('success', 'Akun berhasil diverifikasi. Selamat datang!');
+    }
+
+    /**
+     * Resend Verification OTP
+     */
+    public function resendVerificationOtp(Request $request)
+    {
+        $request->validate(['email' => 'required|email|exists:users,email']);
+        
+        // Rate Limit Resend
+        $throttleKey = 'resend_otp|'.$request->email;
+        if (RateLimiter::tooManyAttempts($throttleKey, 3)) { // 3 times per 5 minutes
+            $seconds = RateLimiter::availableIn($throttleKey);
+            return back()->with('error', "Mohon tunggu {$seconds} detik sebelum meminta kode baru.");
+        }
+        RateLimiter::hit($throttleKey, 300);
+
+        $otp = \App\Models\OtpCode::generate($request->email, \App\Models\OtpCode::TYPE_EMAIL_VERIFICATION);
+        $user = User::where('email', $request->email)->first();
+
+        // Send Email
+        $emailSent = true;
+        try {
+            \Illuminate\Support\Facades\Mail::to($request->email)->send(new \App\Mail\OtpVerificationMail(
+                $otp->code, 
+                $user ? $user->name : 'Pengguna', 
+                'email_verification'
+            ));
+        } catch (\Exception $e) {
+            $emailSent = false;
+            \Log::error("Gagal mengirim ulang email OTP ke {$request->email}: " . $e->getMessage());
+        }
+
+        // For Development: Log OTP
+        \Log::info("Resend OTP untuk {$request->email}: {$otp->code}");
+        
+        if ($emailSent) {
+            return back()->with('success', 'Kode verifikasi baru telah dikirim.');
+        } 
+        
+        return back()->with('error', 'Gagal mengirim email kode OTP. Cek log server.');
     }
 
     /**

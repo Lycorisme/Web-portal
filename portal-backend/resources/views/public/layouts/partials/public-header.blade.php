@@ -140,14 +140,75 @@
                                 Dashboard
                             </a>
                         @else
-                            <div class="flex items-center gap-3">
-                                <span class="text-sm font-bold text-slate-300">{{ auth()->user()->name }}</span>
-                                <form method="POST" action="{{ route('logout') }}">
-                                    @csrf
-                                    <button type="submit" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-800 text-slate-400 hover:text-white hover:bg-rose-500/80 transition-all">
-                                        <i class="fas fa-sign-out-alt"></i>
-                                    </button>
-                                </form>
+                            <div class="relative" x-data="{ userMenuOpen: false }">
+                                <button @click="userMenuOpen = !userMenuOpen" @click.outside="userMenuOpen = false" class="flex items-center gap-3 pl-3 pr-2 py-1.5 rounded-full bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 hover:border-slate-600 transition-all group">
+                                     <span class="text-sm font-bold text-slate-300 group-hover:text-white">{{ auth()->user()->name }}</span>
+                                     @if(auth()->user()->profile_photo)
+                                         <img src="{{ auth()->user()->avatar }}" class="w-8 h-8 rounded-full bg-slate-700 object-cover ring-2 ring-slate-800 group-hover:ring-emerald-500/50 transition-all">
+                                     @else
+                                         <div class="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-600 to-teal-600 flex items-center justify-center text-white font-bold text-xs ring-2 ring-slate-800 group-hover:ring-emerald-500/50 transition-all shadow-lg shadow-emerald-900/20">
+                                             {{ substr(auth()->user()->name, 0, 1) }}
+                                         </div>
+                                     @endif
+                                     <i class="fas fa-chevron-down text-slate-500 text-[10px] ml-1 transition-transform duration-300" :class="userMenuOpen ? 'rotate-180' : ''"></i>
+                                </button>
+                            
+                                <div x-show="userMenuOpen" 
+                                     x-transition:enter="transition ease-out duration-200"
+                                     x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+                                     x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                                     x-transition:leave="transition ease-in duration-150"
+                                     x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                                     x-transition:leave-end="opacity-0 translate-y-2 scale-95"
+                                     style="display: none;"
+                                     class="absolute right-0 top-full mt-3 w-60 rounded-2xl bg-[#0b1120] border border-slate-700/50 shadow-2xl shadow-black/50 overflow-hidden py-2 z-50 ring-1 ring-white/5">
+                                     
+                                     <div class="px-5 py-3 border-b border-white/5 mb-1 bg-white/[0.02]">
+                                         <p class="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Member Area</p>
+                                         <p class="text-xs text-slate-400 mt-0.5 truncate">{{ auth()->user()->email }}</p>
+                                     </div>
+                            
+                                     <div class="px-2 py-1 space-y-0.5">
+                                         <a href="#" class="group flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-xl transition-all">
+                                            <div class="w-8 h-8 rounded-lg bg-slate-800 border border-white/5 flex items-center justify-center group-hover:border-emerald-500/30 group-hover:bg-emerald-500/10 transition-colors">
+                                                <i class="fas fa-user-circle text-slate-400 group-hover:text-emerald-400"></i>
+                                            </div>
+                                            Profil Saya
+                                         </a>
+                                         <a href="#" class="group flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-xl transition-all">
+                                            <div class="w-8 h-8 rounded-lg bg-slate-800 border border-white/5 flex items-center justify-center group-hover:border-pink-500/30 group-hover:bg-pink-500/10 transition-colors">
+                                                <i class="fas fa-heart text-slate-400 group-hover:text-pink-400"></i>
+                                            </div>
+                                            Berita Disukai
+                                         </a>
+                                         <a href="#" class="group flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-xl transition-all">
+                                            <div class="w-8 h-8 rounded-lg bg-slate-800 border border-white/5 flex items-center justify-center group-hover:border-blue-500/30 group-hover:bg-blue-500/10 transition-colors">
+                                                <i class="fas fa-comment-alt text-slate-400 group-hover:text-blue-400"></i>
+                                            </div>
+                                            Komentar Saya
+                                         </a>
+                                         <a href="#" class="group flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-xl transition-all">
+                                            <div class="w-8 h-8 rounded-lg bg-slate-800 border border-white/5 flex items-center justify-center group-hover:border-amber-500/30 group-hover:bg-amber-500/10 transition-colors">
+                                                <i class="fas fa-cog text-slate-400 group-hover:text-amber-400"></i>
+                                            </div>
+                                            Pengaturan Akun
+                                         </a>
+                                     </div>
+                                     
+                                     <div class="h-px bg-white/5 my-2 mx-4"></div>
+                                     
+                                     <div class="px-2 pb-1">
+                                         <form method="POST" action="{{ route('logout') }}">
+                                             @csrf
+                                             <button type="submit" class="w-full group flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 rounded-xl transition-all">
+                                                 <div class="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center group-hover:bg-rose-500/20 transition-colors">
+                                                     <i class="fas fa-sign-out-alt"></i>
+                                                 </div>
+                                                 Keluar
+                                             </button>
+                                         </form>
+                                     </div>
+                                </div>
                             </div>
                         @endif
                     @else

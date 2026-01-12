@@ -29,6 +29,11 @@ Route::middleware('guest')->group(function () {
     Route::post('/password/verify-otp', [\App\Http\Controllers\PasswordResetController::class, 'verifyOtp'])->name('password.verify-otp');
     Route::post('/password/reset', [\App\Http\Controllers\PasswordResetController::class, 'resetPassword'])->name('password.reset');
     Route::post('/password/resend-otp', [\App\Http\Controllers\PasswordResetController::class, 'resendOtp'])->name('password.resend-otp');
+
+    // Email Verification Routes
+    Route::get('/verify-email', [AuthController::class, 'showVerifyForm'])->name('verification.notice');
+    Route::post('/verify-email', [AuthController::class, 'verifyEmail'])->name('verification.verify');
+    Route::post('/verify-email/resend', [AuthController::class, 'resendVerificationOtp'])->name('verification.resend');
 });
 
 // Logout (Authenticated Only)

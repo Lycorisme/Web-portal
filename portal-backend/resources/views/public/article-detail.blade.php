@@ -168,14 +168,42 @@
                                 </form>
                             </div>
                         @else
-                            <a href="{{ route('login') }}" wire:navigate class="flex items-center gap-2 group">
-                                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-slate-800 text-slate-400 group-hover:bg-rose-500/20 group-hover:text-rose-500 flex items-center justify-center transition-all">
-                                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                                    </svg>
+                            <div class="relative" x-data="{ showLoginToast: false }">
+                                <button @click="showLoginToast = true; setTimeout(() => showLoginToast = false, 4000)" 
+                                        class="flex items-center gap-2 group">
+                                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-slate-800 text-slate-400 group-hover:bg-rose-500/20 group-hover:text-rose-500 flex items-center justify-center transition-all shadow-lg shadow-black/20 border border-slate-700/50 group-hover:border-rose-500/50">
+                                        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                                        </svg>
+                                    </div>
+                                    <template x-if="!showLoginToast">
+                                        <span class="text-xs sm:text-sm text-slate-500 hidden xs:inline font-bold group-hover:text-rose-400 transition-colors">Like</span>
+                                    </template>
+                                </button>
+
+                                {{-- Toast / Tooltip --}}
+                                <div x-show="showLoginToast" 
+                                     x-transition:enter="transition ease-out duration-300"
+                                     x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+                                     x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                                     x-transition:leave="transition ease-in duration-200"
+                                     x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                                     x-transition:leave-end="opacity-0 translate-y-2 scale-95"
+                                     style="display: none;"
+                                     @click.outside="showLoginToast = false"
+                                     class="absolute bottom-full left-0 mb-3 w-64 bg-slate-800/90 backdrop-blur-xl border border-rose-500/30 text-white text-xs p-4 rounded-2xl shadow-2xl z-[60]">
+                                     <div class="flex items-start gap-3">
+                                         <div class="p-1.5 bg-rose-500/20 rounded-lg text-rose-400 flex-shrink-0">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                         </div>
+                                         <div>
+                                            <p class="font-bold text-slate-200 mb-1">Akses Terbatas</p>
+                                            <p class="text-slate-400 leading-relaxed">Silakan <a href="{{ route('login') }}" class="text-emerald-400 font-bold hover:underline decoration-emerald-500/30">Login</a> terlebih dahulu untuk menyukai berita ini.</p>
+                                        </div>
+                                     </div>
+                                     <div class="absolute bottom-[-6px] left-4 w-3 h-3 bg-slate-800/90 border-r border-b border-rose-500/30 rotate-45"></div>
                                 </div>
-                                <span class="text-xs sm:text-sm text-slate-500 hidden xs:inline">Login untuk like</span>
-                            </a>
+                            </div>
                         @endauth
 
                         {{-- Comments Count --}}

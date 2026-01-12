@@ -29,6 +29,11 @@ class DashboardController extends Controller
         $isAuthor = $user->isAuthor();
         $isEditor = $user->isEditor();
         $isAdmin = $user->isSuperAdmin() || in_array($user->role, ['admin']);
+
+        // Redirect if user cannot access dashboard (e.g. Member)
+        if (!$user->canAccessDashboard()) {
+            return redirect()->route('public.home')->with('error', 'Anda tidak memiliki akses ke halaman ini.');
+        }
         
         // Build base query based on role
         $articleQuery = $this->getArticleQueryByRole($user);
