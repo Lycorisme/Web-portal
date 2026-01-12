@@ -106,6 +106,14 @@ class AuthController extends Controller
             
         $status = $emailSent ? 'success' : 'error';
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'email' => $user->email,
+                'message' => $status === 'success' ? 'Registrasi berhasil. Kode verifikasi terkirim.' : 'Registrasi berhasil, tetapi email gagal terkirim.'
+            ]);
+        }
+
         // Redirect to verify page
         return redirect()->route('verification.notice', ['email' => $user->email])
             ->with($status, $message);

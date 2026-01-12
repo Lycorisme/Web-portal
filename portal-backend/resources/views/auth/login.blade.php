@@ -58,6 +58,42 @@
 
         {{-- Right Panel (Dynamic Content) --}}
         <div x-data="authPanel()" class="flex-1 md:flex-none w-full md:w-[50%] relative bg-[#0b1120]/80 flex flex-col h-full">
+
+            {{-- Toast Notifications (Floating) --}}
+            <div class="absolute top-24 left-1/2 -translate-x-1/2 w-full max-w-sm px-6 z-50 pointer-events-none">
+                {{-- Error Toast --}}
+                <div x-show="errorMessage" x-cloak
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0 -translate-y-4 scale-95"
+                     x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                     x-transition:leave="transition ease-in duration-200"
+                     x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                     x-transition:leave-end="opacity-0 -translate-y-4 scale-95"
+                     class="pointer-events-auto mb-3 p-3 rounded-xl bg-red-500/90 backdrop-blur-md border border-red-500/20 shadow-xl shadow-red-900/20 flex items-start gap-3">
+                    <div class="p-1 bg-white/20 rounded-full shrink-0">
+                        <i data-lucide="alert-circle" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <p class="text-xs font-semibold text-white mt-0.5 leading-relaxed" x-text="errorMessage"></p>
+                    <button @click="errorMessage = ''" class="ml-auto text-white/70 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+                </div>
+
+                {{-- Success Toast --}}
+                <div x-show="successMessage" x-cloak
+                     x-init="$watch('successMessage', value => { if(value) setTimeout(() => successMessage = '', 4000) })"
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0 -translate-y-4 scale-95"
+                     x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                     x-transition:leave="transition ease-in duration-200"
+                     x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                     x-transition:leave-end="opacity-0 -translate-y-4 scale-95"
+                     class="pointer-events-auto mb-3 p-3 rounded-xl bg-emerald-500/90 backdrop-blur-md border border-emerald-500/20 shadow-xl shadow-emerald-900/20 flex items-start gap-3">
+                    <div class="p-1 bg-white/20 rounded-full shrink-0">
+                        <i data-lucide="check-circle" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <p class="text-xs font-semibold text-white mt-0.5 leading-relaxed" x-text="successMessage"></p>
+                    <button @click="successMessage = ''" class="ml-auto text-white/70 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+                </div>
+            </div>
             
             {{-- Navigation Tabs --}}
             <nav class="flex-none flex w-full border-b border-white/5">
@@ -94,29 +130,11 @@
             {{-- Content Area --}}
             <div class="flex-1 overflow-y-auto custom-scrollbar p-8 md:p-14 relative">
                 
-                {{-- Alert Messages --}}
-                <div x-show="errorMessage" x-cloak
-                     x-transition:enter="transition ease-out duration-300"
-                     x-transition:enter-start="opacity-0 -translate-y-2"
-                     x-transition:enter-end="opacity-100 translate-y-0"
-                     class="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 flex items-start gap-3">
-                    <i data-lucide="alert-circle" class="w-5 h-5 text-red-400 shrink-0 mt-0.5"></i>
-                    <p class="text-sm text-red-300" x-text="errorMessage"></p>
-                </div>
-
-                <div x-show="successMessage" x-cloak
-                     x-transition:enter="transition ease-out duration-300"
-                     x-transition:enter-start="opacity-0 -translate-y-2"
-                     x-transition:enter-end="opacity-100 translate-y-0"
-                     class="mb-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-start gap-3">
-                    <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400 shrink-0 mt-0.5"></i>
-                    <p class="text-sm text-emerald-300" x-text="successMessage"></p>
-                </div>
-
                 {{-- Form Partials --}}
                 @include('auth.partials.login-form')
                 @include('auth.partials.register-form')
                 @include('auth.partials.reset-password-form')
+                @include('auth.partials.verify-form')
             </div>
             
             <div class="h-1 w-full bg-gradient-to-r from-transparent via-brand-500/20 to-transparent"></div>

@@ -2,7 +2,7 @@
 <script>
     function authPanel() {
         return {
-            mode: 'login',
+            mode: 'login', // login, register, reset, verify
             resetStep: 1,
             resetEmail: '',
             maskedEmail: '',
@@ -11,6 +11,21 @@
             newPassword: '',
             confirmPassword: '',
             showPassword: false,
+            
+            // Register Data
+            registerName: '',
+            registerEmail: '',
+            registerPassword: '',
+            registerPasswordConfirmation: '',
+            showRegisterPassword: false,
+            agreed: false,
+            
+            // Verify Data
+            verifyEmail: '',
+            verifyOtpDigits: ['', '', '', '', '', ''],
+            verifyCountdown: 0,
+            verifyCountdownInterval: null,
+            
             isLoading: false,
             errorMessage: '',
             successMessage: '',
@@ -29,10 +44,32 @@
                 if (/[^a-zA-Z0-9]/.test(password)) strength++;
                 return strength;
             },
+
+            get registerPasswordStrength() {
+                const password = this.registerPassword;
+                if (!password) return 0;
+                let strength = 0;
+                if (password.length >= 8) strength++;
+                if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+                if (/[0-9]/.test(password)) strength++;
+                if (/[^a-zA-Z0-9]/.test(password)) strength++;
+                return strength;
+            },
+
+            get passwordStrengthText() {
+                const s = this.registerPasswordStrength;
+                if (s === 0) return '';
+                if (s === 1) return 'Lemah';
+                if (s === 2) return 'Cukup';
+                if (s === 3) return 'Baik';
+                return 'Sangat Kuat';
+            },
             
             switchMode(newMode) {
                 this.errorMessage = '';
                 this.successMessage = '';
+                
+                // Clear state on switch unless specifically needed
                 if (newMode === 'login' || newMode === 'register') {
                     this.resetStep = 1;
                     this.resetEmail = '';
@@ -42,8 +79,163 @@
                     this.confirmPassword = '';
                     this.clearCountdown();
                 }
+                
                 this.mode = newMode;
                 this.$nextTick(() => { lucide.createIcons(); });
+            },
+
+            // Registration AJAX
+            async submitRegister() {
+                if (!this.agreed) return;
+                this.isLoading = true;
+                this.errorMessage = '';
+                this.successMessage = '';
+
+                try {
+                    const response = await fetch('{{ route("register") }}', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json', 
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}', 
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({ 
+                            name: this.registerName,
+                            email: this.registerEmail,
+                            password: this.registerPassword,
+                            password_confirmation: this.registerPasswordConfirmation
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok && data.success) {
+                        // Success -> Move to verify tab
+                        this.verifyEmail = data.email;
+                        this.switchMode('verify');
+                        this.successMessage = data.message;
+                        this.startVerifyCountdown(60);
+                    } else {
+                        // Laravel validation errors format or custom json
+                        if (data.errors) {
+                            // Join first error of each field
+                            this.errorMessage = Object.values(data.errors).flat()[0];
+                        } else {
+                            this.errorMessage = data.message || 'Terjadi kesalahan saat registrasi.';
+                        }
+                    }
+                } catch (error) {
+                    this.errorMessage = 'Terjadi kesalahan jaringan atau server.';
+                    console.error('Register error:', error);
+                } finally {
+                    this.isLoading = false;
+                }
+            },
+            
+            // Verify Logic
+            handleVerifyOtpInput(event, index) {
+                const value = event.target.value;
+                if (!/^\d*$/.test(value)) { this.verifyOtpDigits[index] = ''; return; }
+                if (value && index < 5) { document.getElementById('verify-otp-' + (index + 1))?.focus(); }
+            },
+            
+            handleVerifyOtpBackspace(event, index) {
+                if (!this.verifyOtpDigits[index] && index > 0) { document.getElementById('verify-otp-' + (index - 1))?.focus(); }
+            },
+            
+            handleVerifyOtpPaste(event) {
+                event.preventDefault();
+                const pastedData = event.clipboardData.getData('text').trim();
+                if (/^\d{6}$/.test(pastedData)) {
+                    for (let i = 0; i < 6; i++) { this.verifyOtpDigits[i] = pastedData[i]; }
+                    document.getElementById('verify-otp-5')?.focus();
+                }
+            },
+
+            get formatVerifyCountdown() {
+                const minutes = Math.floor(this.verifyCountdown / 60);
+                const seconds = this.verifyCountdown % 60;
+                return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            },
+
+            startVerifyCountdown(seconds) {
+                this.verifyCountdown = seconds;
+                if (this.verifyCountdownInterval) clearInterval(this.verifyCountdownInterval);
+                this.verifyCountdownInterval = setInterval(() => {
+                    if (this.verifyCountdown > 0) this.verifyCountdown--;
+                    else clearInterval(this.verifyCountdownInterval);
+                }, 1000);
+            },
+
+            async submitVerify() {
+                const otp = this.verifyOtpDigits.join('');
+                if (otp.length !== 6) { this.errorMessage = 'Masukkan kode OTP 6 digit.'; return; }
+                
+                this.isLoading = true;
+                this.errorMessage = '';
+                
+                try { // Using existing route logic which redirects, we might need to change it or handle redirect manually?
+                      // Wait, auth controller verifyEmail returns redirect.
+                      // If we fetch it, we get the redirected page content.
+                      // Ideally we should update verifyEmail to return JSON too OR standard form submit.
+                      // User said "tanpa refresh" for swapping tabs. But final login redirect is fine to be a comprehensive load.
+                      // Let's try standard submit via JS construction to allow true redirect handling by browser if successful
+                      
+                      const form = document.createElement('form');
+                      form.method = 'POST';
+                      form.action = '{{ route("verification.verify") }}';
+                      
+                      const csrf = document.createElement('input');
+                      csrf.type = 'hidden';
+                      csrf.name = '_token';
+                      csrf.value = '{{ csrf_token() }}';
+                      form.appendChild(csrf);
+                      
+                      const emailInput = document.createElement('input');
+                      emailInput.type = 'hidden';
+                      emailInput.name = 'email';
+                      emailInput.value = this.verifyEmail;
+                      form.appendChild(emailInput);
+                      
+                      const otpInput = document.createElement('input');
+                      otpInput.type = 'hidden';
+                      otpInput.name = 'otp';
+                      otpInput.value = otp;
+                      form.appendChild(otpInput);
+                      
+                      document.body.appendChild(form);
+                      form.submit();
+                      
+                } catch (e) {
+                    this.isLoading = false;
+                }
+            },
+
+            async resendVerifyOtp() {
+                this.isLoading = true;
+                try {
+                     const response = await fetch('{{ route("verification.resend") }}', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json', 
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}', 
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ email: this.verifyEmail })
+                    });
+                    
+                    if (response.ok) {
+                        this.successMessage = 'Kode baru telah dikirim.';
+                        this.startVerifyCountdown(60);
+                    } else {
+                        this.errorMessage = 'Gagal mengirim ulang kode.';
+                    }
+                } catch(e) {
+                    this.errorMessage = 'Terjadi kesalahan.';
+                } finally {
+                    this.isLoading = false;
+                }
             },
             
             async sendOtp() {
