@@ -40,7 +40,7 @@
             
             {{-- Brand Column (Span 4) --}}
             <div class="lg:col-span-5 space-y-8">
-                <a href="{{ route('public.home') }}" class="inline-flex items-center gap-4 group">
+                <a href="{{ route('public.home') }}" wire:navigate class="inline-flex items-center gap-4 group">
                     @if(!empty($logoUrl))
                         <div class="relative">
                             <div class="absolute inset-0 bg-emerald-500 blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
@@ -94,33 +94,33 @@
                     <h4 class="text-white font-display font-bold text-lg tracking-tight">Menu Utama</h4>
                     <ul class="space-y-4">
                         <li>
-                            <a href="{{ route('public.home') }}" class="group flex items-center gap-3 text-slate-400 hover:text-white transition-colors">
+                            <a href="{{ route('public.home') }}" wire:navigate class="group flex items-center gap-3 text-slate-400 hover:text-white transition-colors">
                                 <span class="w-1.5 h-1.5 rounded-full bg-slate-700 group-hover:bg-emerald-400 transition-colors"></span>
                                 <span class="text-sm font-medium">Beranda</span>
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('public.articles') }}" class="group flex items-center gap-3 text-slate-400 hover:text-white transition-colors">
+                            <a href="{{ route('public.articles') }}" wire:navigate class="group flex items-center gap-3 text-slate-400 hover:text-white transition-colors">
                                 <span class="w-1.5 h-1.5 rounded-full bg-slate-700 group-hover:bg-emerald-400 transition-colors"></span>
                                 <span class="text-sm font-medium">Artikel</span>
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('public.gallery') }}" class="group flex items-center gap-3 text-slate-400 hover:text-white transition-colors">
+                            <a href="{{ route('public.gallery') }}" wire:navigate class="group flex items-center gap-3 text-slate-400 hover:text-white transition-colors">
                                 <span class="w-1.5 h-1.5 rounded-full bg-slate-700 group-hover:bg-emerald-400 transition-colors"></span>
                                 <span class="text-sm font-medium">Galeri</span>
                             </a>
                         </li>
                         @auth
                             <li>
-                                <a href="{{ route('dashboard') }}" class="group flex items-center gap-3 text-slate-400 hover:text-emerald-400 transition-colors">
+                                <a href="{{ route('dashboard') }}" wire:navigate class="group flex items-center gap-3 text-slate-400 hover:text-emerald-400 transition-colors">
                                     <span class="w-1.5 h-1.5 rounded-full bg-slate-700 group-hover:bg-emerald-400 transition-colors"></span>
                                     <span class="text-sm font-medium">Dashboard</span>
                                 </a>
                             </li>
                         @else
                             <li>
-                                <a href="{{ route('login') }}" class="group flex items-center gap-3 text-slate-400 hover:text-emerald-400 transition-colors">
+                                <a href="{{ route('login') }}" wire:navigate class="group flex items-center gap-3 text-slate-400 hover:text-emerald-400 transition-colors">
                                     <span class="w-1.5 h-1.5 rounded-full bg-slate-700 group-hover:bg-emerald-400 transition-colors"></span>
                                     <span class="text-sm font-medium">Masuk</span>
                                 </a>
@@ -135,7 +135,7 @@
                     <ul class="space-y-4">
                         @foreach($footerCategories as $cat)
                             <li>
-                                <a href="{{ route('public.articles', ['kategori' => $cat->slug]) }}" class="group flex items-center gap-3 text-slate-400 hover:text-white transition-colors">
+                                <a href="{{ route('public.articles', ['kategori' => $cat->slug]) }}" wire:navigate class="group flex items-center gap-3 text-slate-400 hover:text-white transition-colors">
                                     <span class="w-1.5 h-1.5 rounded-full bg-slate-700 group-hover:bg-blue-400 transition-colors"></span>
                                     <span class="text-sm font-medium">{{ $cat->name }}</span>
                                 </a>

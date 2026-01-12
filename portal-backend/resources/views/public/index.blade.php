@@ -7,8 +7,7 @@
     <header class="max-w-7xl mx-auto px-6 pt-32">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[500px]">
             <!-- Hero Main -->
-            <div class="lg:col-span-8 relative group cursor-pointer overflow-hidden rounded-[40px] border border-slate-800 shadow-2xl shadow-emerald-500/5 animate-float-slow"
-                 onclick="window.location.href='{{ $featuredArticle ? route('public.article.show', $featuredArticle->slug) : '#' }}'">
+            <a href="{{ $featuredArticle ? route('public.article.show', $featuredArticle->slug) : '#' }}" wire:navigate class="block lg:col-span-8 relative group overflow-hidden rounded-[40px] border border-slate-800 shadow-2xl shadow-emerald-500/5 animate-float-slow">
                 @if($featuredArticle && $featuredArticle->image_url)
                     <img src="{{ $featuredArticle->image_url }}" class="w-full h-full object-cover transition duration-1000 group-hover:scale-105">
                 @else
@@ -39,14 +38,13 @@
                         <h2 class="text-3xl md:text-5xl font-extrabold text-white leading-tight">Belum ada berita utama</h2>
                     @endif
                 </div>
-            </div>
+            </a>
 
             <!-- Hero Side (2 items) -->
             <div class="lg:col-span-4 flex flex-col gap-6">
                 @php $sideArticles = $latestArticles->take(2); @endphp
                 @foreach($sideArticles as $article)
-                    <div class="flex-1 relative group overflow-hidden rounded-[32px] border border-slate-800 cursor-pointer hover:border-emerald-500/30 transition-colors"
-                         onclick="window.location.href='{{ route('public.article.show', $article->slug) }}'">
+                    <a href="{{ route('public.article.show', $article->slug) }}" wire:navigate class="block flex-1 relative group overflow-hidden rounded-[32px] border border-slate-800 hover:border-emerald-500/30 transition-colors">
                         @if($article->image_url)
                             <img src="{{ $article->image_url }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
                         @else
@@ -62,7 +60,7 @@
                                 {{ $article->categoryRelation?->name ?? 'Update' }}
                             </p>
                         </div>
-                    </div>
+                    </a>
                 @endforeach
                 
                 @for($i = 0; $i < (2 - $sideArticles->count()); $i++)
@@ -101,9 +99,9 @@
                 
                 <div class="flex-1 overflow-x-auto hide-scrollbar">
                     <div class="flex items-center gap-2 text-xs font-bold text-slate-500 whitespace-nowrap min-w-max px-2">
-                        <a href="{{ route('public.articles') }}" class="text-white bg-slate-800 px-4 py-1.5 rounded-full border border-slate-700 hover:bg-slate-700 transition">Semua</a>
+                        <a href="{{ route('public.articles') }}" wire:navigate class="text-white bg-slate-800 px-4 py-1.5 rounded-full border border-slate-700 hover:bg-slate-700 transition">Semua</a>
                         @foreach($categories as $category)
-                             <a href="{{ route('public.articles', ['kategori' => $category->slug]) }}" 
+                             <a href="{{ route('public.articles', ['kategori' => $category->slug]) }}" wire:navigate
                                 class="text-slate-400 bg-slate-900/50 hover:bg-slate-800 hover:text-white px-4 py-1.5 rounded-full border border-slate-800 hover:border-slate-700 transition">
                                 {{ $category->name }}
                              </a>
@@ -138,7 +136,7 @@
                                     </span>
                                 </div>
                                 <h4 class="text-xl md:text-2xl font-bold text-white group-hover:text-emerald-400 transition-all leading-snug mb-3 font-display">
-                                    <a href="{{ route('public.article.show', $article->slug) }}">
+                                    <a href="{{ route('public.article.show', $article->slug) }}" wire:navigate>
                                         {{ $article->title }}
                                     </a>
                                 </h4>
@@ -151,7 +149,7 @@
                                     <i class="fas fa-check-circle"></i> Terverifikasi
                                 </span>
                                 <span class="text-slate-700">|</span>
-                                <a href="{{ route('public.article.show', $article->slug) }}" class="text-xs font-bold text-white uppercase tracking-widest hover:text-emerald-500 transition-all flex items-center gap-2">
+                                <a href="{{ route('public.article.show', $article->slug) }}" wire:navigate class="text-xs font-bold text-white uppercase tracking-widest hover:text-emerald-500 transition-all flex items-center gap-2">
                                     Baca Selengkapnya <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                                 </a>
                             </div>
@@ -168,7 +166,7 @@
             </div>
             
             <div class="flex justify-center pt-10">
-                <a href="{{ route('public.articles') }}" class="px-12 py-4 rounded-2xl bg-slate-900 border border-slate-800 text-white font-bold hover:bg-emerald-600 transition-all shadow-xl uppercase text-xs tracking-widest">
+                <a href="{{ route('public.articles') }}" wire:navigate class="px-12 py-4 rounded-2xl bg-slate-900 border border-slate-800 text-white font-bold hover:bg-emerald-600 transition-all shadow-xl uppercase text-xs tracking-widest">
                     Muat Berita Lainnya
                 </a>
             </div>
@@ -184,7 +182,7 @@
                 </h3>
                 <div class="space-y-6">
                     @forelse($popularArticles as $article)
-                        <div class="flex gap-4 group cursor-pointer" onclick="window.location.href='{{ route('public.article.show', $article->slug) }}'">
+                        <a href="{{ route('public.article.show', $article->slug) }}" wire:navigate class="flex gap-4 group">
                             <div class="w-20 h-20 rounded-2xl overflow-hidden shrink-0 border border-slate-800">
                                 @if($article->image_url)
                                     <img src="{{ $article->image_url }}" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition duration-500">
@@ -201,7 +199,7 @@
                                     {{ $article->likes_count ?? 0 }} Likes
                                 </span>
                             </div>
-                        </div>
+                        </a>
                     @empty
                         <p class="text-xs text-slate-600 font-bold italic">Belum ada data</p>
                     @endforelse
@@ -216,7 +214,7 @@
                 <div class="flex flex-wrap gap-2">
                     @isset($popularTags)
                         @foreach($popularTags as $tag)
-                            <a href="{{ route('public.articles', ['tag' => $tag->slug]) }}" class="px-4 py-2 bg-slate-900 border border-slate-800 rounded-xl text-[10px] font-black text-slate-400 hover:text-white hover:border-emerald-500 transition-all cursor-pointer uppercase">
+                            <a href="{{ route('public.articles', ['tag' => $tag->slug]) }}" wire:navigate class="px-4 py-2 bg-slate-900 border border-slate-800 rounded-xl text-[10px] font-black text-slate-400 hover:text-white hover:border-emerald-500 transition-all cursor-pointer uppercase">
                                 #{{ $tag->name }}
                             </a>
                         @endforeach

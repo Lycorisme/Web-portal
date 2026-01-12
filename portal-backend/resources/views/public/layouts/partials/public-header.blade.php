@@ -26,7 +26,7 @@
     <div class="max-w-7xl mx-auto px-6">
         <div class="flex justify-between items-center">
             {{-- Logo --}}
-            <a href="{{ route('public.home') }}" class="flex items-center gap-3 group">
+            <a href="{{ route('public.home') }}" wire:navigate class="flex items-center gap-3 group">
                 @if(!empty($siteLogo))
                     <img src="{{ asset($siteLogo) }}" alt="{{ $siteName }}" class="h-10 w-auto group-hover:scale-105 transition-transform duration-300">
                 @endif
@@ -43,15 +43,15 @@
 
             {{-- Desktop Navigation --}}
             <nav class="hidden lg:flex items-center gap-1 p-1 bg-slate-950/30 backdrop-blur-sm border border-white/5 rounded-full">
-                <a href="{{ route('public.home') }}" 
+                <a href="{{ route('public.home') }}" wire:navigate 
                    class="px-5 py-2 rounded-full text-sm font-bold transition-all duration-300 relative overflow-hidden group {{ request()->routeIs('public.home') ? 'text-white bg-white/10 shadow-inner' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
                    Beranda
                 </a>
-                <a href="{{ route('public.articles') }}" 
+                <a href="{{ route('public.articles') }}" wire:navigate 
                    class="px-5 py-2 rounded-full text-sm font-bold transition-all duration-300 {{ request()->routeIs('public.articles') ? 'text-white bg-white/10 shadow-inner' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
                    Artikel
                 </a>
-                <a href="{{ route('public.gallery') }}" 
+                <a href="{{ route('public.gallery') }}" wire:navigate 
                    class="px-5 py-2 rounded-full text-sm font-bold transition-all duration-300 {{ request()->routeIs('public.gallery') ? 'text-white bg-white/10 shadow-inner' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
                    Galeri
                 </a>
@@ -69,7 +69,7 @@
                 <div class="hidden md:flex items-center">
                     @auth
                         @if(auth()->user()->canAccessDashboard())
-                            <a href="{{ route('dashboard') }}" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-xs font-bold uppercase tracking-wider shadow-lg shadow-emerald-500/20 transition-all transform hover:-translate-y-0.5 border border-emerald-400/20">
+                            <a href="{{ route('dashboard') }}" wire:navigate class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-xs font-bold uppercase tracking-wider shadow-lg shadow-emerald-500/20 transition-all transform hover:-translate-y-0.5 border border-emerald-400/20">
                                 Dashboard
                             </a>
                         @else
@@ -84,7 +84,7 @@
                             </div>
                         @endif
                     @else
-                        <a href="{{ route('login') }}" class="group relative px-6 py-2.5 rounded-xl overflow-hidden bg-slate-800 border border-slate-700 text-slate-300 font-bold text-xs uppercase tracking-wider hover:text-white hover:border-slate-500 transition-all">
+                        <a href="{{ route('login') }}" wire:navigate class="group relative px-6 py-2.5 rounded-xl overflow-hidden bg-slate-800 border border-slate-700 text-slate-300 font-bold text-xs uppercase tracking-wider hover:text-white hover:border-slate-500 transition-all">
                             <span class="relative z-10 flex items-center gap-2">
                                 Masuk <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
                             </span>
@@ -127,15 +127,15 @@
                  <span class="text-3xl font-bold font-display text-white mb-2">{{ $siteName }}</span>
             @endif
 
-            <a href="{{ route('public.home') }}" 
-               class="text-3xl font-display font-bold transition-colors tracking-tight {{ request()->routeIs('public.home') ? 'text-emerald-400' : 'text-white hover:text-emerald-400' }}">
-               Beranda
+            <a href="{{ route('public.home') }}" wire:navigate 
+                class="text-3xl font-display font-bold transition-colors tracking-tight {{ request()->routeIs('public.home') ? 'text-emerald-400' : 'text-white hover:text-emerald-400' }}">
+                Beranda
             </a>
-            <a href="{{ route('public.articles') }}" 
+            <a href="{{ route('public.articles') }}" wire:navigate 
                class="text-3xl font-display font-bold transition-colors tracking-tight {{ request()->routeIs('public.articles*') ? 'text-emerald-400' : 'text-white hover:text-emerald-400' }}">
                Artikel
             </a>
-            <a href="{{ route('public.gallery') }}" 
+            <a href="{{ route('public.gallery') }}" wire:navigate 
                class="text-3xl font-display font-bold transition-colors tracking-tight {{ request()->routeIs('public.gallery') ? 'text-emerald-400' : 'text-white hover:text-emerald-400' }}">
                Galeri
             </a>
@@ -154,7 +154,7 @@
                         </div>
                     </div>
                      @if(auth()->user()->canAccessDashboard())
-                        <a href="{{ route('dashboard') }}" class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 rounded-2xl text-center text-white font-bold uppercase tracking-widest text-sm shadow-xl shadow-emerald-600/20 transition-all">
+                        <a href="{{ route('dashboard') }}" wire:navigate class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 rounded-2xl text-center text-white font-bold uppercase tracking-widest text-sm shadow-xl shadow-emerald-600/20 transition-all">
                             Dashboard
                         </a>
                     @endif
@@ -166,7 +166,7 @@
                     </form>
                  </div>
             @else
-                <a href="{{ route('login') }}" class="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 rounded-2xl text-center text-white font-bold uppercase tracking-widest text-sm shadow-xl shadow-emerald-600/20 transition-all">
+                <a href="{{ route('login') }}" wire:navigate class="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 rounded-2xl text-center text-white font-bold uppercase tracking-widest text-sm shadow-xl shadow-emerald-600/20 transition-all">
                     Masuk / Daftar
                 </a>
             @endauth
@@ -210,9 +210,9 @@
             
             <div class="mt-8 flex flex-wrap justify-center gap-3">
                 <span class="text-slate-500 text-sm font-semibold uppercase tracking-widest">Populer:</span>
-                <a href="{{ route('public.articles', ['tag' => 'teknologi']) }}" class="text-sm font-bold text-emerald-400 hover:text-emerald-300 transition-colors underline decoration-emerald-500/30 font-display">Teknologi</a>
-                <a href="{{ route('public.articles', ['tag' => 'pendidikan']) }}" class="text-sm font-bold text-emerald-400 hover:text-emerald-300 transition-colors underline decoration-emerald-500/30 font-display">Pendidikan</a>
-                <a href="{{ route('public.articles', ['tag' => 'digital']) }}" class="text-sm font-bold text-emerald-400 hover:text-emerald-300 transition-colors underline decoration-emerald-500/30 font-display">Digital</a>
+                <a href="{{ route('public.articles', ['tag' => 'teknologi']) }}" wire:navigate class="text-sm font-bold text-emerald-400 hover:text-emerald-300 transition-colors underline decoration-emerald-500/30 font-display">Teknologi</a>
+                <a href="{{ route('public.articles', ['tag' => 'pendidikan']) }}" wire:navigate class="text-sm font-bold text-emerald-400 hover:text-emerald-300 transition-colors underline decoration-emerald-500/30 font-display">Pendidikan</a>
+                <a href="{{ route('public.articles', ['tag' => 'digital']) }}" wire:navigate class="text-sm font-bold text-emerald-400 hover:text-emerald-300 transition-colors underline decoration-emerald-500/30 font-display">Digital</a>
             </div>
         </div>
     </div>

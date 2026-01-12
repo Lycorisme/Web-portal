@@ -139,7 +139,7 @@
                         <p class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 sm:mb-4">Tags</p>
                         <div class="flex flex-wrap gap-1.5 sm:gap-2">
                             @foreach($article->tags as $tag)
-                                <a href="{{ route('public.articles', ['tag' => $tag->slug]) }}" 
+                                <a href="{{ route('public.articles', ['tag' => $tag->slug]) }}" wire:navigate 
                                    class="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-slate-800/50 hover:bg-emerald-500 text-slate-400 hover:text-white text-[10px] sm:text-xs font-semibold rounded-lg border border-slate-700/50 hover:border-emerald-500 transition-all">
                                     #{{ $tag->name }}
                                 </a>
@@ -168,7 +168,7 @@
                                 </form>
                             </div>
                         @else
-                            <a href="{{ route('login') }}" class="flex items-center gap-2 group">
+                            <a href="{{ route('login') }}" wire:navigate class="flex items-center gap-2 group">
                                 <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-slate-800 text-slate-400 group-hover:bg-rose-500/20 group-hover:text-rose-500 flex items-center justify-center transition-all">
                                     <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
@@ -226,7 +226,7 @@
                             @else
                                 <div class="p-4 sm:p-6 bg-slate-950/50 border border-dashed border-slate-700 rounded-lg sm:rounded-xl text-center">
                                     <p class="text-slate-400 mb-3 sm:mb-4 text-sm">Masuk untuk ikut berdiskusi</p>
-                                    <a href="{{ route('login') }}" class="inline-block px-5 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-emerald-600 to-teal-500 text-white text-xs sm:text-sm font-bold rounded-lg sm:rounded-xl shadow-lg shadow-emerald-500/20 hover:from-emerald-500 hover:to-teal-400 transition-all">
+                                    <a href="{{ route('login') }}" wire:navigate class="inline-block px-5 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-emerald-600 to-teal-500 text-white text-xs sm:text-sm font-bold rounded-lg sm:rounded-xl shadow-lg shadow-emerald-500/20 hover:from-emerald-500 hover:to-teal-400 transition-all">
                                         Login
                                     </a>
                                 </div>
@@ -323,7 +323,7 @@
                         </h4>
                         <div class="space-y-3 sm:space-y-4">
                             @forelse($relatedArticles as $index => $related)
-                                <a href="{{ route('public.article.show', $related->slug) }}" class="group flex gap-2.5 sm:gap-3">
+                                <a href="{{ route('public.article.show', $related->slug) }}" wire:navigate class="group flex gap-2.5 sm:gap-3">
                                     <span class="text-xl sm:text-2xl font-black text-slate-800 group-hover:text-emerald-500 transition-colors w-6 sm:w-8 flex-shrink-0">
                                         {{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}
                                     </span>
@@ -358,7 +358,7 @@
                             </h4>
                             <div class="flex flex-wrap gap-1.5 sm:gap-2">
                                 @foreach($allTags as $tag)
-                                    <a href="{{ route('public.articles', ['tag' => $tag->slug]) }}" 
+                                    <a href="{{ route('public.articles', ['tag' => $tag->slug]) }}" wire:navigate 
                                        class="px-2 sm:px-3 py-1 sm:py-1.5 bg-slate-800/50 hover:bg-emerald-500 text-slate-400 hover:text-white text-[10px] sm:text-xs font-semibold rounded-lg border border-slate-700/50 hover:border-emerald-500 transition-all">
                                         #{{ $tag->name }}
                                     </a>

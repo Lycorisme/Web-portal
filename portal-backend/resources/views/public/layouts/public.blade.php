@@ -45,13 +45,14 @@
         }
     </script>
     
-    {{-- Alpine.js --}}
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    {{-- Alpine.js (Bundled with Livewire) --}}
+    {{-- <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script> --}}
 
     {{-- Styles Partial --}}
     @include('public.layouts.partials.public-styles')
 
     @stack('styles')
+    @livewireStyles
 </head>
 <body class="bg-slate-950 text-slate-200 antialiased selection:bg-emerald-500/30 selection:text-emerald-400 overflow-x-hidden">
 
@@ -96,5 +97,6 @@
     </div>
 
     @stack('scripts')
+    @livewireScripts
 </body>
 </html>

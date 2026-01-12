@@ -53,15 +53,15 @@
             {{-- Filter Bar --}}
             <div class="mb-16 flex flex-wrap justify-center gap-4 relative z-10">
                 <div class="p-1.5 rounded-2xl bg-slate-900/50 backdrop-blur-md border border-white/5 flex flex-wrap justify-center gap-2 shadow-2xl">
-                    <a href="{{ route('public.gallery') }}" 
+                    <a href="{{ route('public.gallery') }}" wire:navigate 
                        class="px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all duration-300 {{ !request('album') && !request('type') ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-500/25' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
                         Semua
                     </a>
-                    <a href="{{ route('public.gallery', array_merge(request()->query(), ['type' => 'image'])) }}" 
+                    <a href="{{ route('public.gallery', array_merge(request()->query(), ['type' => 'image'])) }}" wire:navigate 
                        class="px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all duration-300 {{ request('type') == 'image' ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-500/25' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
                         Foto
                     </a>
-                    <a href="{{ route('public.gallery', array_merge(request()->query(), ['type' => 'video'])) }}" 
+                    <a href="{{ route('public.gallery', array_merge(request()->query(), ['type' => 'video'])) }}" wire:navigate 
                        class="px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all duration-300 {{ request('type') == 'video' ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-500/25' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
                         Video
                     </a>
@@ -78,12 +78,12 @@
                              x-transition:enter-start="opacity-0 translate-y-2"
                              x-transition:enter-end="opacity-100 translate-y-0"
                              class="absolute top-full mt-2 w-56 p-2 rounded-2xl bg-slate-900 border border-slate-700/50 shadow-xl backdrop-blur-xl z-30 max-h-60 overflow-y-auto">
-                            <a href="{{ route('public.gallery', array_diff_key(request()->query(), ['album' => ''])) }}" 
+                            <a href="{{ route('public.gallery', array_diff_key(request()->query(), ['album' => ''])) }}" wire:navigate 
                                class="block px-4 py-3 rounded-xl text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800 transition-colors uppercase tracking-wider">
                                 Semua Album
                             </a>
                             @foreach($albums as $album)
-                                <a href="{{ route('public.gallery', array_merge(request()->query(), ['album' => $album])) }}" 
+                                <a href="{{ route('public.gallery', array_merge(request()->query(), ['album' => $album])) }}" wire:navigate 
                                    class="block px-4 py-3 rounded-xl text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800 transition-colors uppercase tracking-wider border-t border-white/5">
                                     {{ $album }}
                                 </a>
@@ -150,7 +150,7 @@
                         <i class="far fa-images text-6xl text-slate-700 mb-6 block animate-float"></i>
                         <h3 class="text-xl font-bold text-white uppercase tracking-widest mb-2">Galeri Kosong</h3>
                         <p class="text-slate-500 text-sm mb-8">Tidak ada item galeri yang ditemukan untuk filter ini.</p>
-                        <a href="{{ route('public.gallery') }}" class="inline-flex items-center px-8 py-3 rounded-xl bg-slate-800 text-white font-bold uppercase tracking-widest text-xs hover:bg-emerald-600 transition-all shadow-lg hover:shadow-emerald-500/25">
+                        <a href="{{ route('public.gallery') }}" wire:navigate class="inline-flex items-center px-8 py-3 rounded-xl bg-slate-800 text-white font-bold uppercase tracking-widest text-xs hover:bg-emerald-600 transition-all shadow-lg hover:shadow-emerald-500/25">
                             Reset Filter
                         </a>
                     </div>

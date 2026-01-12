@@ -51,11 +51,11 @@
                 <div class="bg-slate-900/50 rounded-2xl md:rounded-[32px] border border-slate-800 p-4 md:p-6 backdrop-blur-sm">
                     <h3 class="text-sm font-black text-white uppercase tracking-widest mb-4">Kategori</h3>
                     <div class="flex flex-col space-y-2">
-                        <a href="{{ route('public.articles') }}" class="flex justify-between items-center px-4 py-3 rounded-xl transition-all {{ !request('kategori') ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white border border-transparent' }}">
+                        <a href="{{ route('public.articles') }}" wire:navigate class="flex justify-between items-center px-4 py-3 rounded-xl transition-all {{ !request('kategori') ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white border border-transparent' }}">
                             <span class="text-xs font-bold uppercase tracking-wide">Semua</span>
                         </a>
                         @foreach($categories as $category)
-                            <a href="{{ route('public.articles', ['kategori' => $category->slug]) }}" class="flex justify-between items-center px-4 py-3 rounded-xl transition-all {{ request('kategori') == $category->slug ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white border border-transparent' }}">
+                            <a href="{{ route('public.articles', ['kategori' => $category->slug]) }}" wire:navigate class="flex justify-between items-center px-4 py-3 rounded-xl transition-all {{ request('kategori') == $category->slug ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white border border-transparent' }}">
                                 <span class="text-xs font-bold uppercase tracking-wide">{{ $category->name }}</span>
                                 <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-md font-black">{{ $category->articles_count }}</span>
                             </a>
@@ -130,7 +130,7 @@
 
                                         <!-- Title -->
                                         <h2 class="{{ $titleSize }} font-extrabold text-white leading-tight mb-2 group-hover:text-emerald-400 transition-colors">
-                                            <a href="{{ route('public.article.show', $article->slug) }}" class="focus:outline-none">
+                                            <a href="{{ route('public.article.show', $article->slug) }}" wire:navigate class="focus:outline-none">
                                                 <span class="absolute inset-0 z-10"></span>
                                                 {{ $article->title }}
                                             </a>
@@ -161,7 +161,7 @@
                     <div class="text-center py-12 md:py-20 bg-slate-900/50 rounded-2xl md:rounded-[32px] border border-dashed border-slate-800">
                         <h3 class="text-base md:text-lg font-bold text-white uppercase tracking-widest">Tidak ada artikel</h3>
                         <div class="mt-6">
-                            <a href="{{ route('public.articles') }}" class="inline-flex items-center px-6 py-2 border border-slate-700 shadow-sm text-xs font-bold uppercase tracking-widest rounded-xl text-white hover:bg-slate-800 transition-all">
+                            <a href="{{ route('public.articles') }}" wire:navigate class="inline-flex items-center px-6 py-2 border border-slate-700 shadow-sm text-xs font-bold uppercase tracking-widest rounded-xl text-white hover:bg-slate-800 transition-all">
                                 Reset Filter
                             </a>
                         </div>
