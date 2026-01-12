@@ -4,136 +4,181 @@
 
 @push('styles')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-<style>
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-    .glass-card {
-        background: rgba(15, 23, 42, 0.6);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-    .sidebar-link.active {
-        background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(6, 182, 212, 0.1));
-        border-color: rgba(16, 185, 129, 0.3);
-        color: #10b981;
-    }
-    .input-field {
-        @apply w-full bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 transition-all;
-    }
-    .btn-primary {
-        @apply px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 hover:-translate-y-0.5;
-    }
-    .btn-secondary {
-        @apply px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl border border-slate-700 transition-all;
-    }
-    .btn-danger {
-        @apply px-6 py-3 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 font-bold rounded-xl border border-rose-500/30 transition-all;
-    }
-</style>
 @endpush
 
 @section('content')
-<div class="min-h-screen pt-28 pb-16" x-data="profilePage()">
+<div class="min-h-screen pt-28 pb-16 relative" x-data="profilePage()">
+    
+    {{-- Background Glow --}}
+    <div class="absolute top-20 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[500px] bg-emerald-500/10 blur-[120px] rounded-full pointer-events-none -z-10"></div>
+
     <div class="max-w-7xl mx-auto px-6">
         
-        {{-- Profile Header --}}
-        <div class="glass-card rounded-3xl p-8 mb-8 relative overflow-hidden">
-            <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-purple-500/5"></div>
-            <div class="relative flex flex-col md:flex-row items-center gap-6">
-                {{-- Avatar --}}
-                <div class="relative group">
-                    <div class="w-28 h-28 rounded-full overflow-hidden ring-4 ring-emerald-500/20 group-hover:ring-emerald-500/40 transition-all shadow-2xl">
+        {{-- Profile Header Card --}}
+        <div class="rounded-[2.5rem] p-8 mb-10 relative overflow-hidden bg-slate-900/40 backdrop-blur-xl border border-white/5 shadow-2xl ring-1 ring-white/5 group">
+            
+            {{-- Decorative Background --}}
+            <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+            <div class="absolute -top-24 -right-24 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl group-hover:bg-emerald-500/20 transition-all duration-700"></div>
+            
+            <div class="relative flex flex-col md:flex-row items-center gap-8 md:gap-12 z-10">
+                {{-- Avatar Section --}}
+                <div class="relative shrink-0">
+                    <div class="w-32 h-32 md:w-36 md:h-36 rounded-full overflow-hidden ring-4 ring-emerald-500/20 shadow-2xl relative z-10 group-hover:ring-emerald-500/40 transition-all duration-500 transform group-hover:scale-105 bg-slate-800">
                         @if($user->profile_photo)
-                            <img src="{{ $user->avatar }}" class="w-full h-full object-cover" id="header-avatar">
+                            <img src="{{ $user->avatar }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" id="header-avatar">
                         @else
-                            <div class="w-full h-full bg-gradient-to-br from-emerald-600 to-teal-600 flex items-center justify-center text-white text-4xl font-bold" id="header-avatar-placeholder">
+                            <div class="w-full h-full bg-gradient-to-br from-emerald-600 to-teal-600 flex items-center justify-center text-white text-5xl font-bold font-display" id="header-avatar-placeholder">
                                 {{ substr($user->name, 0, 1) }}
                             </div>
                         @endif
                     </div>
-                    <div class="absolute bottom-0 right-0 w-8 h-8 bg-emerald-500 rounded-full border-4 border-slate-900 flex items-center justify-center">
-                        @if($user->email_verified_at)
-                            <i class="fas fa-check text-white text-xs"></i>
+                    {{-- Status Badge (Absolute) --}}
+                    <div class="absolute bottom-1 right-1 md:bottom-2 md:right-2 z-20">
+                         @if($user->email_verified_at)
+                            <div class="w-8 h-8 md:w-10 md:h-10 bg-emerald-500 rounded-full border-[3px] border-slate-900 flex items-center justify-center shadow-lg transform translate-y-1 translate-x-1" title="Terverifikasi">
+                                <i class="fas fa-check text-white text-xs md:text-sm font-bold"></i>
+                            </div>
                         @else
-                            <i class="fas fa-exclamation text-white text-xs"></i>
+                            <div class="w-8 h-8 md:w-10 md:h-10 bg-amber-500 rounded-full border-[3px] border-slate-900 flex items-center justify-center shadow-lg transform translate-y-1 translate-x-1 animate-pulse" title="Belum Verifikasi">
+                                <i class="fas fa-exclamation text-white text-xs md:text-sm font-bold"></i>
+                            </div>
                         @endif
                     </div>
                 </div>
                 
-                {{-- Info --}}
-                <div class="text-center md:text-left flex-1">
-                    <h1 class="text-3xl font-display font-bold text-white mb-2" id="header-name">{{ $user->name }}</h1>
-                    <p class="text-slate-400 mb-3" id="header-email">{{ $user->email }}</p>
-                    <div class="flex flex-wrap justify-center md:justify-start gap-2">
-                        <span class="px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 rounded-full text-emerald-400 text-xs font-bold uppercase tracking-wider">
-                            <i class="fas fa-user mr-1"></i> Member
+                {{-- User Info Section --}}
+                <div class="text-center md:text-left flex-1 min-w-0">
+                    <h1 class="text-4xl md:text-5xl font-display font-bold text-white mb-2 tracking-tight drop-shadow-sm" id="header-name">{{ $user->name }}</h1>
+                    <p class="text-slate-400 text-lg mb-6 font-medium tracking-wide" id="header-email">{{ $user->email }}</p>
+                    
+                    <div class="flex flex-wrap justify-center md:justify-start gap-3">
+                        <span class="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 text-xs font-bold uppercase tracking-widest shadow-lg shadow-emerald-500/5 backdrop-blur-sm">
+                            <i class="fas fa-user-circle"></i> Member Area
                         </span>
+                        
                         @if($user->email_verified_at)
-                            <span class="px-3 py-1 bg-blue-500/10 border border-blue-500/30 rounded-full text-blue-400 text-xs font-bold uppercase tracking-wider">
-                                <i class="fas fa-shield-alt mr-1"></i> Terverifikasi
+                            <span class="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-full text-blue-400 text-xs font-bold uppercase tracking-widest shadow-lg shadow-blue-500/5 backdrop-blur-sm">
+                                <i class="fas fa-shield-alt"></i> Akun Terverifikasi
                             </span>
                         @else
-                            <span class="px-3 py-1 bg-amber-500/10 border border-amber-500/30 rounded-full text-amber-400 text-xs font-bold uppercase tracking-wider">
-                                <i class="fas fa-exclamation-triangle mr-1"></i> Belum Verifikasi
+                            <span class="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-full text-amber-400 text-xs font-bold uppercase tracking-widest shadow-lg shadow-amber-500/5 backdrop-blur-sm animate-pulse">
+                                <i class="fas fa-lock"></i> Perlu Verifikasi
                             </span>
                         @endif
                     </div>
                 </div>
                 
-                {{-- Stats --}}
-                <div class="flex gap-6">
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-white">{{ $stats['likes_count'] }}</div>
-                        <div class="text-xs text-slate-500 uppercase tracking-wider">Likes</div>
+                {{-- Quick Stats Section --}}
+                <div class="flex gap-8 md:gap-12 md:pr-8 py-4 md:py-0 border-t md:border-t-0 md:border-l border-white/5 w-full md:w-auto justify-center md:justify-end">
+                    <div class="text-center group/stat cursor-default">
+                        <div class="text-3xl font-display font-bold text-white mb-1 group-hover/stat:text-emerald-400 transition-colors">{{ $stats['likes_count'] }}</div>
+                        <div class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] group-hover/stat:text-slate-300 transition-colors">Disukai</div>
                     </div>
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-white">{{ $stats['comments_count'] }}</div>
-                        <div class="text-xs text-slate-500 uppercase tracking-wider">Komentar</div>
+                    <div class="text-center group/stat cursor-default">
+                        <div class="text-3xl font-display font-bold text-white mb-1 group-hover/stat:text-blue-400 transition-colors">{{ $stats['comments_count'] }}</div>
+                        <div class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] group-hover/stat:text-slate-300 transition-colors">Komentar</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        {{-- Main Content --}}
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            {{-- Sidebar Navigation --}}
-            <div class="lg:col-span-1">
-                <div class="glass-card rounded-2xl p-4 sticky top-28 space-y-2">
+        {{-- Main Layout Grid --}}
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            {{-- Navigation Sidebar --}}
+            <div class="lg:col-span-3 sticky top-32 z-20">
+                <nav class="flex flex-col gap-2 p-3 rounded-2xl bg-slate-900/60 backdrop-blur-md border border-white/5 shadow-xl">
                     <button @click="activeTab = 'settings'" 
-                            :class="activeTab === 'settings' ? 'active' : ''"
-                            class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all border border-transparent">
-                        <i class="fas fa-user-cog w-5"></i>
-                        <span class="font-semibold">Pengaturan Akun</span>
+                            :class="activeTab === 'settings' ? 'bg-slate-800 text-white shadow-lg ring-1 ring-white/10' : 'text-slate-400 hover:text-white hover:bg-white/5'"
+                            class="w-full flex items-center gap-4 px-5 py-4 rounded-xl transition-all duration-300 group text-left relative overflow-hidden">
+                        
+                        {{-- Active Indicator Bar --}}
+                        <div x-show="activeTab === 'settings'" class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-emerald-500 rounded-r-full"
+                             x-transition:enter="transition ease-out duration-300"
+                             x-transition:enter-start="opacity-0 -translate-x-full"
+                             x-transition:enter-end="opacity-100 translate-x-0"></div>
+
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center transition-colors duration-300"
+                             :class="activeTab === 'settings' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800/50 text-slate-500 group-hover:text-emerald-400 group-hover:bg-emerald-500/10'">
+                            <i class="fas fa-user-cog text-lg"></i>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-bold tracking-wide">Pengaturan Akun</span>
+                            <span class="block text-[10px] text-slate-500 font-medium mt-0.5">Ubah profil & sandi</span>
+                        </div>
                     </button>
+                    
                     <button @click="activeTab = 'activity'" 
-                            :class="activeTab === 'activity' ? 'active' : ''"
-                            class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all border border-transparent">
-                        <i class="fas fa-history w-5"></i>
-                        <span class="font-semibold">Aktivitas Saya</span>
+                            :class="activeTab === 'activity' ? 'bg-slate-800 text-white shadow-lg ring-1 ring-white/10' : 'text-slate-400 hover:text-white hover:bg-white/5'"
+                            class="w-full flex items-center gap-4 px-5 py-4 rounded-xl transition-all duration-300 group text-left relative overflow-hidden">
+                        
+                        <div x-show="activeTab === 'activity'" class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-pink-500 rounded-r-full"
+                             x-transition:enter="transition ease-out duration-300"
+                             x-transition:enter-start="opacity-0 -translate-x-full"
+                             x-transition:enter-end="opacity-100 translate-x-0"></div>
+
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center transition-colors duration-300"
+                             :class="activeTab === 'activity' ? 'bg-pink-500/20 text-pink-400' : 'bg-slate-800/50 text-slate-500 group-hover:text-pink-400 group-hover:bg-pink-500/10'">
+                            <i class="fas fa-heart text-lg"></i>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-bold tracking-wide">Aktivitas Saya</span>
+                            <span class="block text-[10px] text-slate-500 font-medium mt-0.5">Likes & komentar</span>
+                        </div>
                     </button>
+                    
                     <button @click="activeTab = 'security'" 
-                            :class="activeTab === 'security' ? 'active' : ''"
-                            class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all border border-transparent">
-                        <i class="fas fa-shield-alt w-5"></i>
-                        <span class="font-semibold">Keamanan</span>
+                            :class="activeTab === 'security' ? 'bg-slate-800 text-white shadow-lg ring-1 ring-white/10' : 'text-slate-400 hover:text-white hover:bg-white/5'"
+                            class="w-full flex items-center gap-4 px-5 py-4 rounded-xl transition-all duration-300 group text-left relative overflow-hidden">
+                        
+                        <div x-show="activeTab === 'security'" class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-cyan-500 rounded-r-full"
+                             x-transition:enter="transition ease-out duration-300"
+                             x-transition:enter-start="opacity-0 -translate-x-full"
+                             x-transition:enter-end="opacity-100 translate-x-0"></div>
+
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center transition-colors duration-300"
+                             :class="activeTab === 'security' ? 'bg-cyan-500/20 text-cyan-400' : 'bg-slate-800/50 text-slate-500 group-hover:text-cyan-400 group-hover:bg-cyan-500/10'">
+                            <i class="fas fa-shield-alt text-lg"></i>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-bold tracking-wide">Keamanan & Sesi</span>
+                            <span class="block text-[10px] text-slate-500 font-medium mt-0.5">Logs & zona bahaya</span>
+                        </div>
                     </button>
-                </div>
+                </nav>
             </div>
 
-            {{-- Content Area --}}
-            <div class="lg:col-span-3">
-                {{-- Tab: Settings --}}
-                <div x-show="activeTab === 'settings'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-6">
+            {{-- Tab Contents --}}
+            <div class="lg:col-span-9 min-h-[400px]">
+                
+                {{-- Settings Tab --}}
+                <div x-show="activeTab === 'settings'"
+                     x-transition:enter="transition ease-[cubic-bezier(0.32,0.72,0,1)] duration-500"
+                     x-transition:enter-start="opacity-0 translate-y-8 scale-[0.98]"
+                     x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                     style="display: none;"
+                     class="space-y-8">
                     @include('public.profile.partials.settings-tab')
                 </div>
 
-                {{-- Tab: Activity --}}
-                <div x-show="activeTab === 'activity'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-6">
+                {{-- Activity Tab --}}
+                <div x-show="activeTab === 'activity'"
+                     x-transition:enter="transition ease-[cubic-bezier(0.32,0.72,0,1)] duration-500"
+                     x-transition:enter-start="opacity-0 translate-y-8 scale-[0.98]"
+                     x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                     style="display: none;"
+                     class="space-y-8">
                     @include('public.profile.partials.activity-tab')
                 </div>
 
-                {{-- Tab: Security --}}
-                <div x-show="activeTab === 'security'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-6">
+                {{-- Security Tab --}}
+                <div x-show="activeTab === 'security'"
+                     x-transition:enter="transition ease-[cubic-bezier(0.32,0.72,0,1)] duration-500"
+                     x-transition:enter-start="opacity-0 translate-y-8 scale-[0.98]"
+                     x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                     style="display: none;"
+                     class="space-y-8">
                     @include('public.profile.partials.security-tab')
                 </div>
             </div>
@@ -172,16 +217,22 @@ function profilePage() {
                         icon: 'success',
                         title: 'Berhasil!',
                         text: data.message,
-                        background: '#1e293b',
-                        color: '#fff',
-                        confirmButtonColor: '#10b981'
+                        background: '#0f172a',
+                        color: '#f8fafc',
+                        confirmButtonColor: '#10b981',
+                        customClass: {
+                            popup: 'rounded-2xl border border-white/10'
+                        }
                     });
                     if (data.user) {
                         document.getElementById('header-name').textContent = data.user.name;
                         document.getElementById('header-email').textContent = data.user.email;
                     }
                     if (data.photo_url) {
-                        location.reload();
+                        const img = document.getElementById('header-avatar');
+                        if(img) img.src = data.photo_url;
+                        const preview = document.getElementById('preview-avatar');
+                        if(preview) preview.src = data.photo_url;
                     }
                     if (data.redirect) {
                         window.location.href = data.redirect;
@@ -191,19 +242,26 @@ function profilePage() {
                         icon: 'error',
                         title: 'Gagal!',
                         text: data.message,
-                        background: '#1e293b',
-                        color: '#fff',
-                        confirmButtonColor: '#ef4444'
+                        background: '#0f172a',
+                        color: '#f8fafc',
+                        confirmButtonColor: '#ef4444',
+                        customClass: {
+                            popup: 'rounded-2xl border border-white/10'
+                        }
                     });
                 }
             } catch (error) {
+                console.error(error);
                 Swal.fire({
                     icon: 'error',
                     title: 'Error!',
                     text: 'Terjadi kesalahan. Silakan coba lagi.',
-                    background: '#1e293b',
-                    color: '#fff',
-                    confirmButtonColor: '#ef4444'
+                    background: '#0f172a',
+                    color: '#f8fafc',
+                    confirmButtonColor: '#ef4444',
+                    customClass: {
+                        popup: 'rounded-2xl border border-white/10'
+                    }
                 });
             }
             
@@ -214,18 +272,21 @@ function profilePage() {
             Swal.fire({
                 title: 'Hapus Akun?',
                 html: `
-                    <p class="text-slate-400 mb-4">Tindakan ini tidak dapat dibatalkan. Ketik <strong class="text-rose-400">HAPUS AKUN</strong> untuk konfirmasi.</p>
-                    <input type="text" id="delete-confirm" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white" placeholder="Ketik: HAPUS AKUN">
-                    <input type="password" id="delete-password" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white mt-3" placeholder="Password Anda">
+                    <p class="text-slate-400 text-sm mb-6">Seluruh data Anda akan dihapus permanen. Ketik <strong class="text-rose-400">HAPUS AKUN</strong> untuk konfirmasi.</p>
+                    <input type="text" id="delete-confirm" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-rose-500 transition-colors text-center font-bold tracking-widest uppercase mb-3" placeholder="HAPUS AKUN">
+                    <input type="password" id="delete-password" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-rose-500 transition-colors text-center" placeholder="Password Anda">
                 `,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#ef4444',
-                cancelButtonColor: '#475569',
-                confirmButtonText: 'Hapus Akun',
+                cancelButtonColor: '#334155',
+                confirmButtonText: 'Ya, Hapus Permanen',
                 cancelButtonText: 'Batal',
-                background: '#1e293b',
-                color: '#fff',
+                background: '#0f172a',
+                color: '#f8fafc',
+                customClass: {
+                    popup: 'rounded-2xl border border-rose-500/20'
+                },
                 preConfirm: () => {
                     return {
                         confirmation: document.getElementById('delete-confirm').value,
@@ -256,10 +317,11 @@ function profilePage() {
                 if (result.success) {
                     Swal.fire({
                         icon: 'success',
-                        title: 'Akun Dihapus',
+                        title: 'Akun Terhapus',
                         text: result.message,
-                        background: '#1e293b',
-                        color: '#fff'
+                        background: '#0f172a',
+                        color: '#f8fafc',
+                        confirmButtonColor: '#10b981'
                     }).then(() => {
                         window.location.href = result.redirect;
                     });
@@ -268,17 +330,19 @@ function profilePage() {
                         icon: 'error',
                         title: 'Gagal',
                         text: result.message,
-                        background: '#1e293b',
-                        color: '#fff'
+                        background: '#0f172a',
+                        color: '#f8fafc',
+                        confirmButtonColor: '#ef4444'
                     });
                 }
             } catch (error) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: 'Terjadi kesalahan',
-                    background: '#1e293b',
-                    color: '#fff'
+                    text: 'Terjadi kesalahan sistem',
+                    background: '#0f172a',
+                    color: '#f8fafc',
+                    confirmButtonColor: '#ef4444'
                 });
             }
         }
