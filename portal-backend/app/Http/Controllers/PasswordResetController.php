@@ -163,6 +163,8 @@ class PasswordResetController extends Controller
             'password.required' => 'Password baru wajib diisi.',
             'password.confirmed' => 'Konfirmasi password tidak cocok.',
             'password.min' => 'Password minimal 8 karakter.',
+            'password.mixed' => 'Password harus mengandung huruf besar dan kecil.',
+            'password.numbers' => 'Password harus mengandung angka.',
         ]);
 
         $email = strtolower($request->email);
@@ -186,6 +188,14 @@ class PasswordResetController extends Controller
                 'success' => false,
                 'message' => 'Pengguna tidak ditemukan.',
             ], 404);
+        }
+
+        // Check if new password is same as old password
+        if (Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Password baru tidak boleh sama dengan password sebelumnya. Gunakan password yang berbeda.',
+            ], 422);
         }
 
         // Update password
