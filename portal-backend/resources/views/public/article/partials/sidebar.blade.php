@@ -6,7 +6,7 @@
         <div class="bg-slate-900/50 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-slate-800/50 p-4 sm:p-5">
             <h4 class="text-sm sm:text-base font-bold text-white mb-4 sm:mb-5 flex items-center gap-2">
                 <span class="w-1 h-4 sm:h-5 bg-gradient-to-b from-emerald-400 to-teal-500 rounded-full flex-shrink-0"></span>
-                Artikel Populer
+                Artikel Serupa
             </h4>
             <div class="space-y-3 sm:space-y-4">
                 @forelse($relatedArticles as $index => $related)

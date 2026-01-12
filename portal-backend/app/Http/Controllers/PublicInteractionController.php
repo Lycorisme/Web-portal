@@ -68,9 +68,24 @@ class PublicInteractionController extends Controller
      */
     public function storeComment(Request $request, Article $article)
     {
-        $request->validate([
+        // Custom validation for JSON response
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'comment_text' => 'required|string|min:3|max:2000',
+        ], [
+            'comment_text.required' => 'Komentar tidak boleh kosong.',
+            'comment_text.min' => 'Komentar minimal 3 karakter.',
+            'comment_text.max' => 'Komentar maksimal 2000 karakter.',
         ]);
+
+        if ($validator->fails()) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $validator->errors()->first('comment_text'),
+                ], 422);
+            }
+            return back()->withErrors($validator)->withInput();
+        }
 
         $user = auth()->user();
 
@@ -126,7 +141,7 @@ class PublicInteractionController extends Controller
                     'text' => $comment->comment_text,
                     'user' => [
                         'name' => $user->name,
-                        'avatar' => $user->avatar,
+                        'avatar' => $user->avatar_url,
                     ],
                     'time_ago' => $comment->time_ago,
                 ],
@@ -141,9 +156,24 @@ class PublicInteractionController extends Controller
      */
     public function storeReply(Request $request, ArticleComment $comment)
     {
-        $request->validate([
+        // Custom validation for JSON response
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'comment_text' => 'required|string|min:3|max:2000',
+        ], [
+            'comment_text.required' => 'Balasan tidak boleh kosong.',
+            'comment_text.min' => 'Balasan minimal 3 karakter.',
+            'comment_text.max' => 'Balasan maksimal 2000 karakter.',
         ]);
+
+        if ($validator->fails()) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $validator->errors()->first('comment_text'),
+                ], 422);
+            }
+            return back()->withErrors($validator)->withInput();
+        }
 
         $user = auth()->user();
 
@@ -196,7 +226,7 @@ class PublicInteractionController extends Controller
                     'text' => $reply->comment_text,
                     'user' => [
                         'name' => $user->name,
-                        'avatar' => $user->avatar,
+                        'avatar' => $user->avatar_url,
                     ],
                     'time_ago' => $reply->time_ago,
                 ],
@@ -204,5 +234,83 @@ class PublicInteractionController extends Controller
         }
 
         return back()->with('success', 'Balasan berhasil ditambahkan');
+    }
+
+    /**
+     * Update comment
+     */
+    public function updateComment(Request $request, ArticleComment $comment)
+    {
+        if ($comment->user_id !== auth()->id()) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized action.',
+                ], 403);
+            }
+            return back()->with('error', 'Unauthorized action.');
+        }
+
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'comment_text' => 'required|string|min:3|max:2000',
+        ], [
+            'comment_text.required' => 'Komentar tidak boleh kosong.',
+            'comment_text.min' => 'Komentar minimal 3 karakter.',
+            'comment_text.max' => 'Komentar maksimal 2000 karakter.',
+        ]);
+
+        if ($validator->fails()) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $validator->errors()->first('comment_text'),
+                ], 422);
+            }
+            return back()->withErrors($validator);
+        }
+
+        $comment->update([
+            'comment_text' => $request->comment_text,
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Komentar berhasil diperbarui',
+                'comment' => [
+                    'id' => $comment->id,
+                    'text' => $comment->comment_text,
+                ],
+            ]);
+        }
+
+        return back()->with('success', 'Komentar berhasil diperbarui');
+    }
+
+    /**
+     * Delete comment
+     */
+    public function deleteComment(Request $request, ArticleComment $comment)
+    {
+        if ($comment->user_id !== auth()->id()) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized action.',
+                ], 403);
+            }
+            return back()->with('error', 'Unauthorized action.');
+        }
+
+        $comment->delete();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Komentar berhasil dihapus',
+            ]);
+        }
+
+        return back()->with('success', 'Komentar berhasil dihapus');
     }
 }

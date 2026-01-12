@@ -25,8 +25,8 @@
             <article class="flex-1 min-w-0 w-full lg:w-auto">
                 
                 {{-- Article Body --}}
-                <div class="bg-slate-900/50 backdrop-blur-sm rounded-2xl lg:rounded-3xl border border-slate-800/50 p-4 sm:p-6 lg:p-8">
-                    <div class="prose prose-sm sm:prose-base lg:prose-lg prose-invert max-w-none w-full
+                <div class="bg-slate-900/50 backdrop-blur-sm rounded-2xl lg:rounded-3xl border border-slate-800/50 p-4 sm:p-6 lg:p-8 overflow-hidden">
+                    <div class="prose prose-sm sm:prose-base lg:prose-lg prose-invert max-w-none w-full break-words
                                 prose-headings:text-white prose-headings:font-bold prose-headings:break-words
                                 prose-p:text-slate-300 prose-p:leading-relaxed prose-p:break-words
                                 prose-a:text-emerald-400 prose-a:no-underline hover:prose-a:underline prose-a:break-all
@@ -60,13 +60,15 @@
                 {{-- Engagement Bar --}}
                 @include('public.article.partials.engagement-bar')
 
-                {{-- Comments Section --}}
-                @include('public.article.partials.comments-section')
+
             </article>
 
             {{-- Sidebar --}}
             @include('public.article.partials.sidebar')
         </div>
+
+        {{-- Comments Section --}}
+        @include('public.article.partials.comments-section')
     </main>
 </div>
 @endsection

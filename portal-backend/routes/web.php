@@ -59,6 +59,8 @@ Route::prefix('p')->name('public.')->group(function () {
         Route::post('/artikel/{article}/like', [\App\Http\Controllers\PublicInteractionController::class, 'toggleLike'])->name('article.like');
         Route::post('/artikel/{article}/comment', [\App\Http\Controllers\PublicInteractionController::class, 'storeComment'])->name('article.comment');
         Route::post('/comment/{comment}/reply', [\App\Http\Controllers\PublicInteractionController::class, 'storeReply'])->name('comment.reply');
+        Route::put('/comment/{comment}', [\App\Http\Controllers\PublicInteractionController::class, 'updateComment'])->name('comment.update');
+        Route::delete('/comment/{comment}', [\App\Http\Controllers\PublicInteractionController::class, 'deleteComment'])->name('comment.delete');
         
         // Public Profile Routes (Member Only)
         Route::prefix('profil')->name('profile.')->group(function () {
