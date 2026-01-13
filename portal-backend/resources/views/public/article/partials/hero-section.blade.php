@@ -21,48 +21,47 @@
             <img src="{{ $article->image_url }}" alt="{{ $article->title }}" 
                  class="w-full h-full object-cover object-center transform group-hover/hero:scale-105 transition-transform duration-1000 ease-out">
             
-            {{-- Overlay Gradients for Readability --}}
-            <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-[#020617] opacity-80"></div>
-            <div class="absolute inset-0 bg-gradient-to-t from-[#020617] via-[#020617]/50 to-transparent"></div>
+            {{-- Gradient Overlay --}}
+            <div class="absolute inset-0 bg-gradient-to-t from-[#020617] via-[#020617]/60 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-[#020617]/80 to-transparent opacity-60"></div>
             
-            {{-- Content Overlay (Centered) --}}
-            <div class="absolute inset-0 z-20 w-full flex flex-col items-center justify-center px-4 sm:px-6">
-                <div class="w-full max-w-4xl text-center">
+            {{-- Content Overlay (Bottom LEFT) --}}
+            <div class="absolute inset-0 z-20 w-full flex flex-col justify-end pb-16 sm:pb-20 lg:pb-24 px-4 sm:px-6">
+                <div class="w-full max-w-5xl mx-auto">
                     
                     {{-- Meta Badge --}}
-                    <div class="flex items-center justify-center gap-3 sm:gap-4 flex-wrap mb-6">
-                        <span class="px-4 py-1.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 backdrop-blur-md text-[10px] sm:text-xs font-bold rounded-full uppercase tracking-widest shadow-lg shadow-emerald-500/10">
+                    <div class="flex items-center gap-3 sm:gap-4 flex-wrap mb-6">
+                        <span class="px-3 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 backdrop-blur-md text-[10px] sm:text-xs font-bold rounded-lg uppercase tracking-widest shadow-lg shadow-emerald-500/10 hover:bg-emerald-500/30 transition-colors">
                             {{ $article->categoryRelation?->name ?? 'Umum' }}
                         </span>
-                        <span class="flex items-center gap-2 text-slate-300 text-xs sm:text-sm font-medium bg-black/20 backdrop-blur-sm px-3 py-1 rounded-full border border-white/5">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <span class="flex items-center gap-2 text-slate-300 text-xs sm:text-sm font-medium">
+                            <i data-lucide="calendar" class="w-3.5 h-3.5 opacity-70"></i>
                             {{ \Carbon\Carbon::parse($article->published_at)->translatedFormat('d F Y') }}
                         </span>
                     </div>
 
                     {{-- Title --}}
-                    <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight tracking-tight drop-shadow-2xl break-words mb-8"
-                        style="text-shadow: 0 4px 30px rgba(0,0,0,0.8);">
+                    <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight tracking-tight drop-shadow-lg break-words max-w-4xl mb-6">
                         {{ $article->title }}
                     </h1>
 
-                    {{-- Author Chip --}}
+                    {{-- Author --}}
                     @if($article->author)
-                        <div class="inline-flex items-center gap-3 p-2 pr-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-full hover:bg-white/10 transition-all duration-300 cursor-default group/author">
+                        <div class="flex items-center gap-3">
                             @if($article->author->avatar_url)
                                 <img src="{{ $article->author->avatar_url }}" alt="{{ $article->author->name }}" 
-                                     class="w-10 h-10 rounded-full object-cover ring-2 ring-white/20 group-hover/author:ring-emerald-500/50 transition-all">
+                                     class="w-10 h-10 rounded-full object-cover ring-2 ring-emerald-500/50">
                             @else
-                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-sm ring-2 ring-white/20">
+                                <div class="w-10 h-10 rounded-full bg-theme-600 flex items-center justify-center text-white font-bold text-sm ring-2 ring-emerald-500/50">
                                     {{ substr($article->author->name, 0, 1) }}
                                 </div>
                             @endif
                             
                             <div class="text-left flex flex-col justify-center">
-                                <span class="text-white text-sm font-bold leading-none mb-1 group-hover/author:text-emerald-300 transition-colors">
+                                <span class="text-white text-sm font-bold leading-none mb-1">
                                     {{ $article->author->name }}
                                 </span>
-                                <span class="text-slate-400 text-xs leading-none">
+                                <span class="text-emerald-400 text-xs font-medium leading-none">
                                     {{ $article->author->role ?? 'Penulis' }}
                                 </span>
                             </div>

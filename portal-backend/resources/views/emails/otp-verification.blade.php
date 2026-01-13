@@ -144,8 +144,13 @@
     <div class="email-wrapper">
         <!-- Header -->
         <div class="header">
-            @if($logoBase64)
-                <img src="{{ $logoBase64 }}" alt="{{ $siteName }}">
+            @if(!empty($logoDataUrl))
+                <img src="{{ $logoDataUrl }}" alt="{{ $siteName }}" style="max-height: 60px; width: auto; margin-bottom: 10px;">
+            @else
+                <!-- Fallback: Text-based logo -->
+                <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%); border-radius: 12px; display: inline-block; line-height: 60px; text-align: center; margin-bottom: 10px;">
+                    <span style="color: white; font-size: 24px; font-weight: bold;">{{ substr($siteName, 0, 1) }}</span>
+                </div>
             @endif
             <h1>{{ $siteName }}</h1>
         </div>

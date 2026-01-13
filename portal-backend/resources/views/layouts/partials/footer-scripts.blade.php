@@ -8,6 +8,7 @@
             showNotification: false,
             showProfile: false,
             currentPath: window.location.pathname,
+            captureMode: false,
 
             init() {
                 // Apply dark mode
@@ -16,9 +17,13 @@
                 // Apply theme
                 this.applyTheme();
 
+                // Initialize sidebar height sync for full page screenshots
+                this.syncSidebarHeight();
+
                 // Listen for Livewire navigation
                 document.addEventListener('livewire:navigated', () => {
                     this.currentPath = window.location.pathname;
+                    this.syncSidebarHeight();
                 });
 
                 // Watch for dark mode changes
@@ -32,6 +37,26 @@
                     localStorage.setItem('themePreset', value);
                     this.applyTheme();
                 });
+
+                // Watch for capture mode
+                this.$watch('captureMode', (value) => {
+                    this.toggleCaptureMode(value);
+                });
+
+                // Keyboard shortcut for capture mode (Ctrl+Shift+P)
+                document.addEventListener('keydown', (e) => {
+                    if (e.ctrlKey && e.shiftKey && e.key === 'P') {
+                        e.preventDefault();
+                        this.captureMode = !this.captureMode;
+                    }
+                });
+
+                // Sync sidebar height on resize and content changes
+                window.addEventListener('resize', () => this.syncSidebarHeight());
+
+                // Create a MutationObserver to watch for DOM changes
+                const observer = new MutationObserver(() => this.syncSidebarHeight());
+                observer.observe(document.body, { childList: true, subtree: true });
             },
 
             applyDarkMode() {
@@ -48,6 +73,70 @@
 
             toggleDarkMode() {
                 this.darkMode = !this.darkMode;
+            },
+
+            // Sync sidebar height with document height for full page screenshots
+            syncSidebarHeight() {
+                requestAnimationFrame(() => {
+                    const sidebar = document.getElementById('admin-sidebar');
+                    const mainContent = document.getElementById('main-content');
+                    const sidebarWrapper = document.getElementById('sidebar-wrapper');
+                    
+                    if (sidebar && mainContent && sidebarWrapper) {
+                        const docHeight = Math.max(
+                            document.body.scrollHeight,
+                            document.documentElement.scrollHeight,
+                            mainContent.scrollHeight
+                        );
+                        
+                        // Set minimum height on sidebar wrapper to match content
+                        sidebarWrapper.style.minHeight = docHeight + 'px';
+                    }
+                });
+            },
+
+            // Toggle capture mode for full page screenshots
+            toggleCaptureMode(enabled) {
+                if (enabled) {
+                    document.body.classList.add('capture-mode');
+                    document.documentElement.classList.add('capture-mode');
+                    
+                    // Force sidebar to show full height
+                    const sidebar = document.getElementById('admin-sidebar');
+                    const sidebarWrapper = document.getElementById('sidebar-wrapper');
+                    const mainContent = document.getElementById('main-content');
+                    
+                    if (sidebar && sidebarWrapper && mainContent) {
+                        const docHeight = Math.max(
+                            document.body.scrollHeight,
+                            document.documentElement.scrollHeight,
+                            mainContent.scrollHeight
+                        );
+                        
+                        sidebarWrapper.style.minHeight = docHeight + 'px';
+                        sidebar.style.position = 'relative';
+                        sidebar.style.height = 'auto';
+                        sidebar.style.minHeight = '100%';
+                    }
+                    
+                    console.log('📷 Capture mode ENABLED - Ready for full page screenshot');
+                } else {
+                    document.body.classList.remove('capture-mode');
+                    document.documentElement.classList.remove('capture-mode');
+                    
+                    // Reset sidebar styles
+                    const sidebar = document.getElementById('admin-sidebar');
+                    const sidebarWrapper = document.getElementById('sidebar-wrapper');
+                    
+                    if (sidebar && sidebarWrapper) {
+                        sidebarWrapper.style.minHeight = '';
+                        sidebar.style.position = '';
+                        sidebar.style.height = '';
+                        sidebar.style.minHeight = '';
+                    }
+                    
+                    console.log('📷 Capture mode DISABLED');
+                }
             }
         }
     }

@@ -7,6 +7,7 @@
 
 {{-- Desktop Sidebar --}}
 <aside 
+    id="admin-sidebar"
     x-data="{ 
         trashedCount: {{ $trashedCount ?? 0 }},
         async fetchTrashCount() {
@@ -25,7 +26,7 @@
         window.addEventListener('trash-updated', () => fetchTrashCount());
     "
     :class="sidebarOpen ? 'translate-x-0 w-72' : 'lg:translate-x-0 lg:w-20 -translate-x-full'"
-    class="fixed left-0 top-0 h-full bg-white/95 dark:bg-surface-900/95 backdrop-blur-xl border-r border-surface-200/50 dark:border-surface-800/50 transition-all duration-300 ease-out z-50 flex flex-col shadow-xl shadow-surface-900/5 overflow-hidden"
+    class="fixed left-0 top-0 h-screen min-h-full bg-white/95 dark:bg-surface-900/95 backdrop-blur-xl border-r border-surface-200/50 dark:border-surface-800/50 transition-all duration-300 ease-out z-50 flex flex-col shadow-xl shadow-surface-900/5 overflow-hidden print:absolute print:h-auto print:min-h-full print:overflow-visible"
     x-cloak>
 
     {{-- Logo Section --}}

@@ -16,33 +16,60 @@
             <div class="flex items-start gap-3">
                 <i data-lucide="info" class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5"></i>
                 <div class="text-xs sm:text-sm text-amber-800 dark:text-amber-300">
-                    <p class="font-medium mb-1">Untuk Gmail SMTP:</p>
+                    <p class="font-medium mb-1">Pilih Driver yang Sesuai:</p>
                     <ul class="list-disc list-inside space-y-0.5 text-amber-700 dark:text-amber-400">
-                        <li>Aktifkan 2FA di akun Google Anda</li>
-                        <li>Buat <strong>App Password</strong> di pengaturan keamanan Google</li>
-                        <li>Gunakan App Password (16 digit) sebagai password SMTP</li>
+                        <li><strong>Resend (Recommended)</strong> - Menggunakan HTTP API, tidak terpengaruh blokir port SMTP. Gratis 3K email/bulan.</li>
+                        <li><strong>SMTP Gmail</strong> - Memerlukan App Password dan port 587/465 harus tidak diblokir.</li>
+                        <li><strong>Log</strong> - Untuk development, email tidak terkirim tapi di-log ke file.</li>
                     </ul>
                 </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6" x-data="{ 
+            selectedDriver: '{{ $rawSettings['mail_driver'] ?? 'smtp' }}',
+            init() {
+                this.$watch('selectedDriver', (value) => {
+                    document.getElementById('mail_driver').value = value;
+                });
+            }
+        }">
             {{-- Mail Driver --}}
             <div class="space-y-2">
                 <label for="mail_driver" class="block text-sm font-medium text-surface-700 dark:text-surface-300">
                     Driver Email
                 </label>
-                <select name="mail_driver" id="mail_driver"
+                <select name="mail_driver" id="mail_driver" x-model="selectedDriver"
                     class="w-full px-4 py-3 bg-surface-50 dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-xl text-surface-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200">
                     <option value="smtp" {{ ($rawSettings['mail_driver'] ?? 'smtp') === 'smtp' ? 'selected' : '' }}>SMTP</option>
+                    <option value="resend" {{ ($rawSettings['mail_driver'] ?? '') === 'resend' ? 'selected' : '' }}>Resend (HTTP API - Recommended)</option>
                     <option value="sendmail" {{ ($rawSettings['mail_driver'] ?? '') === 'sendmail' ? 'selected' : '' }}>Sendmail</option>
                     <option value="log" {{ ($rawSettings['mail_driver'] ?? '') === 'log' ? 'selected' : '' }}>Log (Development)</option>
                 </select>
-                <p class="text-xs text-surface-500">SMTP untuk production, Log untuk testing tanpa kirim email</p>
+                <p class="text-xs text-surface-500">Resend menggunakan HTTP API, tidak terpengaruh blokir port SMTP</p>
             </div>
 
-            {{-- SMTP Host --}}
-            <div class="space-y-2">
+            {{-- Resend API Key (shown when resend is selected) --}}
+            <div class="space-y-2" x-show="selectedDriver === 'resend'" x-transition>
+                <label for="resend_api_key" class="block text-sm font-medium text-surface-700 dark:text-surface-300">
+                    Resend API Key
+                </label>
+                <div class="relative" x-data="{ showKey: false }">
+                    <i data-lucide="key" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-surface-400"></i>
+                    <input :type="showKey ? 'text' : 'password'" name="resend_api_key" id="resend_api_key"
+                        value="{{ $rawSettings['resend_api_key'] ?? '' }}"
+                        class="w-full pl-12 pr-12 py-3 bg-surface-50 dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-xl text-surface-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
+                        placeholder="re_xxxxxxxxxx">
+                    <button type="button" @click="showKey = !showKey" class="absolute right-4 top-1/2 -translate-y-1/2 text-surface-400 hover:text-surface-600 transition-colors">
+                        <i data-lucide="eye" class="w-5 h-5" x-show="!showKey"></i>
+                        <i data-lucide="eye-off" class="w-5 h-5" x-show="showKey" x-cloak></i>
+                    </button>
+                </div>
+                <p class="text-xs text-surface-500">Dapatkan di <a href="https://resend.com/api-keys" target="_blank" class="text-primary-500 hover:underline">resend.com/api-keys</a></p>
+            </div>
+
+            {{-- SMTP Host (shown when smtp is selected) --}}
+            <div class="space-y-2" x-show="selectedDriver === 'smtp'" x-transition>
                 <label for="smtp_host" class="block text-sm font-medium text-surface-700 dark:text-surface-300">
                     SMTP Host
                 </label>
@@ -52,33 +79,34 @@
                     placeholder="smtp.gmail.com">
             </div>
 
+
             {{-- SMTP Port --}}
-            <div class="space-y-2">
+            <div class="space-y-2" x-show="selectedDriver === 'smtp'" x-transition>
                 <label for="smtp_port" class="block text-sm font-medium text-surface-700 dark:text-surface-300">
                     SMTP Port
                 </label>
                 <input type="number" name="smtp_port" id="smtp_port"
-                    value="{{ $rawSettings['smtp_port'] ?? '465' }}"
+                    value="{{ $rawSettings['smtp_port'] ?? '587' }}"
                     class="w-full px-4 py-3 bg-surface-50 dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-xl text-surface-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
-                    placeholder="465">
-                <p class="text-xs text-surface-500">465 (SSL) atau 587 (TLS)</p>
+                    placeholder="587">
+                <p class="text-xs text-surface-500">587 (TLS - Recommended) atau 465 (SSL)</p>
             </div>
 
             {{-- SMTP Encryption --}}
-            <div class="space-y-2">
+            <div class="space-y-2" x-show="selectedDriver === 'smtp'" x-transition>
                 <label for="smtp_encryption" class="block text-sm font-medium text-surface-700 dark:text-surface-300">
                     Enkripsi
                 </label>
                 <select name="smtp_encryption" id="smtp_encryption"
                     class="w-full px-4 py-3 bg-surface-50 dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-xl text-surface-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200">
-                    <option value="ssl" {{ ($rawSettings['smtp_encryption'] ?? 'ssl') === 'ssl' ? 'selected' : '' }}>SSL</option>
-                    <option value="tls" {{ ($rawSettings['smtp_encryption'] ?? '') === 'tls' ? 'selected' : '' }}>TLS</option>
+                    <option value="tls" {{ ($rawSettings['smtp_encryption'] ?? 'tls') === 'tls' ? 'selected' : '' }}>TLS (Recommended)</option>
+                    <option value="ssl" {{ ($rawSettings['smtp_encryption'] ?? '') === 'ssl' ? 'selected' : '' }}>SSL</option>
                     <option value="" {{ ($rawSettings['smtp_encryption'] ?? '') === '' ? 'selected' : '' }}>None</option>
                 </select>
             </div>
 
             {{-- SMTP Username --}}
-            <div class="space-y-2">
+            <div class="space-y-2" x-show="selectedDriver === 'smtp'" x-transition>
                 <label for="smtp_username" class="block text-sm font-medium text-surface-700 dark:text-surface-300">
                     SMTP Username
                 </label>
@@ -92,7 +120,7 @@
             </div>
 
             {{-- SMTP Password --}}
-            <div class="space-y-2" x-data="{ showPassword: false }">
+            <div class="space-y-2" x-show="selectedDriver === 'smtp'" x-transition x-data="{ showPassword: false }">
                 <label for="smtp_password" class="block text-sm font-medium text-surface-700 dark:text-surface-300">
                     SMTP Password / App Password
                 </label>
@@ -199,13 +227,14 @@
                             test_email: this.testEmail,
                             // Include current form values for testing
                             mail_driver: document.getElementById('mail_driver').value,
-                            smtp_host: document.getElementById('smtp_host').value,
-                            smtp_port: document.getElementById('smtp_port').value,
-                            smtp_username: document.getElementById('smtp_username').value,
-                            smtp_password: document.getElementById('smtp_password').value,
-                            smtp_encryption: document.getElementById('smtp_encryption').value,
-                            mail_from_address: document.getElementById('mail_from_address').value,
-                            mail_from_name: document.getElementById('mail_from_name').value,
+                            resend_api_key: document.getElementById('resend_api_key')?.value || '',
+                            smtp_host: document.getElementById('smtp_host')?.value || '',
+                            smtp_port: document.getElementById('smtp_port')?.value || '587',
+                            smtp_username: document.getElementById('smtp_username')?.value || '',
+                            smtp_password: document.getElementById('smtp_password')?.value || '',
+                            smtp_encryption: document.getElementById('smtp_encryption')?.value || 'tls',
+                            mail_from_address: document.getElementById('mail_from_address')?.value || '',
+                            mail_from_name: document.getElementById('mail_from_name')?.value || '',
                         })
                     });
                     

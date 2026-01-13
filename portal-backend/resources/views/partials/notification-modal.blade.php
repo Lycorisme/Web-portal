@@ -1,4 +1,72 @@
 {{-- Notification Modal --}}
+@php
+    use Illuminate\Support\Str;
+    // Fetch latest real data for notifications
+    $notifications = collect();
+
+    // 1. Blocked IPs
+    try {
+        $blockedIps = \App\Models\BlockedClient::latest()
+            ->take(3)
+            ->get()
+            ->map(function($item) {
+                return [
+                    'type' => 'blocked_ip',
+                    'title' => 'IP ' . $item->ip_address . ' terblokir',
+                    'desc' => $item->reason ? Str::limit($item->reason, 40) : 'Aktivitas mencurigakan',
+                    'time' => $item->created_at,
+                    'icon' => 'shield-alert',
+                    'color' => 'text-accent-amber',
+                    'bg' => 'bg-accent-amber/20'
+                ];
+            });
+        $notifications = $notifications->merge($blockedIps);
+    } catch (\Exception $e) {}
+
+    // 2. Published Articles
+    try {
+        $articles = \App\Models\Article::where('status', 'published')
+            ->latest()
+            ->take(3)
+            ->with('author')
+            ->get()
+            ->map(function($item) {
+                return [
+                    'type' => 'article',
+                    'title' => 'Berita dipublish: ' . Str::limit($item->title, 25),
+                    'desc' => 'Oleh ' . ($item->author->name ?? 'Admin'),
+                    'time' => $item->updated_at ?? $item->created_at,
+                    'icon' => 'check-circle',
+                    'color' => 'text-accent-emerald',
+                    'bg' => 'bg-accent-emerald/20'
+                ];
+            });
+        $notifications = $notifications->merge($articles);
+    } catch (\Exception $e) {}
+
+    // 3. New Users
+    try {
+        $users = \App\Models\User::latest()
+            ->take(2)
+            ->get()
+            ->map(function($item) {
+                return [
+                    'type' => 'user',
+                    'title' => 'User baru: ' . $item->name,
+                    'desc' => $item->email,
+                    'time' => $item->created_at,
+                    'icon' => 'user-plus',
+                    'color' => 'text-theme-600 dark:text-theme-400',
+                    'bg' => 'bg-theme-100 dark:bg-theme-500/20'
+                ];
+            });
+        $notifications = $notifications->merge($users);
+    } catch (\Exception $e) {}
+
+    // Sort and limit
+    $notifications = $notifications->sortByDesc('time')->take(8);
+@endphp
+
 <template x-teleport="body">
     <div 
         x-show="showNotificationModal"
@@ -48,36 +116,22 @@
                 <div class="max-h-[60vh] overflow-y-auto">
                     {{-- Notification List --}}
                     <div class="divide-y divide-surface-100 dark:divide-surface-800/50">
-                        <a href="#"
-                            class="flex items-start gap-4 p-5 hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors group">
-                            <div class="w-10 h-10 rounded-xl bg-accent-emerald/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
-                                <i data-lucide="check-circle" class="w-5 h-5 text-accent-emerald"></i>
+                        @forelse($notifications as $notif)
+                        <a href="#" class="flex items-start gap-4 p-5 hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors group">
+                            <div class="w-10 h-10 rounded-xl {{ $notif['bg'] }} flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                                <i data-lucide="{{ $notif['icon'] }}" class="w-5 h-5 {{ $notif['color'] }}"></i>
                             </div>
                             <div class="flex-1 min-w-0">
-                                <p class="text-sm font-medium text-surface-900 dark:text-white group-hover:text-theme-600 transition-colors">Berita berhasil dipublish</p>
-                                <p class="text-xs text-surface-500 mt-1">2 menit yang lalu</p>
+                                <p class="text-sm font-medium text-surface-900 dark:text-white group-hover:text-theme-600 transition-colors">{{ $notif['title'] }}</p>
+                                <p class="text-xs text-surface-500 mt-1">{{ $notif['desc'] }} • {{ $notif['time']->diffForHumans() }}</p>
                             </div>
                         </a>
-                        <a href="#"
-                            class="flex items-start gap-4 p-5 hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors group">
-                            <div class="w-10 h-10 rounded-xl bg-accent-amber/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
-                                <i data-lucide="shield-alert" class="w-5 h-5 text-accent-amber"></i>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-sm font-medium text-surface-900 dark:text-white group-hover:text-theme-600 transition-colors">IP 192.168.1.45 terblokir</p>
-                                <p class="text-xs text-surface-500 mt-1">15 menit yang lalu</p>
-                            </div>
-                        </a>
-                        <a href="#"
-                            class="flex items-start gap-4 p-5 hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors group">
-                            <div class="w-10 h-10 rounded-xl bg-theme-100 dark:bg-theme-500/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
-                                <i data-lucide="user-plus" class="w-5 h-5 text-theme-600 dark:text-theme-400"></i>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-sm font-medium text-surface-900 dark:text-white group-hover:text-theme-600 transition-colors">User baru terdaftar</p>
-                                <p class="text-xs text-surface-500 mt-1">1 jam yang lalu</p>
-                            </div>
-                        </a>
+                        @empty
+                        <div class="p-8 text-center text-surface-500">
+                            <i data-lucide="bell-off" class="w-12 h-12 mx-auto mb-3 text-surface-300"></i>
+                            <p>Belum ada notifikasi</p>
+                        </div>
+                        @endforelse
                     </div>
                 </div>
 

@@ -1,5 +1,5 @@
 {{-- Login Left Panel --}}
-<div class="flex-none w-[50%] relative hidden md:flex flex-col justify-between p-12 lg:p-16 border-r border-white/5 overflow-hidden">
+<div class="flex-none w-[50%] relative hidden md:flex flex-col justify-between p-12 lg:p-16 2xl:p-20 border-r border-white/5 overflow-hidden">
     {{-- Background effects --}}
     <div class="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent pointer-events-none"></div>
     
@@ -23,11 +23,11 @@
 
     {{-- Middle: Hero Text --}}
     <div class="relative z-10 my-auto">
-        <h1 class="font-display text-5xl lg:text-7xl font-bold leading-[1.1] tracking-tight mb-8">
+        <h1 class="font-display text-5xl lg:text-7xl 2xl:text-8xl font-bold leading-[1.1] tracking-tight mb-8">
             Digital <br>
             <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-300 to-brand-500">Excellence.</span>
         </h1>
-        <p class="text-lg text-slate-400 leading-relaxed font-light max-w-sm">
+        <p class="text-lg lg:text-xl 2xl:text-2xl text-slate-400 leading-relaxed font-light max-w-sm 2xl:max-w-md">
             Satu platform terintegrasi untuk mengelola seluruh ekosistem digital Anda dengan keamanan tingkat tinggi.
         </p>
     </div>

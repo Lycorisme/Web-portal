@@ -183,31 +183,61 @@ class SettingsController extends Controller
         try {
             // Get mail settings from request (not yet saved)
             $mailDriver = $request->input('mail_driver', 'smtp');
-            $smtpHost = $request->input('smtp_host');
-            $smtpPort = $request->input('smtp_port', 465);
-            $smtpUsername = $request->input('smtp_username');
-            $smtpPassword = $request->input('smtp_password');
-            $smtpEncryption = $request->input('smtp_encryption', 'ssl');
-            $fromAddress = $request->input('mail_from_address') ?: $smtpUsername;
             $fromName = $request->input('mail_from_name') ?: SiteSetting::get('site_name', 'Portal');
 
-            // Validate required fields
-            if (!$smtpHost || !$smtpUsername) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'SMTP Host dan Username wajib diisi.'
-                ]);
-            }
+            // Configure based on driver type
+            if ($mailDriver === 'resend') {
+                // Resend uses HTTP API - not affected by SMTP port blocking
+                $resendApiKey = $request->input('resend_api_key');
+                $fromAddress = $request->input('mail_from_address') ?: 'onboarding@resend.dev';
 
-            // Temporarily configure mail settings
-            Config::set('mail.default', $mailDriver);
-            Config::set('mail.mailers.smtp.host', $smtpHost);
-            Config::set('mail.mailers.smtp.port', (int) $smtpPort);
-            Config::set('mail.mailers.smtp.username', $smtpUsername);
-            Config::set('mail.mailers.smtp.password', $smtpPassword);
-            Config::set('mail.mailers.smtp.encryption', $smtpEncryption === 'none' ? null : $smtpEncryption);
-            Config::set('mail.from.address', $fromAddress);
-            Config::set('mail.from.name', $fromName);
+                if (!$resendApiKey) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Resend API Key wajib diisi. Dapatkan di resend.com/api-keys'
+                    ]);
+                }
+
+                // Configure Resend
+                Config::set('mail.default', 'resend');
+                Config::set('resend.api_key', $resendApiKey);
+                Config::set('mail.from.address', $fromAddress);
+                Config::set('mail.from.name', $fromName);
+
+            } elseif ($mailDriver === 'log') {
+                // Log driver - for development/testing
+                Config::set('mail.default', 'log');
+                $fromAddress = $request->input('mail_from_address') ?: 'test@example.com';
+                Config::set('mail.from.address', $fromAddress);
+                Config::set('mail.from.name', $fromName);
+
+            } else {
+                // SMTP driver
+                $smtpHost = $request->input('smtp_host');
+                $smtpPort = $request->input('smtp_port', 587);
+                $smtpUsername = $request->input('smtp_username');
+                $smtpPassword = $request->input('smtp_password');
+                $smtpEncryption = $request->input('smtp_encryption', 'tls');
+                $fromAddress = $request->input('mail_from_address') ?: $smtpUsername;
+
+                // Validate required fields for SMTP
+                if (!$smtpHost || !$smtpUsername) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'SMTP Host dan Username wajib diisi.'
+                    ]);
+                }
+
+                // Configure SMTP
+                Config::set('mail.default', 'smtp');
+                Config::set('mail.mailers.smtp.host', $smtpHost);
+                Config::set('mail.mailers.smtp.port', (int) $smtpPort);
+                Config::set('mail.mailers.smtp.username', $smtpUsername);
+                Config::set('mail.mailers.smtp.password', $smtpPassword);
+                Config::set('mail.mailers.smtp.encryption', $smtpEncryption === 'none' ? null : $smtpEncryption);
+                Config::set('mail.from.address', $fromAddress);
+                Config::set('mail.from.name', $fromName);
+            }
 
             // Prepare email data
             $siteName = SiteSetting::get('site_name', 'Portal');

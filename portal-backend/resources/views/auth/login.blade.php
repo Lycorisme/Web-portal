@@ -40,7 +40,7 @@
     
     @include('auth.partials.login-styles')
 </head>
-<body class="min-h-screen relative flex items-center justify-center p-4 overflow-hidden selection:bg-brand-500/30">
+<body class="min-h-screen relative flex items-center justify-center p-4 overflow-x-auto selection:bg-brand-500/30 zoom-wrapper">
 
     {{-- Ambient Background --}}
     <div class="fixed inset-0 pointer-events-none z-0">
@@ -51,7 +51,7 @@
     </div>
 
     {{-- Main Container --}}
-    <div class="relative z-10 w-full max-w-[1100px] h-[80vh] min-h-[600px] max-h-[800px] glass-card rounded-[32px] overflow-hidden flex flex-row shadow-2xl">
+    <div class="relative z-10 w-full min-w-[900px] max-w-[1200px] h-[85vh] min-h-[650px] max-h-[850px] glass-card rounded-[32px] overflow-hidden flex flex-row shadow-2xl zoom-container">
         
         {{-- Left Panel --}}
         @include('auth.partials.login-left-panel')
@@ -128,7 +128,7 @@
             </nav>
 
             {{-- Content Area --}}
-            <div class="flex-1 overflow-y-auto custom-scrollbar p-8 md:p-14 relative">
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-8 md:p-14 2xl:p-16 relative">
                 
                 {{-- Form Partials --}}
                 @include('auth.partials.login-form')

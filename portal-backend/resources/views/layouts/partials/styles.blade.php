@@ -289,4 +289,144 @@
         background: #27272a !important;
         color: #d4d4d8 !important;
     }
+
+    /* ============================================
+       PRINT / FULL PAGE SCREENSHOT STYLES
+       Fixes sidebar cutoff during GoFullPage/print
+       ============================================ */
+    @media print {
+        /* Reset body for print layout */
+        body {
+            overflow: visible !important;
+            height: auto !important;
+        }
+
+        /* Layout wrapper should use regular flex in print */
+        #app-layout-wrapper {
+            display: flex !important;
+            flex-direction: row !important;
+            min-height: auto !important;
+        }
+
+        /* Sidebar wrapper for print - ensures full height */
+        #sidebar-wrapper {
+            position: relative !important;
+            width: 288px !important;
+            flex-shrink: 0 !important;
+            height: auto !important;
+            min-height: 100% !important;
+        }
+
+        /* Convert sidebar from fixed to relative for proper capture */
+        #admin-sidebar {
+            position: relative !important;
+            width: 100% !important;
+            height: auto !important;
+            min-height: 100% !important;
+            overflow: visible !important;
+            transform: none !important;
+            left: 0 !important;
+            top: 0 !important;
+        }
+
+        /* Ensure main content doesn't overlap sidebar */
+        #main-content {
+            flex: 1 !important;
+            margin-left: 0 !important;
+            overflow: visible !important;
+        }
+
+        /* Ensure nav scrolls properly */
+        #sidebar-nav {
+            overflow: visible !important;
+            max-height: none !important;
+            flex: 1 !important;
+        }
+
+        /* Hide mobile backdrop */
+        .fixed.inset-0.z-40 {
+            display: none !important;
+        }
+
+        /* Ensure all containers are visible */
+        .min-h-screen {
+            min-height: auto !important;
+            height: auto !important;
+        }
+
+        /* Remove backdrop blur effects that can cause issues */
+        .backdrop-blur-xl,
+        .backdrop-blur-sm {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+
+        /* Ensure visibility of all elements */
+        [x-cloak] {
+            display: block !important;
+        }
+
+        /* Remove fixed position from header if any */
+        header {
+            position: relative !important;
+        }
+
+        /* Print-friendly background */
+        .dark .bg-surface-950,
+        .dark .bg-surface-900\/95,
+        .dark #admin-sidebar {
+            background-color: #18181b !important;
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
+        }
+
+        /* Ensure gradients render in print */
+        .bg-theme-gradient {
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
+        }
+    }
+
+    /* Additional class for programmatic full-page capture mode */
+    body.capture-mode #app-layout-wrapper,
+    html.capture-mode #app-layout-wrapper {
+        display: flex !important;
+        flex-direction: row !important;
+    }
+
+    body.capture-mode #sidebar-wrapper,
+    html.capture-mode #sidebar-wrapper {
+        position: relative !important;
+        width: 288px !important;
+        flex-shrink: 0 !important;
+    }
+
+    body.capture-mode #admin-sidebar,
+    html.capture-mode #admin-sidebar {
+        position: relative !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 100% !important;
+        overflow: visible !important;
+        transform: none !important;
+    }
+
+    body.capture-mode #main-content,
+    html.capture-mode #main-content {
+        overflow: visible !important;
+        margin-left: 0 !important;
+        flex: 1 !important;
+    }
+
+    body.capture-mode #sidebar-nav,
+    html.capture-mode #sidebar-nav {
+        overflow: visible !important;
+        max-height: none !important;
+    }
+
+    body.capture-mode,
+    html.capture-mode {
+        overflow: visible !important;
+        height: auto !important;
+    }
 </style>

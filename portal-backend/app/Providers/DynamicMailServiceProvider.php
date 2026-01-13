@@ -31,46 +31,75 @@ class DynamicMailServiceProvider extends ServiceProvider
         try {
             // Get mail settings from database
             $mailDriver = SiteSetting::get('mail_driver');
-            $smtpHost = SiteSetting::get('smtp_host');
-            $smtpPort = SiteSetting::get('smtp_port');
-            $smtpUsername = SiteSetting::get('smtp_username');
-            $smtpPassword = SiteSetting::get('smtp_password');
-            $smtpEncryption = SiteSetting::get('smtp_encryption');
+            
+            // Skip if no driver configured
+            if (!$mailDriver) {
+                return;
+            }
+
+            // Set the default mailer
+            Config::set('mail.default', $mailDriver);
+
+            // Get common settings
             $mailFromAddress = SiteSetting::get('mail_from_address');
-            $mailFromName = SiteSetting::get('mail_from_name');
+            $mailFromName = SiteSetting::get('mail_from_name') ?: SiteSetting::get('site_name', config('app.name'));
 
-            // Only override if database settings are configured
-            if ($smtpHost && $smtpUsername) {
-                // Set the default mailer
-                if ($mailDriver) {
-                    Config::set('mail.default', $mailDriver);
-                }
-
-                // Configure SMTP settings
-                Config::set('mail.mailers.smtp.host', $smtpHost);
+            // Configure based on driver type
+            if ($mailDriver === 'resend') {
+                // Resend driver - uses HTTP API
+                $resendApiKey = SiteSetting::get('resend_api_key');
                 
-                if ($smtpPort) {
-                    Config::set('mail.mailers.smtp.port', (int) $smtpPort);
+                if ($resendApiKey) {
+                    // Set environment variable for Resend SDK
+                    putenv("RESEND_API_KEY={$resendApiKey}");
+                    $_ENV['RESEND_API_KEY'] = $resendApiKey;
+                    $_SERVER['RESEND_API_KEY'] = $resendApiKey;
+                    
+                    // Also set in config
+                    Config::set('resend.api_key', $resendApiKey);
+                    
+                    // Set from address (use Resend default if not set)
+                    $fromAddress = $mailFromAddress ?: 'onboarding@resend.dev';
+                    Config::set('mail.from.address', $fromAddress);
+                    Config::set('mail.from.name', $mailFromName);
                 }
                 
-                Config::set('mail.mailers.smtp.username', $smtpUsername);
-                Config::set('mail.mailers.smtp.password', $smtpPassword);
+            } elseif ($mailDriver === 'smtp') {
+                // SMTP driver
+                $smtpHost = SiteSetting::get('smtp_host');
+                $smtpPort = SiteSetting::get('smtp_port');
+                $smtpUsername = SiteSetting::get('smtp_username');
+                $smtpPassword = SiteSetting::get('smtp_password');
+                $smtpEncryption = SiteSetting::get('smtp_encryption');
 
-                // Handle encryption
-                if ($smtpEncryption === 'none' || $smtpEncryption === '') {
-                    Config::set('mail.mailers.smtp.encryption', null);
-                } else {
-                    Config::set('mail.mailers.smtp.encryption', $smtpEncryption);
+                if ($smtpHost && $smtpUsername) {
+                    Config::set('mail.mailers.smtp.host', $smtpHost);
+                    
+                    if ($smtpPort) {
+                        Config::set('mail.mailers.smtp.port', (int) $smtpPort);
+                    }
+                    
+                    Config::set('mail.mailers.smtp.username', $smtpUsername);
+                    Config::set('mail.mailers.smtp.password', $smtpPassword);
+
+                    // Handle encryption
+                    if ($smtpEncryption === 'none' || $smtpEncryption === '') {
+                        Config::set('mail.mailers.smtp.encryption', null);
+                    } else {
+                        Config::set('mail.mailers.smtp.encryption', $smtpEncryption);
+                    }
+
+                    // Set from address
+                    $fromAddress = $mailFromAddress ?: $smtpUsername;
+                    Config::set('mail.from.address', $fromAddress);
+                    Config::set('mail.from.name', $mailFromName);
                 }
-
-                // Set from address
-                if ($mailFromAddress) {
-                    Config::set('mail.from.address', $mailFromAddress);
-                }
-
-                // Set from name (fallback to site name)
-                $fromName = $mailFromName ?: SiteSetting::get('site_name', config('app.name'));
-                Config::set('mail.from.name', $fromName);
+                
+            } elseif ($mailDriver === 'log') {
+                // Log driver - for development
+                $fromAddress = $mailFromAddress ?: 'test@example.com';
+                Config::set('mail.from.address', $fromAddress);
+                Config::set('mail.from.name', $mailFromName);
             }
 
         } catch (\Exception $e) {

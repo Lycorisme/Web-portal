@@ -3,12 +3,9 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Storage;
 use App\Models\SiteSetting;
 
 class OtpVerificationMail extends Mailable
@@ -20,7 +17,8 @@ class OtpVerificationMail extends Mailable
     public string $type;
     public int $expiryMinutes;
     public string $siteName;
-    public ?string $logoBase64;
+    public ?string $logoPath;
+    public ?string $logoDataUrl;
 
     /**
      * Create a new message instance.
@@ -30,15 +28,16 @@ class OtpVerificationMail extends Mailable
         $this->otpCode = $otpCode;
         $this->userName = $userName;
         $this->type = $type;
-        $this->expiryMinutes = SiteSetting::get('otp_expiry_minutes', 10);
+        $this->expiryMinutes = (int) SiteSetting::get('otp_expiry_minutes', 10);
         $this->siteName = SiteSetting::get('site_name', 'Portal');
-        $this->logoBase64 = $this->convertLogoToBase64();
+        $this->logoPath = $this->getLogoPath();
+        $this->logoDataUrl = $this->getLogoDataUrl();
     }
 
     /**
-     * Convert logo to base64 for email embedding
+     * Get physical path to logo file
      */
-    protected function convertLogoToBase64(): ?string
+    protected function getLogoPath(): ?string
     {
         $logoUrl = SiteSetting::get('logo_url');
         
@@ -51,24 +50,41 @@ class OtpVerificationMail extends Mailable
             
             if (str_starts_with($logoPath, 'storage/')) {
                 $storagePath = str_replace('storage/', '', $logoPath);
-                if (Storage::disk('public')->exists($storagePath)) {
-                    $fileContents = Storage::disk('public')->get($storagePath);
-                    $mimeType = Storage::disk('public')->mimeType($storagePath);
-                    return 'data:' . $mimeType . ';base64,' . base64_encode($fileContents);
+                $fullPath = storage_path('app/public/' . $storagePath);
+                
+                if (file_exists($fullPath)) {
+                    return $fullPath;
                 }
             } else {
                 $publicPath = public_path($logoPath);
                 if (file_exists($publicPath)) {
-                    $fileContents = file_get_contents($publicPath);
-                    $mimeType = mime_content_type($publicPath);
-                    return 'data:' . $mimeType . ';base64,' . base64_encode($fileContents);
+                    return $publicPath;
                 }
             }
         } catch (\Exception $e) {
-            \Log::warning('Failed to convert logo to base64 for OTP email', ['error' => $e->getMessage()]);
+            \Log::warning('Failed to get logo path', ['error' => $e->getMessage()]);
         }
 
         return null;
+    }
+
+    /**
+     * Convert logo to base64 data URL
+     */
+    protected function getLogoDataUrl(): ?string
+    {
+        if (!$this->logoPath || !file_exists($this->logoPath)) {
+            return null;
+        }
+
+        try {
+            $fileContents = file_get_contents($this->logoPath);
+            $mimeType = mime_content_type($this->logoPath);
+            return 'data:' . $mimeType . ';base64,' . base64_encode($fileContents);
+        } catch (\Exception $e) {
+            \Log::warning('Failed to convert logo to data URL', ['error' => $e->getMessage()]);
+            return null;
+        }
     }
 
     /**
@@ -89,30 +105,21 @@ class OtpVerificationMail extends Mailable
     }
 
     /**
-     * Get the message content definition.
+     * Build the message
      */
-    public function content(): Content
+    public function build()
     {
-        return new Content(
-            view: 'emails.otp-verification',
-            with: [
+        $mail = $this->view('emails.otp-verification')
+            ->with([
                 'otpCode' => $this->otpCode,
                 'userName' => $this->userName,
                 'type' => $this->type,
                 'expiryMinutes' => $this->expiryMinutes,
                 'siteName' => $this->siteName,
-                'logoBase64' => $this->logoBase64,
-            ],
-        );
-    }
+                'logoPath' => $this->logoPath,
+                'logoDataUrl' => $this->logoDataUrl,
+            ]);
 
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
-    public function attachments(): array
-    {
-        return [];
+        return $mail;
     }
 }

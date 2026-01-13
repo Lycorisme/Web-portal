@@ -38,6 +38,7 @@ function galleryApp() {
         imagePreviews: [],
         formErrors: {},
         formLoading: false,
+        activeTab: 'basic',
 
         // Album Autocomplete
         albums: [],

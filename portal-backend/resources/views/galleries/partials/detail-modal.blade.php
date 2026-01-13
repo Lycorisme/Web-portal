@@ -36,7 +36,7 @@
             >
                 {{-- Header --}}
                 <template x-if="selectedItem">
-                    <div class="flex flex-col">
+                    <div class="flex flex-col h-full overflow-hidden">
                         {{-- Header Bar --}}
                         <div class="bg-white/80 dark:bg-surface-900/80 backdrop-blur-md border-b border-surface-200/50 dark:border-surface-700/50 px-4 sm:px-6 py-4 flex-shrink-0 flex items-center justify-between z-20">
                             <div class="flex items-center gap-3 sm:gap-4">
@@ -55,7 +55,7 @@
                         </div>
 
                         {{-- Content --}}
-                        <div class="p-4 sm:p-6 space-y-5 overflow-y-auto">
+                        <div class="p-4 sm:p-6 space-y-5 overflow-y-auto flex-1 min-h-0">
                             {{-- Image/Video Preview --}}
                             <div class="rounded-2xl overflow-hidden bg-surface-100 dark:bg-surface-800 shadow-inner">
                                 <template x-if="selectedItem.media_type === 'image' && selectedItem.image_url">

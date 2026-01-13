@@ -31,36 +31,30 @@
                 x-transition:leave="ease-in duration-200"
                 x-transition:leave-start="opacity-100 translate-y-0 scale-100"
                 x-transition:leave-end="opacity-0 translate-y-8 scale-95"
-                class="relative transform overflow-hidden bg-white dark:bg-surface-900 text-left shadow-2xl transition-all w-full sm:max-w-2xl h-[90vh] sm:h-auto sm:max-h-[85vh] flex flex-col sm:rounded-3xl border-t sm:border border-white/20 ring-1 ring-black/5 dark:ring-white/10"
+                class="relative transform overflow-hidden bg-white dark:bg-surface-900 text-left shadow-2xl transition-all w-full sm:max-w-6xl h-[95vh] sm:h-[90vh] flex flex-col sm:rounded-3xl border-t sm:border border-white/20 ring-1 ring-black/5 dark:ring-white/10"
                 @click.stop
             >
                 {{-- Header --}}
                 @include('galleries.partials.form-modal.header')
 
-                {{-- Form Content --}}
-                <div class="flex-1 overflow-y-auto bg-white dark:bg-surface-900 scroll-smooth">
-                    <form id="galleryForm" @submit.prevent="submitForm()" class="p-4 sm:p-6 space-y-6">
-                        {{-- Media Type Selector --}}
-                        @include('galleries.partials.form-modal.media-type-selector')
+                {{-- Main Layout --}}
+                <div class="flex flex-1 overflow-hidden relative">
+                    {{-- Sidebar Navigation --}}
+                    @include('galleries.partials.form-modal.sidebar')
 
-                        {{-- Title & Description --}}
-                        @include('galleries.partials.form-modal.title-description')
+                    {{-- Content Scroll Area --}}
+                    <div class="flex-1 overflow-y-auto bg-white dark:bg-surface-900 relative scroll-smooth" id="form-scroll-container">
+                        <form id="galleryForm" @submit.prevent="submitForm()" class="p-4 sm:p-8 pb-10 max-w-4xl mx-auto space-y-6 sm:space-y-8">
+                            {{-- Tab 1: Basic Info --}}
+                            @include('galleries.partials.form-modal.tab-basic')
 
-                        {{-- Image Upload --}}
-                        @include('galleries.partials.form-modal.image-upload')
+                            {{-- Tab 2: Media --}}
+                            @include('galleries.partials.form-modal.tab-media')
 
-                        {{-- Video URL --}}
-                        @include('galleries.partials.form-modal.video-url')
-
-                        {{-- Album & Location --}}
-                        @include('galleries.partials.form-modal.album-location')
-
-                        {{-- Event Date --}}
-                        @include('galleries.partials.form-modal.event-date')
-
-                        {{-- Settings Toggles --}}
-                        @include('galleries.partials.form-modal.settings-toggles')
-                    </form>
+                            {{-- Tab 3: Settings --}}
+                            @include('galleries.partials.form-modal.tab-settings')
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
