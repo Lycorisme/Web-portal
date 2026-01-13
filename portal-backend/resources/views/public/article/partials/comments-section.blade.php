@@ -22,7 +22,8 @@
         ];
     })->values()) }})">
     
-    <div class="bg-slate-900/50 backdrop-blur-sm rounded-xl sm:rounded-2xl lg:rounded-3xl border border-slate-800/50 p-4 sm:p-6 lg:p-8">
+    <div class="bg-slate-900/80 backdrop-blur-md rounded-[32px] sm:rounded-[40px] border border-white/5 p-6 sm:p-8 lg:p-10 shadow-2xl relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 opacity-30"></div>
         <h3 class="text-lg sm:text-xl font-bold text-white mb-5 sm:mb-6 flex items-center gap-2 sm:gap-3">
             Komentar
             <span class="text-xs sm:text-sm bg-emerald-500/10 text-emerald-400 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full"

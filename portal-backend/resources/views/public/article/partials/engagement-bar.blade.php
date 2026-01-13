@@ -1,5 +1,5 @@
 {{-- Engagement Bar --}}
-<div class="mt-4 sm:mt-6 p-4 sm:p-5 bg-gradient-to-r from-slate-900/80 to-slate-800/50 rounded-xl sm:rounded-2xl border border-slate-700/30 flex flex-wrap items-center justify-between gap-3 sm:gap-4">
+<div class="mt-6 sm:mt-8 p-4 sm:p-5 bg-slate-950/50 rounded-[24px] border border-white/5 flex flex-wrap items-center justify-between gap-4 backdrop-blur-sm">
     <div class="flex items-center gap-3 sm:gap-4">
         {{-- Like Button --}}
         @auth
