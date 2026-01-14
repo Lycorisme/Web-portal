@@ -74,7 +74,7 @@
             class="px-3 text-xs font-semibold text-surface-400 dark:text-surface-500 uppercase tracking-wider mb-3 mt-2 transition-opacity duration-300">
             Menu Utama</p>
 
-        {{-- Dashboard --}}
+        {{-- 1. Dashboard --}}
         <a href="{{ route('dashboard') }}" wire:navigate
             class="flex items-center rounded-xl transition-all duration-200 group relative overflow-hidden {{ request()->routeIs('dashboard') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
             :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
@@ -83,7 +83,7 @@
             <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Dashboard</span>
         </a>
 
-        {{-- Kelola Berita --}}
+        {{-- 2. Kelola Berita --}}
         <a href="{{ route('articles') }}" wire:navigate
             class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('articles*') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
             :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
@@ -92,96 +92,84 @@
             <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Kelola Berita</span>
         </a>
 
-        {{-- Kategori --}}
+        {{-- 3. Kategori Berita --}}
         @if(auth()->user()->canManageCategories())
         <a href="{{ route('categories') }}" wire:navigate
             class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('categories*') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
             :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
-            :title="!sidebarOpen ? 'Kategori' : ''">
+            :title="!sidebarOpen ? 'Kategori Berita' : ''">
             <i data-lucide="folder-tree" class="w-5 h-5 flex-shrink-0"></i>
-            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Kategori</span>
+            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Kategori Berita</span>
         </a>
         @endif
 
-        {{-- Tag --}}
+        {{-- 4. Kelola Tag --}}
         @if(auth()->user()->canManageTags())
         <a href="{{ route('tags') }}" wire:navigate
             class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('tags*') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
             :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
-            :title="!sidebarOpen ? 'Tag' : ''">
+            :title="!sidebarOpen ? 'Kelola Tag' : ''">
             <i data-lucide="tags" class="w-5 h-5 flex-shrink-0"></i>
-            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Tag</span>
+            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Kelola Tag</span>
         </a>
         @endif
 
-        {{-- Galeri --}}
+        {{-- 5. Galeri Kegiatan --}}
         <a href="{{ route('galleries') }}" wire:navigate
             class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('galleries*') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
             :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
-            :title="!sidebarOpen ? 'Galeri' : ''">
+            :title="!sidebarOpen ? 'Galeri Kegiatan' : ''">
             <i data-lucide="image" class="w-5 h-5 flex-shrink-0"></i>
-            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Galeri</span>
+            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Galeri Kegiatan</span>
         </a>
 
-        {{-- Tong Sampah --}}
-        <a href="{{ route('trash') }}" wire:navigate
-            class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('trash*') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
-            :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
-            :title="!sidebarOpen ? 'Tong Sampah' : ''">
-            <i data-lucide="trash-2" class="w-5 h-5 flex-shrink-0"></i>
-            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Tong Sampah</span>
-            <span x-show="sidebarOpen && trashedCount > 0" x-cloak
-                class="ml-auto bg-accent-rose/20 text-accent-rose text-xs font-semibold px-2 py-0.5 rounded-full"
-                x-text="trashedCount"></span>
-        </a>
-
-        <div class="my-3 border-t border-surface-200/50 dark:border-surface-800/50 mx-2"></div>
-
-        {{-- Keamanan --}}
+        {{-- Keamanan & Monitoring --}}
         @if(auth()->user()->canAccessSecurity())
+        <div class="my-3 border-t border-surface-200/50 dark:border-surface-800/50 mx-2"></div>
+        
         <p x-show="sidebarOpen" x-cloak
             class="px-3 text-xs font-semibold text-surface-400 dark:text-surface-500 uppercase tracking-wider mb-3 transition-opacity duration-300">
             Keamanan</p>
 
-        {{-- Activity Log --}}
+        {{-- 6. Security Audit (Activity Log) --}}
         <a href="{{ route('activity-log') }}" wire:navigate
             class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('activity-log*') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
             :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
-            :title="!sidebarOpen ? 'Activity Log' : ''">
-            <i data-lucide="activity" class="w-5 h-5 flex-shrink-0"></i>
-            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Activity Log</span>
+            :title="!sidebarOpen ? 'Security Audit' : ''">
+            <i data-lucide="shield-check" class="w-5 h-5 flex-shrink-0"></i>
+            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Security Audit</span>
         </a>
 
-        {{-- IP Terblokir --}}
+        {{-- 7. Monitoring Akses (Blocked IPs) --}}
         <a href="{{ route('blocked-clients') }}" wire:navigate
             class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('blocked-clients*') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
             :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
-            :title="!sidebarOpen ? 'IP Terblokir' : ''">
+            :title="!sidebarOpen ? 'Monitoring Akses' : ''">
             <i data-lucide="shield-ban" class="w-5 h-5 flex-shrink-0"></i>
-            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">IP Terblokir</span>
+            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Monitoring Akses</span>
             <span x-show="sidebarOpen && blockedCount > 0" x-cloak
                 class="ml-auto bg-accent-amber/20 text-accent-amber text-xs font-semibold px-2 py-0.5 rounded-full"
                 x-text="blockedCount"></span>
         </a>
 
-        {{-- Laporan --}}
+        {{-- 8. Laporan (Cetak PDF) --}}
         <a href="{{ route('reports') }}" wire:navigate
             class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('reports*') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
             :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
             :title="!sidebarOpen ? 'Laporan' : ''">
-            <i data-lucide="clipboard-list" class="w-5 h-5 flex-shrink-0"></i>
+            <i data-lucide="file-text" class="w-5 h-5 flex-shrink-0"></i>
             <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Laporan</span>
         </a>
-
-        <div class="my-3 border-t border-surface-200/50 dark:border-surface-800/50 mx-2"></div>
         @endif
 
-        {{-- Pengaturan --}}
+        {{-- Pengaturan & Manajemen --}}
+        <div class="my-3 border-t border-surface-200/50 dark:border-surface-800/50 mx-2"></div>
+
         <p x-show="sidebarOpen" x-cloak
             class="px-3 text-xs font-semibold text-surface-400 dark:text-surface-500 uppercase tracking-wider mb-3 transition-opacity duration-300">
             Pengaturan</p>
 
-        {{-- Pengaturan Situs --}}
+        {{-- 9. Pengaturan Situs --}}
         @if(auth()->user()->canAccessSettings())
         <a href="{{ route('settings') }}" wire:navigate
             class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('settings') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
@@ -192,25 +180,28 @@
         </a>
         @endif
 
-        {{-- Profil Saya --}}
-        <a href="{{ route('profile') }}" wire:navigate
-            class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('profile*') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
-            :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
-            :title="!sidebarOpen ? 'Profil Saya' : ''">
-            <i data-lucide="user-circle" class="w-5 h-5 flex-shrink-0"></i>
-            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Profil Saya</span>
-        </a>
-
-        {{-- Kelola User --}}
+        {{-- 10. Manajemen User --}}
         @if(auth()->user()->canManageUsers())
         <a href="{{ route('users') }}" wire:navigate
             class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('users*') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
             :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
-            :title="!sidebarOpen ? 'Kelola User' : ''">
+            :title="!sidebarOpen ? 'Manajemen User' : ''">
             <i data-lucide="users" class="w-5 h-5 flex-shrink-0"></i>
-            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Kelola User</span>
+            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Manajemen User</span>
         </a>
         @endif
+
+        {{-- 11. Tong Sampah --}}
+        <a href="{{ route('trash') }}" wire:navigate
+            class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('trash*') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
+            :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
+            :title="!sidebarOpen ? 'Tong Sampah' : ''">
+            <i data-lucide="trash-2" class="w-5 h-5 flex-shrink-0"></i>
+            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Tong Sampah</span>
+            <span x-show="sidebarOpen && trashedCount > 0" x-cloak
+                class="ml-auto bg-accent-rose/20 text-accent-rose text-xs font-semibold px-2 py-0.5 rounded-full"
+                x-text="trashedCount"></span>
+        </a>
     </nav>
 
     {{-- Sidebar Footer - Version Info --}}
