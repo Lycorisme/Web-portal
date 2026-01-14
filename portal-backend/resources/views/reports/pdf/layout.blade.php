@@ -140,7 +140,8 @@
         }
         
         .ttd-image-container {
-            height: 90px;
+            /* Height now set dynamically via inline style */
+            min-height: 80px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -148,11 +149,11 @@
             position: relative;
         }
         .ttd-image {
-            height: 80px;
+            /* Height now set dynamically via inline style */
             z-index: 10;
         }
         .ttd-stamp {
-            height: 85px;
+            /* Height now set dynamically via inline style */
             position: absolute;
             left: 10%; 
             top: 0;
@@ -160,7 +161,7 @@
             opacity: 0.9;
             transform: rotate(-10deg); 
         }
-        .ttd-spacer { height: 90px; }
+        .ttd-spacer { min-height: 80px; }
         
         .ttd-jabatan {
             font-weight: normal; /* Jabatan usually normal or bold, user said 'Row 1 Jabatan' */
@@ -253,15 +254,20 @@
                     </p>
                     <div class="ttd-jabatan">{{ $settings['leader_title'] ?? 'Kepala Balai' }}</div>
                     
-                    <div class="ttd-image-container">
+                    @php
+                        $signatureSize = $settings['signature_size'] ?? 80;
+                        $stampSize = $settings['stamp_size'] ?? 85;
+                        $containerHeight = max($signatureSize, $stampSize) + 10;
+                    @endphp
+                    <div class="ttd-image-container" style="height: {{ $containerHeight }}px;">
                         @if(!empty($settings['stamp_url']))
-                            <img src="{{ public_path($settings['stamp_url']) }}" class="ttd-stamp" alt="Stempel">
+                            <img src="{{ public_path($settings['stamp_url']) }}" class="ttd-stamp" style="height: {{ $stampSize }}px;" alt="Stempel">
                         @endif
 
                         @if(!empty($settings['signature_url']))
-                            <img src="{{ public_path($settings['signature_url']) }}" class="ttd-image" alt="TTD">
+                            <img src="{{ public_path($settings['signature_url']) }}" class="ttd-image" style="height: {{ $signatureSize }}px;" alt="TTD">
                         @else
-                            <div class="ttd-spacer"></div>
+                            <div class="ttd-spacer" style="height: {{ $signatureSize }}px;"></div>
                         @endif
                     </div>
                     

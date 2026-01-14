@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="judul">
-        <h3>LAPORAN DATA ARTIKEL</h3>
+        <h3>LAPORAN DATA BERITA</h3>
     </div>
 
     {{-- Metadata Laporan --}}
@@ -68,7 +68,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" class="center">Tidak ada data artikel pada periode ini.</td>
+                    <td colspan="6" class="center">Tidak ada data berita pada periode ini.</td>
                 </tr>
             @endforelse
         </tbody>

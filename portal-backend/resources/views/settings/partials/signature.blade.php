@@ -8,6 +8,10 @@
         city: '{{ addslashes($rawSettings['letterhead_city'] ?? $rawSettings['site_city'] ?? 'Kota') }}',
         date: '{{ date('d F Y') }}',
         
+        // Size controls (in pixels)
+        signatureSize: {{ $rawSettings['signature_size'] ?? 80 }},
+        stampSize: {{ $rawSettings['stamp_size'] ?? 85 }},
+        
         // Helper untuk preview gambar
         previewImage(event, targetRef, urlProperty) {
             const file = event.target.files[0];
@@ -223,6 +227,87 @@
                     </div>
                 </div>
 
+                {{-- Size Controls --}}
+                <div class="space-y-4 pt-4">
+                    <h3 class="flex items-center gap-2 text-sm font-semibold text-surface-900 dark:text-white pb-2 border-b border-surface-200 dark:border-surface-700">
+                        <i data-lucide="scaling" class="w-4 h-4 text-emerald-500"></i>
+                        Pengaturan Ukuran
+                    </h3>
+                    <p class="text-xs text-surface-500 dark:text-surface-400 -mt-2">
+                        Atur ukuran tanda tangan dan stempel. Perubahan langsung terlihat di Live Preview.
+                    </p>
+
+                    {{-- Signature Size Slider --}}
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <label for="signature_size" class="text-sm font-medium text-surface-700 dark:text-surface-300">
+                                <i data-lucide="pen-tool" class="w-3.5 h-3.5 inline-block mr-1 text-emerald-500"></i>
+                                Ukuran Tanda Tangan
+                            </label>
+                            <span class="text-sm font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded-md" x-text="signatureSize + 'px'">80px</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs text-surface-400">40</span>
+                            <input 
+                                type="range" 
+                                name="signature_size" 
+                                id="signature_size"
+                                x-model="signatureSize"
+                                min="40" 
+                                max="150" 
+                                step="5"
+                                class="flex-1 h-2 bg-surface-200 dark:bg-surface-700 rounded-lg appearance-none cursor-pointer accent-emerald-500 
+                                       [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:bg-emerald-500 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-110
+                                       [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:bg-emerald-500 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:shadow-lg [&::-moz-range-thumb]:cursor-pointer"
+                            >
+                            <span class="text-xs text-surface-400">150</span>
+                        </div>
+                        {{-- Visual Bar Indicator --}}
+                        <div class="h-1.5 bg-surface-100 dark:bg-surface-800 rounded-full overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full transition-all duration-200" :style="'width: ' + ((signatureSize - 40) / 110 * 100) + '%'"></div>
+                        </div>
+                    </div>
+
+                    {{-- Stamp Size Slider --}}
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <label for="stamp_size" class="text-sm font-medium text-surface-700 dark:text-surface-300">
+                                <i data-lucide="stamp" class="w-3.5 h-3.5 inline-block mr-1 text-emerald-500"></i>
+                                Ukuran Stempel
+                            </label>
+                            <span class="text-sm font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded-md" x-text="stampSize + 'px'">85px</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs text-surface-400">40</span>
+                            <input 
+                                type="range" 
+                                name="stamp_size" 
+                                id="stamp_size"
+                                x-model="stampSize"
+                                min="40" 
+                                max="150" 
+                                step="5"
+                                class="flex-1 h-2 bg-surface-200 dark:bg-surface-700 rounded-lg appearance-none cursor-pointer accent-emerald-500 
+                                       [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:bg-emerald-500 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-110
+                                       [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:bg-emerald-500 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:shadow-lg [&::-moz-range-thumb]:cursor-pointer"
+                            >
+                            <span class="text-xs text-surface-400">150</span>
+                        </div>
+                        {{-- Visual Bar Indicator --}}
+                        <div class="h-1.5 bg-surface-100 dark:bg-surface-800 rounded-full overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full transition-all duration-200" :style="'width: ' + ((stampSize - 40) / 110 * 100) + '%'"></div>
+                        </div>
+                    </div>
+
+                    {{-- Info Tip --}}
+                    <div class="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-lg">
+                        <i data-lucide="lightbulb" class="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0"></i>
+                        <p class="text-xs text-amber-700 dark:text-amber-300">
+                            <strong>Tips:</strong> Ukuran yang disarankan adalah 70-100px untuk tanda tangan dan 80-120px untuk stempel agar proporsional di dokumen PDF.
+                        </p>
+                    </div>
+                </div>
+
                 {{-- Tembusan --}}
                 <div class="space-y-4 pt-4">
                     <h3 class="flex items-center gap-2 text-sm font-semibold text-surface-900 dark:text-white pb-2 border-b border-surface-200 dark:border-surface-700">
@@ -270,11 +355,11 @@
                                 <p class="mb-4 font-bold text-surface-900 dark:text-white text-sm uppercase" x-text="leader_title || 'JABATAN PEJABAT'"></p>
                                 
                                 {{-- Signature & Stamp Wrapper --}}
-                                <div class="h-24 relative flex items-center justify-center my-2">
+                                <div class="relative flex items-center justify-center my-2 transition-all duration-300" :style="'min-height: ' + Math.max(signatureSize, stampSize) + 'px'">
                                     {{-- Signature Image --}}
                                     <img x-ref="previewSig" src="{{ !empty($rawSettings['signature_url']) ? asset($rawSettings['signature_url']) : '' }}" 
-                                         class="h-20 w-auto object-contain relative z-20" 
-                                         style="{{ !empty($rawSettings['signature_url']) ? '' : 'display: none;' }}"
+                                         class="w-auto object-contain relative z-20 transition-all duration-300" 
+                                         :style="'height: ' + signatureSize + 'px; {{ !empty($rawSettings['signature_url']) ? '' : 'display: none;' }}'"
                                          alt="Signature">
                                          
                                     <div x-show="!$refs.previewSig.src && !'{{ $rawSettings['signature_url'] ?? '' }}'" class="border border-dashed border-surface-300 p-2 rounded text-xs text-surface-400">
@@ -283,8 +368,8 @@
 
                                     {{-- Stamp Image (Overlapping) --}}
                                     <img x-ref="previewStamp" src="{{ !empty($rawSettings['stamp_url']) ? asset($rawSettings['stamp_url']) : '' }}" 
-                                         class="h-24 w-auto object-contain absolute left-0 z-10 opacity-80 rotate-[-10deg]" 
-                                         style="left: -10px; {{ !empty($rawSettings['stamp_url']) ? '' : 'display: none;' }}"
+                                         class="w-auto object-contain absolute left-0 z-10 opacity-80 rotate-[-10deg] transition-all duration-300" 
+                                         :style="'height: ' + stampSize + 'px; left: -10px; {{ !empty($rawSettings['stamp_url']) ? '' : 'display: none;' }}'"
                                          alt="Stamp">
                                 </div>
 

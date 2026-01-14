@@ -59,6 +59,10 @@ class ReportController extends Controller
             'letterhead_url' => SiteSetting::get('letterhead_url', ''),
             'signature_url' => SiteSetting::get('signature_url', ''),
             'stamp_url' => SiteSetting::get('stamp_url', ''),
+            
+            // Signature & Stamp Size Settings
+            'signature_size' => (int) SiteSetting::get('signature_size', 80),
+            'stamp_size' => (int) SiteSetting::get('stamp_size', 85),
 
             // Leader / Organization Settings
             'leader_name' => SiteSetting::get('leader_name', ''),
@@ -140,7 +144,7 @@ class ReportController extends Controller
 
         $data = [
             'settings' => $this->getReportSettings(),
-            'title' => 'Laporan Data Artikel',
+            'title' => 'Laporan Data Berita',
             'date_from' => $this->formatDate($startDate),
             'date_to' => $this->formatDate($endDate),
             'has_date_filter' => $hasDateFilter,
@@ -151,7 +155,7 @@ class ReportController extends Controller
         $pdf = Pdf::loadView('reports.pdf.articles', $data);
         $pdf->setPaper('A4', 'portrait');
         
-        $filename = 'laporan-artikel-' . ($startDate ? $startDate->format('Ymd') : 'all') . '-' . ($endDate ? $endDate->format('Ymd') : 'now') . '.pdf';
+        $filename = 'laporan-berita-' . ($startDate ? $startDate->format('Ymd') : 'all') . '-' . ($endDate ? $endDate->format('Ymd') : 'now') . '.pdf';
         
         return $pdf->download($filename);
     }

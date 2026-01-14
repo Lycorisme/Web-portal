@@ -12,7 +12,7 @@
                 <th class="number">No</th>
                 <th style="width: 25%;">Nama Kategori</th>
                 <th style="width: 20%;">Slug</th>
-                <th style="width: 15%;">Jumlah Artikel</th>
+                <th style="width: 15%;">Jumlah Berita</th>
                 <th style="width: 12%;">Status</th>
                 <th style="width: 18%;">Dibuat</th>
             </tr>

@@ -230,12 +230,16 @@ Route::middleware('auth')->group(function () {
         Route::get('/blocked-clients/count', [BlockedClientController::class, 'getCount'])->name('blocked-clients.count');
         Route::get('/blocked-clients/data', [BlockedClientController::class, 'getData'])->name('blocked-clients.data');
         Route::post('/blocked-clients', [BlockedClientController::class, 'store'])->name('blocked-clients.store');
+        
+        // Bulk actions MUST be defined BEFORE wildcard routes
+        Route::post('/blocked-clients/bulk-unblock', [BlockedClientController::class, 'bulkUnblock'])->name('blocked-clients.bulk-unblock');
+        Route::delete('/blocked-clients/bulk', [BlockedClientController::class, 'bulkDestroy'])->name('blocked-clients.bulk-destroy');
+        Route::post('/blocked-clients/clear-expired', [BlockedClientController::class, 'clearExpired'])->name('blocked-clients.clear-expired');
+        
+        // Wildcard routes MUST be defined AFTER static routes
         Route::get('/blocked-clients/{blockedClient}', [BlockedClientController::class, 'show'])->name('blocked-clients.show');
         Route::put('/blocked-clients/{blockedClient}', [BlockedClientController::class, 'update'])->name('blocked-clients.update');
         Route::delete('/blocked-clients/{blockedClient}', [BlockedClientController::class, 'destroy'])->name('blocked-clients.destroy');
         Route::post('/blocked-clients/{blockedClient}/unblock', [BlockedClientController::class, 'unblock'])->name('blocked-clients.unblock');
-        Route::post('/blocked-clients/bulk-unblock', [BlockedClientController::class, 'bulkUnblock'])->name('blocked-clients.bulk-unblock');
-        Route::delete('/blocked-clients/bulk', [BlockedClientController::class, 'bulkDestroy'])->name('blocked-clients.bulk-destroy');
-        Route::post('/blocked-clients/clear-expired', [BlockedClientController::class, 'clearExpired'])->name('blocked-clients.clear-expired');
     });
 });

@@ -17,8 +17,8 @@
                         <i data-lucide="newspaper" class="w-6 h-6 text-blue-600 dark:text-blue-400"></i>
                     </div>
                     <div>
-                        <h3 class="font-semibold text-surface-900 dark:text-white">Laporan Artikel</h3>
-                        <p class="text-sm text-surface-500 dark:text-surface-400">Data artikel</p>
+                        <h3 class="font-semibold text-surface-900 dark:text-white">Laporan Berita</h3>
+                        <p class="text-sm text-surface-500 dark:text-surface-400">Data berita</p>
                     </div>
                 </div>
                 
