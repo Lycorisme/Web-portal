@@ -441,7 +441,7 @@
 
 | No | Field Name | Type | Width | Information |
 |----|------------|------|-------|-------------|
-| 1 | id | INT | 10 | Primary Key, Auto Increment |
+| 1 | | INT | 10 | Primary Key, Auto Increment |
 | 2 | migration | VARCHAR | 255 | Nama file migration |
 | 3 | batch | INT | 11 | Nomor batch eksekusi |
 

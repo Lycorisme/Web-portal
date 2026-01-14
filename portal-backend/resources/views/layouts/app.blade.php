@@ -66,14 +66,14 @@
 
         {{-- Sidebar Wrapper - This ensures sidebar extends full height in screenshots --}}
         <div id="sidebar-wrapper" 
-             class="flex-shrink-0 print:relative" 
+             class="flex-shrink-0 print:relative transition-all duration-300 ease-out" 
              :class="sidebarOpen ? 'lg:w-72' : 'lg:w-20 w-0'">
             {{-- Sidebar Component --}}
             @include('partials.sidebar')
         </div>
 
         {{-- Main Content Area --}}
-        <main id="main-content" class="flex-1 transition-all duration-300 min-h-screen pt-0 print:ml-0">
+        <main id="main-content" class="flex-1 transition-all duration-300 ease-out min-h-screen pt-0 print:ml-0">
 
             {{-- Header Component --}}
             @include('partials.header')
