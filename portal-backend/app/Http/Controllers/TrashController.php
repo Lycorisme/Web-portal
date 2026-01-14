@@ -112,7 +112,17 @@ class TrashController extends Controller
 
         // Manual pagination
         $total = $items->count();
-        $currentPage = $request->input('page', 1);
+        $lastPage = (int) ceil($total / $perPage);
+        $currentPage = (int) $request->input('page', 1);
+        
+        // Ensure current page doesn't exceed last page (fix for empty page bug)
+        if ($currentPage > $lastPage && $lastPage > 0) {
+            $currentPage = $lastPage;
+        }
+        if ($currentPage < 1) {
+            $currentPage = 1;
+        }
+        
         $offset = ($currentPage - 1) * $perPage;
         $paginatedItems = $items->slice($offset, $perPage)->values();
 
@@ -121,7 +131,7 @@ class TrashController extends Controller
             'data' => $paginatedItems,
             'meta' => [
                 'current_page' => (int) $currentPage,
-                'last_page' => (int) ceil($total / $perPage),
+                'last_page' => $lastPage,
                 'per_page' => (int) $perPage,
                 'total' => $total,
                 'from' => $total > 0 ? $offset + 1 : 0,
