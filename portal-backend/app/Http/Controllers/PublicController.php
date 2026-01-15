@@ -133,6 +133,18 @@ class PublicController extends Controller
         // Increment views
         $article->increment('views');
 
+        // Log view activity for statistics
+        try {
+            \App\Models\ActivityLog::log(
+                \App\Models\ActivityLog::ACTION_VIEW,
+                'Melihat artikel: ' . $article->title,
+                $article
+            );
+        } catch (\Exception $e) {
+            // Ignore logging errors to prevent blocking the user
+            // This can happen if no user exists in DB yet (User::first() fails)
+        }
+
         // Related articles (same category)
         $relatedArticles = Article::published()
             ->where('id', '!=', $article->id)

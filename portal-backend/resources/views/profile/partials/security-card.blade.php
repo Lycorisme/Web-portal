@@ -192,9 +192,6 @@
                         <p class="text-xs text-surface-500 dark:text-surface-400">Logout dari semua sesi di perangkat lain</p>
                     </div>
                 </div>
-                <p class="text-xs text-surface-500 dark:text-surface-400 mt-2">
-                    Jika Anda merasa ada aktivitas mencurigakan atau ingin mengamankan akun, gunakan fitur ini untuk mengeluarkan semua sesi login di perangkat lain. Cookie "Ingat Saya" pada perangkat lain akan menjadi tidak valid.
-                </p>
             </div>
             <button type="button" 
                     @click="showLogoutAllModal = true"

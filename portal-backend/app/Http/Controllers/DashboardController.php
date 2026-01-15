@@ -126,8 +126,10 @@ class DashboardController extends Controller
             ->get();
 
         // Recent activity logs - Admin only, or own activities for others
+        // Exclude VIEW actions to prevent cluttering the log with page views
         if ($isAdmin) {
             $activityLogs = ActivityLog::with('user')
+                ->where('action', '!=', ActivityLog::ACTION_VIEW)
                 ->orderBy('created_at', 'desc')
                 ->take(10)
                 ->get();
@@ -135,6 +137,7 @@ class DashboardController extends Controller
             // Non-admins see only their own activity
             $activityLogs = ActivityLog::with('user')
                 ->where('user_id', $user->id)
+                ->where('action', '!=', ActivityLog::ACTION_VIEW)
                 ->orderBy('created_at', 'desc')
                 ->take(10)
                 ->get();
@@ -172,19 +175,33 @@ class DashboardController extends Controller
         });
 
         // Visit statistics for the last 7 days (role-filtered)
+        // Use ActivityLog to get real daily view counts
         $visitStats = [];
+        
+        // Cache author article IDs if needed to avoid queries in loop
+        $authorArticleIds = $isAuthor ? Article::where('author_id', $user->id)->pluck('id') : null;
+
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i);
             $dayName = $this->getDayName($date->dayOfWeek);
+            $startOfDay = $date->copy()->startOfDay();
+            $endOfDay = $date->copy()->endOfDay();
             
-            // Get views based on role
-            $dayQuery = (clone $articleQuery)->whereDate('updated_at', $date->toDateString());
-            $dayViews = $dayQuery->sum('views');
+            // Get views from ActivityLog using range to handle timezone differences correctly
+            $dayViewsQuery = ActivityLog::where('action', ActivityLog::ACTION_VIEW)
+                ->whereBetween('created_at', [$startOfDay, $endOfDay]);
+                
+            if ($isAuthor && $authorArticleIds) {
+                $dayViewsQuery->where('subject_type', Article::class)
+                    ->whereIn('subject_id', $authorArticleIds);
+            }
+            
+            $dayViews = $dayViewsQuery->count();
             
             $visitStats[] = [
                 'day' => $dayName,
                 'date' => $date->format('d M'),
-                'views' => $dayViews,
+                'views' => $dayViews, // Count of views today
             ];
         }
         
