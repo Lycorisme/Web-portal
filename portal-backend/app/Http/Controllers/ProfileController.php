@@ -113,7 +113,7 @@ class ProfileController extends Controller
         // Store new photo
         $file = $request->file('profile_photo');
         $filename = 'profile_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
-        $path = $file->storeAs('profiles', $filename, 'public');
+        $path = $file->storeAs('profile-photos', $filename, 'public');
         
         $user->update([
             'profile_photo' => '/storage/' . $path
