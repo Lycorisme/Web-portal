@@ -20,7 +20,7 @@
 
                 
                 {{-- Overlay on Hover --}}
-                <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-2xl sm:rounded-3xl">
                     <div class="text-white text-center">
                         <i data-lucide="camera" class="w-8 h-8 mx-auto mb-2"></i>
                         <span class="text-sm font-medium" x-text="pendingPhotoFile ? 'Ganti Foto' : 'Ubah Foto'"></span>
