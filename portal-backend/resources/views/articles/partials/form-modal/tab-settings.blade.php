@@ -30,7 +30,7 @@
                 <div class="space-y-4">
                     <div>
                         <label class="block text-xs font-medium text-surface-500 mb-1.5">Tags (Opsional)</label>
-                        <div class="relative" x-data="{ open: false, search: '' }">
+                        <div class="relative" x-data="{ open: false, search: '' }" @click.away="open = false">
                             <div class="flex flex-wrap gap-2 p-2 min-h-[46px] bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-xl focus-within:ring-2 focus-within:ring-theme-500 focus-within:border-theme-500 transition-all cursor-text" @click="$refs.tagSearch.focus(); open = true">
                                 <template x-for="tagId in formData.tag_ids" :key="tagId">
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-theme-50 dark:bg-theme-900/30 text-theme-600 dark:text-theme-400 text-xs font-semibold rounded-lg border border-theme-100 dark:border-theme-900/50">
@@ -45,7 +45,6 @@
                                     x-model="search"
                                     @focus="open = true"
                                     @keydown.backspace="if (search === '' && formData.tag_ids.length > 0) formData.tag_ids.pop()"
-                                    @click.away="open = false"
                                     type="text" 
                                     placeholder="Cari tag..." 
                                     class="flex-1 min-w-[120px] bg-transparent border-none focus:ring-0 p-1 text-sm dark:text-white"
