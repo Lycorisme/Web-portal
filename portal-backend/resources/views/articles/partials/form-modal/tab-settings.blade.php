@@ -30,7 +30,7 @@
                 <div class="space-y-4">
                     <div>
                         <label class="block text-xs font-medium text-surface-500 mb-1.5">Tags (Opsional)</label>
-                        <div class="relative" x-data="{ open: false, search: '' }" @click.away="open = false">
+                        <div class="relative" x-data="{ open: false, search: '' }" @click.outside="open = false" @keydown.escape.window="open = false">
                             <div class="flex flex-wrap gap-2 p-2 min-h-[46px] bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-xl focus-within:ring-2 focus-within:ring-theme-500 focus-within:border-theme-500 transition-all cursor-text" @click="$refs.tagSearch.focus(); open = true">
                                 <template x-for="tagId in formData.tag_ids" :key="tagId">
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-theme-50 dark:bg-theme-900/30 text-theme-600 dark:text-theme-400 text-xs font-semibold rounded-lg border border-theme-100 dark:border-theme-900/50">
@@ -44,6 +44,7 @@
                                     x-ref="tagSearch"
                                     x-model="search"
                                     @focus="open = true"
+                                    @blur="setTimeout(() => open = false, 150)"
                                     @keydown.backspace="if (search === '' && formData.tag_ids.length > 0) formData.tag_ids.pop()"
                                     type="text" 
                                     placeholder="Cari tag..." 
@@ -56,12 +57,13 @@
                                  x-transition:enter="transition ease-out duration-200"
                                  x-transition:enter-start="opacity-0 translate-y-2"
                                  x-transition:enter-end="opacity-100 translate-y-0"
+                                 @mousedown.prevent
                                  x-cloak>
                                 <div class="p-2 space-y-1">
                                     <template x-for="tag in tags.filter(t => t.name.toLowerCase().includes(search.toLowerCase()) && !formData.tag_ids.includes(String(t.id)))" :key="tag.id">
                                         <button 
                                             type="button"
-                                            @click="formData.tag_ids.push(String(tag.id)); search = '';"
+                                            @click="formData.tag_ids.push(String(tag.id)); search = ''; $refs.tagSearch.focus();"
                                             class="w-full flex items-center px-3 py-2 text-sm text-left hover:bg-surface-100 dark:hover:bg-surface-700 rounded-lg transition-colors group dark:text-white"
                                         >
                                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 text-surface-400 group-hover:text-theme-500"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
