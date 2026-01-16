@@ -224,13 +224,15 @@ class PublicController extends Controller
         $faviconUrl = SiteSetting::get('favicon_url', '');
         $contactEmail = SiteSetting::get('contact_email', '');
         $contactPhone = SiteSetting::get('contact_phone', '');
+        $footerText = SiteSetting::get('footer_text', '© ' . date('Y') . ' ' . $siteName . '. All rights reserved.');
 
         return view('public.maintenance', compact(
             'siteName',
             'logoUrl',
             'faviconUrl',
             'contactEmail',
-            'contactPhone'
+            'contactPhone',
+            'footerText'
         ));
     }
 }

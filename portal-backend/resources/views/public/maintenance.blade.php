@@ -164,7 +164,7 @@
     {{-- FOOTER INFO --}}
     <div class="fixed bottom-6 w-full text-center">
         <p class="text-[10px] text-slate-600 uppercase tracking-[0.2em] font-medium font-display opacity-60 hover:opacity-100 transition-opacity">
-            {{ $siteName ?? 'Portal' }} &copy; {{ date('Y') }}
+            {!! $footerText !!}
         </p>
     </div>
 
