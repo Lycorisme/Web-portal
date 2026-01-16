@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Under Maintenance - {{ $siteName ?? 'Portal' }}</title>
+    <title>Upgrade System - {{ $siteName ?? 'Portal' }}</title>
     
     {{-- Favicon --}}
     @if($faviconUrl ?? false)
         <link rel="icon" href="{{ $faviconUrl }}" type="image/x-icon">
     @endif
 
-    {{-- Fonts (Google Fonts) --}}
+    {{-- Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    {{-- Icons (Lucide) --}}
+    {{-- Icons --}}
     <script src="https://unpkg.com/lucide@latest"></script>
     
     {{-- Tailwind CSS --}}
@@ -26,31 +26,39 @@
                 extend: {
                     fontFamily: {
                         sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        display: ['"Outfit"', 'sans-serif'],
                     },
                     colors: {
                         dark: {
-                            900: '#0B0F19', // Deep dark blue/black
-                            800: '#111827',
-                            700: '#1F2937',
+                            950: '#02040a', // Ultra dark blue/black
+                            900: '#090e1a',
+                            800: '#131b2e',
                         },
-                        brand: {
-                            500: '#3B82F6', // Blue primary
-                            400: '#60A5FA',
+                        primary: {
+                            500: '#3b82f6', // Bright Blue
+                            600: '#2563eb',
+                        },
+                        accent: {
+                            glow: '#60a5fa',
                         }
+                    },
+                    backgroundImage: {
+                        'grid-white': "linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px)",
                     },
                     animation: {
                         'float': 'float 6s ease-in-out infinite',
-                        'pulse-glow': 'pulse-glow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'spin-slow': 'spin 12s linear infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'bar-loading': 'bar-loading 2s ease-in-out infinite',
                     },
                     keyframes: {
                         float: {
                             '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-20px)' },
+                            '50%': { transform: 'translateY(-10px)' },
                         },
-                        'pulse-glow': {
-                            '0%, 100%': { opacity: '0.4', transform: 'scale(1)' },
-                            '50%': { opacity: '0.8', transform: 'scale(1.1)' },
+                        'bar-loading': {
+                            '0%': { width: '0%', left: '0%' },
+                            '50%': { width: '100%', left: '0%' },
+                            '100%': { width: '0%', left: '100%' }
                         }
                     }
                 }
@@ -58,111 +66,103 @@
         }
     </script>
 </head>
-<body class="bg-dark-900 text-white min-h-screen flex items-center justify-center overflow-hidden relative selection:bg-brand-500/30 selection:text-brand-400">
+<body class="bg-dark-950 text-white min-h-screen flex items-center justify-center overflow-hidden relative">
 
-    {{-- Background Animated Gradients (Pure Tailwind Classes) --}}
-    <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        {{-- Top Center Glow --}}
-        <div class="absolute -top-1/2 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-brand-500/20 rounded-full blur-[120px] animate-pulse-glow"></div>
-        {{-- Bottom Left Glow --}}
-        <div class="absolute -bottom-1/2 -left-1/4 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-[100px]"></div>
-        {{-- Bottom Right Glow --}}
-        <div class="absolute -bottom-1/2 -right-1/4 w-[600px] h-[600px] bg-teal-500/10 rounded-full blur-[100px]"></div>
+    {{-- 1. BACKGROUND LAYERS --}}
+    <div class="fixed inset-0 pointer-events-none">
+        
+        {{-- Very Subtle Grid Background --}}
+        <div class="absolute inset-0 bg-grid-white bg-[length:50px_50px] [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_70%)]"></div>
+
+        {{-- Ambient Glows --}}
+        <div class="absolute top-[-20%] left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-primary-500/10 rounded-full blur-[100px] animate-pulse-slow"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px]"></div>
     </div>
 
-    {{-- Main Content Container (Centered) --}}
-    <div class="relative z-10 w-full max-w-lg px-6 flex flex-col items-center text-center">
+    {{-- 2. MAIN CARD CONTENT --}}
+    <div class="relative z-10 w-full max-w-xl px-4 text-center">
         
-        {{-- Floating Icon/Illustration --}}
-        <div class="mb-10 relative group animate-float">
-            {{-- Glowing Ring Behind --}}
-            <div class="absolute inset-0 bg-brand-500/20 rounded-full blur-xl group-hover:bg-brand-500/30 transition-all duration-500"></div>
-            
-            {{-- Icon Circle --}}
-            <div class="relative w-24 h-24 bg-dark-800/80 backdrop-blur-xl border border-white/10 rounded-3xl flex items-center justify-center shadow-2xl shadow-brand-500/20 ring-1 ring-white/5">
-                <i data-lucide="wrench" class="w-10 h-10 text-brand-400"></i>
-                
-                {{-- Decorative Orbit Dot --}}
-                <div class="absolute -top-1 -right-1 w-3 h-3 bg-brand-400 rounded-full animate-ping"></div>
-                <div class="absolute -top-1 -right-1 w-3 h-3 bg-brand-500 rounded-full"></div>
-            </div>
+        {{-- LOGO (Top Centered - Authority) --}}
+        <div class="mb-10 flex justify-center animate-float">
+            @if($logoUrl ?? false)
+                <img src="{{ $logoUrl }}" alt="{{ $siteName }}" class="h-12 w-auto object-contain drop-shadow-[0_0_15px_rgba(59,130,246,0.3)]">
+            @else
+                <div class="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
+                   <div class="w-8 h-8 rounded-lg bg-primary-500 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-primary-500/30">
+                       {{ substr($siteName ?? 'P', 0, 1) }}
+                   </div>
+                   <span class="text-lg font-bold tracking-tight text-white/90">{{ $siteName ?? 'PORTAL' }}</span>
+                </div>
+            @endif
+        </div>
 
-            {{-- Small Decorative Icons --}}
-            <div class="absolute -left-8 top-1/2 p-2 bg-dark-800/80 backdrop-blur border border-white/5 rounded-xl animate-bounce" style="animation-delay: 1s">
-                <i data-lucide="shield" class="w-4 h-4 text-purple-400"></i>
+        {{-- MAIN ICON (Modern Circle) --}}
+        <div class="mb-10 inline-block relative group">
+            <div class="absolute inset-0 bg-primary-500/20 rounded-full blur-xl group-hover:bg-primary-500/30 transition-all duration-500"></div>
+            <div class="relative w-24 h-24 rounded-full bg-dark-900 border border-white/10 flex items-center justify-center shadow-2xl ring-4 ring-white/5 group-hover:scale-105 transition-transform duration-500">
+                <i data-lucide="wrench" class="w-10 h-10 text-primary-500 relative z-10"></i>
+                
+                {{-- Decorative Orbit --}}
+                <div class="absolute inset-0 rounded-full border border-primary-500/30 border-dashed animate-[spin_10s_linear_infinite]"></div>
             </div>
-            <div class="absolute -right-8 top-1/3 p-2 bg-dark-800/80 backdrop-blur border border-white/5 rounded-xl animate-bounce" style="animation-delay: 2s">
-                <i data-lucide="server" class="w-4 h-4 text-teal-400"></i>
+            
+            {{-- Status Pill --}}
+            <div class="absolute -bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap px-3 py-1 bg-dark-800 border border-primary-500/30 rounded-full flex items-center gap-2 shadow-lg">
+                <span class="w-1.5 h-1.5 rounded-full bg-primary-500 animate-pulse"></span>
+                <span class="text-[10px] uppercase tracking-wider font-bold text-primary-500">Maintenance</span>
             </div>
         </div>
 
-        {{-- Typography --}}
-        <div class="space-y-6">
-            {{-- Status Badge --}}
-            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm">
-                <span class="w-2 h-2 rounded-full bg-brand-400 animate-pulse"></span>
-                <span class="text-xs font-semibold tracking-wider text-slate-300 uppercase">System Maintenance</span>
-            </div>
-
-            {{-- Main Title --}}
-            <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-400">
+        {{-- TEXT CONTENT --}}
+        <div class="space-y-6 mb-12">
+            <h1 class="font-display text-5xl md:text-6xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60 pb-2">
                 Segera Kembali
             </h1>
-
-            {{-- Description --}}
-            <p class="text-lg text-slate-400 leading-relaxed max-w-md mx-auto">
-                Kami sedang melakukan peningkatan sistem untuk performa yang lebih baik. Mohon maaf atas ketidaknyamanan ini.
+            
+            <p class="text-slate-400 text-lg leading-relaxed max-w-md mx-auto font-light">
+                Kami sedang melakukan upgrade keamanan sistem untuk pengalaman yang lebih baik. Mohon kembali dalam beberapa saat.
             </p>
         </div>
 
-        {{-- Progress Indicator --}}
-        <div class="w-full max-w-xs mt-10">
-            <div class="flex justify-between text-xs text-slate-500 mb-2 font-medium">
-                <span>Updating System</span>
-                <span>In Progress...</span>
+        {{-- PROGRESS BAR (Minimalist) --}}
+        <div class="max-w-xs mx-auto mb-10">
+            <div class="flex justify-between text-xs font-medium text-slate-500 mb-2 uppercase tracking-wide">
+                <span>System Upgrade</span>
+                <span class="text-primary-500">Processing...</span>
             </div>
-            <div class="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
-                <div class="h-full bg-brand-500 w-1/3 rounded-full animate-[loading_2s_ease-in-out_infinite] relative">
-                    <div class="absolute inset-0 bg-white/30 blur-sm"></div>
+            <div class="h-1 w-full bg-dark-800 rounded-full overflow-hidden">
+                <div class="h-full bg-primary-500 relative rounded-full">
+                    <div class="absolute top-0 bottom-0 bg-white/50 w-full animate-bar-loading rounded-full"></div>
                 </div>
             </div>
         </div>
 
-        {{-- Action Buttons --}}
-        <div class="mt-12 flex flex-col sm:flex-row items-center gap-4 w-full justify-center">
-            <button onclick="location.reload()" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-white text-dark-900 font-semibold hover:bg-slate-200 transition-colors flex items-center justify-center gap-2 group">
+        {{-- ACTION BUTTONS --}}
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button onclick="location.reload()" class="w-full sm:w-auto px-8 py-3 bg-white text-dark-950 font-bold rounded-xl hover:bg-slate-200 transition-colors flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.1)] group">
                 <i data-lucide="refresh-cw" class="w-4 h-4 group-hover:rotate-180 transition-transform duration-500"></i>
-                <span>Coba Refresh</span>
+                <span>Refresh Halaman</span>
             </button>
             
             @if($contactEmail ?? false)
-            <a href="mailto:{{ $contactEmail }}" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-slate-300 font-medium transition-colors flex items-center justify-center gap-2">
+            <a href="mailto:{{ $contactEmail }}" class="w-full sm:w-auto px-8 py-3 bg-white/5 border border-white/10 text-slate-300 font-medium rounded-xl hover:bg-white/10 hover:text-white transition-colors flex items-center justify-center gap-2">
                 <i data-lucide="mail" class="w-4 h-4"></i>
                 <span>Hubungi Kami</span>
             </a>
             @endif
         </div>
-
-        {{-- Footer --}}
-        <div class="mt-16 text-center">
-             @if($logoUrl ?? false)
-                <img src="{{ $logoUrl }}" alt="{{ $siteName }}" class="h-6 w-auto mx-auto opacity-50 grayscale hover:grayscale-0 transition-all duration-300">
-            @else
-                <span class="text-sm font-semibold text-slate-600 tracking-widest uppercase">{{ $siteName ?? 'PORTAL' }}</span>
-            @endif
-        </div>
+        
     </div>
 
-    {{-- Script for initializing icons --}}
+    {{-- FOOTER INFO --}}
+    <div class="fixed bottom-6 w-full text-center">
+        <p class="text-[10px] text-slate-600 uppercase tracking-[0.2em] opacity-50 hover:opacity-100 transition-opacity">
+            Secure Connection • {{ date('Y') }}
+        </p>
+    </div>
+
     <script>
         lucide.createIcons();
-        
-        // Add custom loading animation keyframe programmatically since we can't use style tag
-        tailwind.config.theme.extend.keyframes.loading = {
-            '0%': { width: '0%', marginLeft: '0%' },
-            '50%': { width: '100%', marginLeft: '0%' },
-            '100%': { width: '0%', marginLeft: '100%' }
-        };
     </script>
 </body>
 </html>
