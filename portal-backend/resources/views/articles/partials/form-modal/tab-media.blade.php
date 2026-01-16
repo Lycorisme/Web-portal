@@ -72,17 +72,12 @@
 
                     {{-- Action Buttons --}}
                     <div class="absolute top-4 right-4 flex items-center gap-2 z-30 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                        {{-- Re-crop Button --}}
+                        {{-- Crop Thumbnail Button - Always visible when thumbnail exists --}}
                         <button 
                             type="button" 
-                            @click.stop.prevent="
-                                if (originalImageFile) {
-                                    openCropModal(originalImageFile);
-                                }
-                            "
-                            x-show="originalImageFile"
-                            class="p-2 bg-amber-500 text-white rounded-xl shadow-lg hover:bg-amber-600 transition-all hover:scale-110"
-                            title="Crop Ulang"
+                            @click.stop.prevent="openCropModalFromUrl()"
+                            class="p-2 bg-cyan-500 text-white rounded-xl shadow-lg hover:bg-cyan-600 transition-all hover:scale-110"
+                            title="Crop Thumbnail"
                         >
                             <i data-lucide="crop" class="w-4 h-4"></i>
                         </button>

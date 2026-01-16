@@ -22,6 +22,41 @@ openCropModal(file) {
     });
 },
 
+// Open Crop Modal from URL (for existing images)
+async openCropModalFromUrl() {
+    // If we have the original file, use it directly
+    if (this.originalImageFile) {
+        this.openCropModal(this.originalImageFile);
+        return;
+    }
+    
+    // Otherwise, fetch the image from URL
+    const thumbnailUrl = this.formData.thumbnail_url;
+    if (!thumbnailUrl) {
+        showToast('error', 'Tidak ada gambar untuk di-crop');
+        return;
+    }
+    
+    try {
+        showToast('info', 'Memuat gambar untuk crop...');
+        
+        // Fetch image from URL
+        const response = await fetch(thumbnailUrl);
+        if (!response.ok) throw new Error('Failed to fetch image');
+        
+        const blob = await response.blob();
+        const fileName = thumbnailUrl.split('/').pop() || 'thumbnail.jpg';
+        const file = new File([blob], fileName, { type: blob.type });
+        
+        // Store as original file and open crop modal
+        this.originalImageFile = file;
+        this.openCropModal(file);
+    } catch (error) {
+        console.error('Error loading image for crop:', error);
+        showToast('error', 'Gagal memuat gambar untuk crop');
+    }
+},
+
 // Initialize Cropper Instance
 initCropper(imageElement) {
     // Destroy existing instance if any
