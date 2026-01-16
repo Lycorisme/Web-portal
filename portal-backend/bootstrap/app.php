@@ -18,6 +18,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
             'role' => \App\Http\Middleware\CheckRole::class,
             'security' => \App\Http\Middleware\CheckSecurityAccess::class,
+            'maintenance' => \App\Http\Middleware\CheckMaintenanceMode::class,
+        ]);
+        
+        // Apply maintenance check to all public web routes
+        $middleware->appendToGroup('web', [
+            \App\Http\Middleware\CheckMaintenanceMode::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

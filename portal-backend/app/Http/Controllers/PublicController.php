@@ -204,4 +204,33 @@ class PublicController extends Controller
 
         return view('public.gallery', compact('galleries', 'albums', 'siteSettings'));
     }
+
+    /**
+     * Show maintenance page
+     */
+    public function showMaintenance()
+    {
+        // Check if maintenance mode is actually enabled
+        $maintenanceMode = SiteSetting::get('maintenance_mode', false);
+        
+        // If maintenance mode is off, redirect to home
+        if (!$maintenanceMode) {
+            return redirect()->route('public.home');
+        }
+
+        // Get site settings for the maintenance page
+        $siteName = SiteSetting::get('site_name', 'Portal');
+        $logoUrl = SiteSetting::get('logo_url', '');
+        $faviconUrl = SiteSetting::get('favicon_url', '');
+        $contactEmail = SiteSetting::get('contact_email', '');
+        $contactPhone = SiteSetting::get('contact_phone', '');
+
+        return view('public.maintenance', compact(
+            'siteName',
+            'logoUrl',
+            'faviconUrl',
+            'contactEmail',
+            'contactPhone'
+        ));
+    }
 }

@@ -53,6 +53,7 @@ Route::prefix('p')->name('public.')->group(function () {
     Route::get('/artikel', [\App\Http\Controllers\PublicController::class, 'listArticles'])->name('articles');
     Route::get('/artikel/{slug}', [\App\Http\Controllers\PublicController::class, 'showArticle'])->name('article.show');
     Route::get('/galeri', [\App\Http\Controllers\PublicController::class, 'showGallery'])->name('gallery');
+    Route::get('/maintenance', [\App\Http\Controllers\PublicController::class, 'showMaintenance'])->name('maintenance');
 
     // Authenticated interactions (Like, Comment)
     Route::middleware('auth')->group(function () {
