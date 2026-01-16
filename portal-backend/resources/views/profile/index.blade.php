@@ -132,6 +132,65 @@
     </div>
 @endsection
 
+@push('styles')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+<style>
+    /* Cropper.js Custom Styles for Profile */
+    .cropper-container {
+        border-radius: 1rem;
+        overflow: hidden;
+    }
+    .cropper-view-box,
+    .cropper-face {
+        border-radius: 0;
+    }
+    .cropper-view-box {
+        outline: 2px solid rgb(16 185 129);
+        outline-color: rgb(16 185 129);
+    }
+    .cropper-line {
+        background-color: rgb(16 185 129);
+    }
+    .cropper-point {
+        background-color: rgb(16 185 129);
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+    }
+    .cropper-point.point-se {
+        width: 12px;
+        height: 12px;
+    }
+    .cropper-dashed {
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+    .cropper-modal {
+        background-color: rgba(0, 0, 0, 0.7);
+    }
+    
+    /* Zoom Range Slider */
+    input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 16px;
+        height: 16px;
+        background: rgb(16 185 129);
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+    }
+    input[type="range"]::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        background: rgb(16 185 129);
+        border-radius: 50%;
+        cursor: pointer;
+        border: none;
+    }
+</style>
+@endpush
+
 @push('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
     @include('profile.partials.scripts')
 @endpush
+
