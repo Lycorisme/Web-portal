@@ -213,13 +213,19 @@ async submitForm() {
         }
 
         const response = await fetch(url, {
-            method: 'POST', // Always POST for FormData with binary (even for updates, using _method)
+            method: 'POST', 
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                 'Accept': 'application/json',
              },
             body: formDataStart,
+            credentials: 'same-origin', // Ensure cookies are sent
         });
+
+        if (response.status === 419) {
+            showToast('error', 'Sesi telah berakhir. Silakan muat ulang halaman.');
+            return;
+        }
 
         const result = await response.json();
 

@@ -41,6 +41,7 @@
                     </div>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="hidden" name="auto_ban_enabled" value="0">
                     <input type="checkbox" name="auto_ban_enabled" class="sr-only peer" {{ ($rawSettings['auto_ban_enabled'] ?? true) ? 'checked' : '' }}>
                     <div class="w-14 h-7 bg-surface-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-surface-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[4px] after:bg-white after:border-surface-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-surface-600 peer-checked:bg-accent-emerald"></div>
                 </label>
@@ -58,6 +59,7 @@
                     </div>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="hidden" name="maintenance_mode" value="0">
                     <input type="checkbox" name="maintenance_mode" class="sr-only peer" {{ ($rawSettings['maintenance_mode'] ?? false) ? 'checked' : '' }}>
                     <div class="w-14 h-7 bg-surface-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-surface-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[4px] after:bg-white after:border-surface-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-surface-600 peer-checked:bg-accent-amber"></div>
                 </label>

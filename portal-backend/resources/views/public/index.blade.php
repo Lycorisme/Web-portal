@@ -7,42 +7,96 @@
     <header class="max-w-7xl mx-auto px-6 pt-32">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[500px]">
             <!-- Hero Main -->
-            <a href="{{ $featuredArticle ? route('public.article.show', $featuredArticle->slug) : '#' }}" wire:navigate class="block lg:col-span-8 relative group overflow-hidden rounded-[40px] border border-slate-800 shadow-2xl shadow-emerald-500/5 animate-float-slow">
-                @if($featuredArticle && $featuredArticle->image_url)
-                    <img src="{{ $featuredArticle->image_url }}" class="w-full h-full object-cover transition duration-1000 group-hover:scale-105">
-                @else
-                    <div class="w-full h-full bg-slate-900 flex items-center justify-center">
-                        <span class="text-slate-700 font-bold uppercase tracking-widest">No Image</span>
-                    </div>
-                @endif
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
-                <div class="absolute bottom-0 p-10 space-y-4">
-                    @if($featuredArticle)
-                        <span class="px-4 py-1 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white text-[10px] font-black rounded-full uppercase tracking-widest shadow-lg shadow-emerald-500/20">
-                            {{ $featuredArticle->categoryRelation?->name ?? 'TERBARU' }}
-                        </span>
-                        <h2 class="text-3xl md:text-5xl font-display font-bold text-white leading-tight">
-                            {{ $featuredArticle->title }}
-                        </h2>
-                        <div class="flex items-center gap-6 text-slate-400 text-sm font-semibold">
-                            <span class="flex items-center gap-2">
-                                <i class="fas fa-user-circle text-emerald-500"></i>
-                                {{ $featuredArticle->author->name ?? 'Admin' }}
-                            </span>
-                            <span class="flex items-center gap-2">
-                                <i class="fas fa-eye text-emerald-500"></i>
-                                {{ $featuredArticle->views }} Views
-                            </span>
+            <!-- Hero Main (Slider) -->
+            <div x-data='{ 
+                    activeSlide: 0,
+                    slides: {!! $featuredArticles->map(fn($a) => [
+                        "img" => $a->image_url,
+                        "title" => $a->title,
+                        "category" => $a->categoryRelation?->name ?? "TERBARU", 
+                        "author" => $a->author->name ?? "Admin",
+                        "views" => $a->views,
+                        "url" => route("public.article.show", $a->slug)
+                    ])->toJson(JSON_HEX_APOS) !!},
+                    interval: null,
+                    next() {
+                        this.activeSlide = (this.activeSlide + 1) % this.slides.length;
+                    },
+                    prev() {
+                        this.activeSlide = (this.activeSlide - 1 + this.slides.length) % this.slides.length;
+                    },
+                    startAutoPlay() {
+                        this.interval = setInterval(() => this.next(), 5000);
+                    },
+                    stopAutoPlay() {
+                        clearInterval(this.interval);
+                    }
+                }' 
+                x-init="startAutoPlay()"
+                @mouseenter="stopAutoPlay()"
+                @mouseleave="startAutoPlay()"
+                class="lg:col-span-8 relative group overflow-hidden rounded-[40px] border border-slate-800 shadow-2xl shadow-emerald-500/5 block min-h-[500px]"
+            >
+                <template x-for="(slide, index) in slides" :key="index">
+                    <a :href="slide.url" wire:navigate 
+                       x-show="activeSlide === index"
+                       x-transition:enter="transition transform ease-out duration-700"
+                       x-transition:enter-start="opacity-0 translate-x-10"
+                       x-transition:enter-end="opacity-100 translate-x-0"
+                       x-transition:leave="transition transform ease-in duration-500 absolute inset-0"
+                       x-transition:leave-start="opacity-100 translate-x-0"
+                       x-transition:leave-end="opacity-0 -translate-x-10"
+                       class="absolute inset-0 w-full h-full block">
+                        
+                        <!-- Image -->
+                        <template x-if="slide.img">
+                             <img :src="slide.img" class="w-full h-full object-cover transition duration-1000 group-hover:scale-105">
+                        </template>
+                        <template x-if="!slide.img">
+                             <div class="w-full h-full bg-slate-900 flex items-center justify-center">
+                                <span class="text-slate-700 font-bold uppercase tracking-widest">No Image</span>
+                             </div>
+                        </template>
+
+                        <!-- Overlay -->
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
+                        
+                        <!-- Content -->
+                        <div class="absolute bottom-0 p-10 space-y-4 max-w-3xl">
+                             <span class="px-4 py-1 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white text-[10px] font-black rounded-full uppercase tracking-widest shadow-lg shadow-emerald-500/20" x-text="slide.category"></span>
+                             <h2 class="text-3xl md:text-5xl font-display font-bold text-white leading-tight" x-text="slide.title"></h2>
+                             <div class="flex items-center gap-6 text-slate-400 text-sm font-semibold">
+                                <span class="flex items-center gap-2">
+                                    <i class="fas fa-user-circle text-emerald-500"></i>
+                                    <span x-text="slide.author"></span>
+                                </span>
+                                <span class="flex items-center gap-2">
+                                    <i class="fas fa-eye text-emerald-500"></i>
+                                    <span x-text="slide.views + ' Views'"></span>
+                                </span>
+                            </div>
                         </div>
-                    @else
-                        <h2 class="text-3xl md:text-5xl font-extrabold text-white leading-tight">Belum ada berita utama</h2>
-                    @endif
+                    </a>
+                </template>
+
+                <!-- Navigation Dots -->
+                <div class="absolute bottom-8 right-8 flex gap-2 z-20">
+                    <template x-for="(slide, index) in slides" :key="index">
+                        <button @click="activeSlide = index" 
+                                class="w-2.5 h-2.5 rounded-full transition-all duration-300"
+                                :class="activeSlide === index ? 'bg-emerald-500 w-8' : 'bg-slate-600 hover:bg-slate-400'">
+                        </button>
+                    </template>
                 </div>
-            </a>
+            </div>
 
             <!-- Hero Side (2 items) -->
             <div class="lg:col-span-4 flex flex-col gap-6">
-                @php $sideArticles = $latestArticles->take(2); @endphp
+                @php 
+                    // Take top 2 for side widget
+                    $sideArticles = $latestArticles->take(2); 
+                @endphp
+
                 @foreach($sideArticles as $article)
                     <a href="{{ route('public.article.show', $article->slug) }}" wire:navigate class="block flex-1 relative group overflow-hidden rounded-[32px] border border-slate-800 hover:border-emerald-500/30 transition-colors">
                         @if($article->image_url)
@@ -111,9 +165,9 @@
             </div>
 
             <div class="space-y-8">
-                <!-- Logic: If we have very few articles, don't skip them in the main feed to avoid empty space. -->
+                <!-- Logic: Take articles starting from index 2 (skipping the first 2 used in Hero Side) -->
                 @php 
-                    $mainFeedArticles = $latestArticles->count() > 2 ? $latestArticles->skip(2) : $latestArticles; 
+                    $mainFeedArticles = $latestArticles->slice(2); 
                 @endphp
                 
                 @foreach($mainFeedArticles as $article)
@@ -165,7 +219,7 @@
                 @endif
             </div>
             
-            <div class="flex justify-center pt-10">
+            <div class="flex justify-center pt-10 w-full clear-both block">
                 <a href="{{ route('public.articles') }}" wire:navigate class="px-12 py-4 rounded-2xl bg-slate-900 border border-slate-800 text-white font-bold hover:bg-emerald-600 transition-all shadow-xl uppercase text-xs tracking-widest">
                     Muat Berita Lainnya
                 </a>

@@ -208,6 +208,8 @@ class ArticleController extends Controller
             'meta_description' => 'nullable|string|max:500',
             'meta_keywords' => 'nullable|string|max:255',
             'published_at' => 'nullable|date',
+            'is_pinned' => 'nullable|boolean',
+            'is_headline' => 'nullable|boolean',
         ]);
 
         try {
@@ -224,7 +226,7 @@ class ArticleController extends Controller
             $data = $request->only([
                 'title', 'excerpt', 'content', 'category_id', 
                 'read_time', 'status', 'meta_title', 'meta_description', 
-                'meta_keywords', 'published_at'
+                'meta_keywords', 'published_at', 'is_pinned', 'is_headline'
             ]);
             
             // Handle Thumbnail Upload
@@ -322,6 +324,8 @@ class ArticleController extends Controller
             'meta_description' => 'nullable|string|max:500',
             'meta_keywords' => 'nullable|string|max:255',
             'published_at' => 'nullable|date',
+            'is_pinned' => 'nullable|boolean',
+            'is_headline' => 'nullable|boolean',
         ]);
 
         try {
@@ -338,7 +342,7 @@ class ArticleController extends Controller
             $data = $request->only([
                 'title', 'excerpt', 'content', 'category_id', 
                 'read_time', 'status', 'meta_title', 'meta_description', 
-                'meta_keywords', 'published_at'
+                'meta_keywords', 'published_at', 'is_pinned', 'is_headline'
             ]);
             
             // Handle Thumbnail Upload

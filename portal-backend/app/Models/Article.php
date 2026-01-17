@@ -37,6 +37,8 @@ class Article extends Model
         'meta_keywords',
         'views',
         'published_at',
+        'is_pinned',
+        'is_headline',
     ];
 
     /**
@@ -48,6 +50,8 @@ class Article extends Model
         'published_at' => 'datetime',
         'read_time' => 'integer',
         'views' => 'integer',
+        'is_pinned' => 'boolean',
+        'is_headline' => 'boolean',
     ];
 
     /**
@@ -123,6 +127,22 @@ class Article extends Model
     public function scopePending($query)
     {
         return $query->where('status', 'pending');
+    }
+
+    /**
+     * Scope for pinned articles.
+     */
+    public function scopePinned($query)
+    {
+        return $query->where('is_pinned', true);
+    }
+
+    /**
+     * Scope for headline articles.
+     */
+    public function scopeHeadline($query)
+    {
+        return $query->where('is_headline', true);
     }
 
     /**

@@ -15,18 +15,32 @@ class PublicController extends Controller
      */
     public function index()
     {
-        // Featured article (most recent published with high views)
-        $featuredArticle = Article::published()
+        // Featured articles (Slider)
+        // 1. Get Headline articles (limit 5)
+        $featuredArticles = Article::published()
             ->with(['author', 'categoryRelation'])
-            ->orderByDesc('views')
-            ->first();
+            ->headline()
+            ->latest('published_at')
+            ->take(5)
+            ->get();
 
-        // Latest articles (excluding featured)
+        // 2. Fallback: If no headlines, take 1 most popular article
+        if ($featuredArticles->isEmpty()) {
+            $featuredArticles = Article::published()
+                ->with(['author', 'categoryRelation'])
+                ->orderByDesc('views')
+                ->take(1)
+                ->get();
+        }
+
+        // Latest articles (excluding featured/headline)
+        // Logic: Pinned first (desc), then by published_at (desc)
+        // UPDATE: Removed exclusion of featured articles so they can appear in the list if pinned/latest
         $latestArticles = Article::published()
             ->with(['author', 'categoryRelation'])
-            ->when($featuredArticle, fn($q) => $q->where('id', '!=', $featuredArticle->id))
+            ->orderByDesc('is_pinned')
             ->latest('published_at')
-            ->take(6)
+            ->take(8)
             ->get();
 
         // Popular articles (by views)
@@ -64,7 +78,7 @@ class PublicController extends Controller
             ->get();
 
         return view('public.index', compact(
-            'featuredArticle',
+            'featuredArticles',
             'latestArticles',
             'popularArticles',
             'categories',
