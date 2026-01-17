@@ -54,6 +54,9 @@ Route::prefix('p')->name('public.')->group(function () {
     Route::get('/artikel/{slug}', [\App\Http\Controllers\PublicController::class, 'showArticle'])->name('article.show');
     Route::get('/galeri', [\App\Http\Controllers\PublicController::class, 'showGallery'])->name('gallery');
     Route::get('/maintenance', [\App\Http\Controllers\PublicController::class, 'showMaintenance'])->name('maintenance');
+    
+    // API for AJAX requests
+    Route::get('/api/articles-by-category', [\App\Http\Controllers\PublicController::class, 'getArticlesByCategory'])->name('api.articles-by-category');
 
     // Authenticated interactions (Like, Comment)
     Route::middleware('auth')->group(function () {

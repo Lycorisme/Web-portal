@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Gallery;
 use App\Models\SiteSetting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class PublicController extends Controller
 {
@@ -217,6 +218,47 @@ class PublicController extends Controller
         ];
 
         return view('public.gallery', compact('galleries', 'albums', 'siteSettings'));
+    }
+
+    /**
+     * API: Get articles by category (for homepage AJAX filter)
+     */
+    public function getArticlesByCategory(Request $request)
+    {
+        $query = Article::published()
+            ->with(['author', 'categoryRelation']);
+
+        // Filter by category slug
+        if ($request->filled('category') && $request->category !== 'all') {
+            $query->whereHas('categoryRelation', fn($q) => 
+                $q->where('slug', $request->category)
+            );
+        }
+
+        $articles = $query
+            ->orderByDesc('is_pinned')
+            ->latest('published_at')
+            ->take(10)
+            ->get()
+            ->map(function($article) {
+                return [
+                    'id' => $article->id,
+                    'title' => $article->title,
+                    'slug' => $article->slug,
+                    'excerpt' => Str::limit(strip_tags($article->content), 130),
+                    'image_url' => $article->image_url,
+                    'category' => $article->categoryRelation?->name ?? 'Berita',
+                    'category_slug' => $article->categoryRelation?->slug,
+                    'author' => $article->author?->name ?? 'Admin',
+                    'published_at' => $article->published_at ? \Carbon\Carbon::parse($article->published_at)->diffForHumans() : '-',
+                    'url' => route('public.article.show', $article->slug),
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'articles' => $articles,
+        ]);
     }
 
     /**

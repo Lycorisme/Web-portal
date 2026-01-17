@@ -133,7 +133,42 @@
     <main class="max-w-7xl mx-auto px-6 py-20 grid grid-cols-1 lg:grid-cols-12 gap-12">
         
         <!-- Main Feed -->
-        <div class="lg:col-span-8 space-y-12">
+        <div class="lg:col-span-8 space-y-12"
+            x-data='{
+                activeCategory: "all",
+                isLoading: false,
+                categories: {!! json_encode($categories->map(fn($c) => ["name" => $c->name, "slug" => $c->slug])) !!},
+                articles: {!! json_encode($latestArticles->slice(2)->map(fn($a) => [
+                    "id" => $a->id,
+                    "title" => $a->title,
+                    "slug" => $a->slug,
+                    "excerpt" => Str::limit(strip_tags($a->content), 130),
+                    "image_url" => $a->image_url,
+                    "category" => $a->categoryRelation?->name ?? "Berita",
+                    "category_slug" => $a->categoryRelation?->slug,
+                    "author" => $a->author?->name ?? "Admin",
+                    "published_at" => $a->published_at ? \Carbon\Carbon::parse($a->published_at)->diffForHumans() : "-",
+                    "url" => route("public.article.show", $a->slug),
+                ])->values()) !!},
+                async fetchArticles(categorySlug) {
+                    if (this.isLoading) return;
+                    this.isLoading = true;
+                    this.activeCategory = categorySlug;
+                    
+                    try {
+                        const response = await fetch(`{{ route("public.api.articles-by-category") }}?category=${categorySlug}`);
+                        const data = await response.json();
+                        if (data.success) {
+                            this.articles = data.articles;
+                        }
+                    } catch (error) {
+                        console.error("Error fetching articles:", error);
+                    } finally {
+                        this.isLoading = false;
+                    }
+                }
+            }'
+        >
             <style>
                 .hide-scrollbar::-webkit-scrollbar {
                     display: none;
@@ -153,70 +188,80 @@
                 
                 <div class="flex-1 overflow-x-auto hide-scrollbar">
                     <div class="flex items-center gap-2 text-xs font-bold text-slate-500 whitespace-nowrap min-w-max px-2">
-                        <a href="{{ route('public.articles') }}" wire:navigate class="text-white bg-slate-800 px-4 py-1.5 rounded-full border border-slate-700 hover:bg-slate-700 transition">Semua</a>
-                        @foreach($categories as $category)
-                             <a href="{{ route('public.articles', ['kategori' => $category->slug]) }}" wire:navigate
-                                class="text-slate-400 bg-slate-900/50 hover:bg-slate-800 hover:text-white px-4 py-1.5 rounded-full border border-slate-800 hover:border-slate-700 transition">
-                                {{ $category->name }}
-                             </a>
-                        @endforeach
+                        <button 
+                            @click="fetchArticles('all')" 
+                            :class="activeCategory === 'all' ? 'text-white bg-slate-800 border-slate-700' : 'text-slate-400 bg-slate-900/50 border-slate-800 hover:bg-slate-800 hover:text-white hover:border-slate-700'"
+                            class="px-4 py-1.5 rounded-full border transition"
+                        >Semua</button>
+                        <template x-for="cat in categories" :key="cat.slug">
+                            <button 
+                                @click="fetchArticles(cat.slug)" 
+                                :class="activeCategory === cat.slug ? 'text-white bg-slate-800 border-slate-700' : 'text-slate-400 bg-slate-900/50 border-slate-800 hover:bg-slate-800 hover:text-white hover:border-slate-700'"
+                                class="px-4 py-1.5 rounded-full border transition"
+                                x-text="cat.name"
+                            ></button>
+                        </template>
                     </div>
                 </div>
             </div>
 
-            <div class="space-y-8">
-                <!-- Logic: Take articles starting from index 2 (skipping the first 2 used in Hero Side) -->
-                @php 
-                    $mainFeedArticles = $latestArticles->slice(2); 
-                @endphp
-                
-                @foreach($mainFeedArticles as $article)
+            <!-- Loading State -->
+            <div x-show="isLoading" class="space-y-8">
+                <template x-for="i in 3" :key="i">
+                    <div class="group flex flex-col md:flex-row gap-8 p-6 rounded-[32px] bg-slate-900/20 animate-pulse">
+                        <div class="w-full md:w-64 h-48 rounded-2xl bg-slate-800"></div>
+                        <div class="flex flex-col justify-between flex-1 space-y-4">
+                            <div class="space-y-3">
+                                <div class="h-4 bg-slate-800 rounded w-24"></div>
+                                <div class="h-8 bg-slate-800 rounded w-3/4"></div>
+                                <div class="h-4 bg-slate-800 rounded w-full"></div>
+                            </div>
+                            <div class="h-4 bg-slate-800 rounded w-32"></div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Articles List -->
+            <div x-show="!isLoading" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0" class="space-y-8">
+                <template x-for="article in articles" :key="article.id">
                     <div class="group flex flex-col md:flex-row gap-8 p-6 rounded-[32px] transition-all duration-500 hover:bg-slate-900/40 border border-transparent hover:border-slate-800 hover:shadow-2xl hover:translate-y-[-4px]">
                         <div class="w-full md:w-64 h-48 rounded-2xl overflow-hidden shrink-0 shadow-xl border border-slate-800 relative">
-                             @if($article->image_url)
-                                <img src="{{ $article->image_url }}" class="w-full h-full object-cover transition duration-700 group-hover:scale-110">
-                            @else
+                            <template x-if="article.image_url">
+                                <img :src="article.image_url" class="w-full h-full object-cover transition duration-700 group-hover:scale-110">
+                            </template>
+                            <template x-if="!article.image_url">
                                 <div class="w-full h-full bg-slate-900 flex items-center justify-center text-slate-700 font-bold text-xs uppercase">No Image</div>
-                            @endif
+                            </template>
                         </div>
                         <div class="flex flex-col justify-between flex-1">
                             <div>
                                 <div class="flex items-center gap-3 mb-4">
-                                    <span class="text-[10px] font-black px-3 py-1 bg-violet-500/10 text-violet-400 border border-violet-500/20 rounded-full uppercase tracking-widest">
-                                        {{ $article->categoryRelation?->name ?? 'Berita' }}
-                                    </span>
-                                    <span class="text-[10px] text-slate-600 font-bold uppercase tracking-widest">
-                                        {{ $article->published_at ? \Carbon\Carbon::parse($article->published_at)->diffForHumans() : '-' }}
-                                    </span>
+                                    <span class="text-[10px] font-black px-3 py-1 bg-violet-500/10 text-violet-400 border border-violet-500/20 rounded-full uppercase tracking-widest" x-text="article.category"></span>
+                                    <span class="text-[10px] text-slate-600 font-bold uppercase tracking-widest" x-text="article.published_at"></span>
                                 </div>
                                 <h4 class="text-xl md:text-2xl font-bold text-white group-hover:text-emerald-400 transition-all leading-snug mb-3 font-display">
-                                    <a href="{{ route('public.article.show', $article->slug) }}" wire:navigate>
-                                        {{ $article->title }}
-                                    </a>
+                                    <a :href="article.url" x-text="article.title"></a>
                                 </h4>
-                                <p class="text-slate-400 text-sm leading-relaxed line-clamp-2">
-                                    {{ Str::limit(strip_tags($article->content), 130) }}
-                                </p>
+                                <p class="text-slate-400 text-sm leading-relaxed line-clamp-2" x-text="article.excerpt"></p>
                             </div>
                             <div class="flex items-center gap-4 mt-6">
                                 <span class="text-xs font-bold text-emerald-500 flex items-center gap-2">
                                     <i class="fas fa-check-circle"></i> Terverifikasi
                                 </span>
                                 <span class="text-slate-700">|</span>
-                                <a href="{{ route('public.article.show', $article->slug) }}" wire:navigate class="text-xs font-bold text-white uppercase tracking-widest hover:text-emerald-500 transition-all flex items-center gap-2">
+                                <a :href="article.url" class="text-xs font-bold text-white uppercase tracking-widest hover:text-emerald-500 transition-all flex items-center gap-2">
                                     Baca Selengkapnya <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                                 </a>
                             </div>
                         </div>
                     </div>
-                @endforeach
+                </template>
                 
-                @if($mainFeedArticles->count() == 0 && $latestArticles->count() > 0 && $latestArticles->take(2)->count() > 0)
-                   {{-- If we have articles but all are in hero side (less than 3 total) --}}
-                   {{-- Do nothing or show message --}}
-                @elseif($latestArticles->count() == 0)
-                    <div class="text-center py-10 text-slate-500 font-bold">Belum ada berita saat ini.</div>
-                @endif
+                <!-- Empty State -->
+                <template x-if="articles.length === 0 && !isLoading">
+                    <div class="text-center py-10 text-slate-500 font-bold">Belum ada berita untuk kategori ini.</div>
+                </template>
             </div>
             
             <div class="flex justify-center pt-10 w-full clear-both block">
