@@ -45,6 +45,9 @@
     class="font-jakarta bg-surface-50 dark:bg-surface-950 text-surface-900 dark:text-surface-100 transition-colors duration-300 overflow-x-hidden antialiased"
 >
 
+    {{-- Global Loading Screen - Rendered simultaneously with sidebar --}}
+    @include('layouts.partials.loading-screen')
+
     {{-- Animated Background Elements --}}
     @include('layouts.partials.background')
 
