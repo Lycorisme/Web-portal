@@ -154,6 +154,13 @@
                     <i data-lucide="mail" class="w-4 h-4"></i>
                     <span>Email</span>
                 </button>
+
+                <button @click="activeTab = 'hosting'"
+                    :class="activeTab === 'hosting' ? 'bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-500/30' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800'"
+                    class="flex-shrink-0 sm:flex-1 flex items-center justify-center gap-2 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl font-medium transition-all duration-200 text-sm whitespace-nowrap">
+                    <i data-lucide="cloud-upload" class="w-4 h-4"></i>
+                    <span>Hosting</span>
+                </button>
             </div>
         </div>
 
@@ -185,6 +192,9 @@
 
             {{-- Email Settings Tab --}}
             @include('settings.partials.email')
+
+            {{-- Hosting/Deployment Settings Tab --}}
+            @include('settings.partials.hosting')
 
             {{-- Save Button --}}
             <div class="mt-6 sm:mt-8 flex flex-col-reverse sm:flex-row gap-3 sm:gap-4 sm:justify-end">

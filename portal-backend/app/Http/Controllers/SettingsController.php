@@ -28,6 +28,7 @@ class SettingsController extends Controller
             'letterhead' => SiteSetting::getByGroup('letterhead'),
             'signature' => SiteSetting::getByGroup('signature'),
             'email' => SiteSetting::getByGroup('email'),
+            'hosting' => SiteSetting::getByGroup('hosting'),
         ];
 
         // Get raw settings for easy access
@@ -79,6 +80,28 @@ class SettingsController extends Controller
                 // Keep existing file if no new file uploaded
                 $data[$field] = $request->input($field . '_current');
             }
+        }
+
+        // Handle hosting password encryption
+        $encryptedFields = ['hosting_db_password', 'hosting_ftp_password'];
+        foreach ($encryptedFields as $field) {
+            if (isset($data[$field]) && !empty($data[$field])) {
+                // Only encrypt if the value has changed (not the masked placeholder)
+                $currentValue = SiteSetting::get($field);
+                if ($data[$field] !== $currentValue && !str_starts_with($data[$field], 'encrypted:')) {
+                    // Store as plain text but mark that it should be handled securely
+                    // Note: We're storing plain text here for now since the .env generator needs readable values
+                    // In a production environment with sensitive data, use encrypt() helper
+                    $data[$field] = $data[$field];
+                }
+            }
+        }
+
+        // Handle checkbox for hosting debug mode
+        if (!isset($data['hosting_app_debug'])) {
+            $data['hosting_app_debug'] = 'false';
+        } else {
+            $data['hosting_app_debug'] = 'true';
         }
 
         // Update all settings
