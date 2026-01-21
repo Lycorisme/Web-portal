@@ -46,7 +46,7 @@
             </div>
 
             {{-- Logo --}}
-            <div class="space-y-4" x-data="{ isDragging: false, previewUrl: '{{ $rawSettings['logo_url'] ?? '' }}' }">
+            <div class="space-y-4" x-data="{ isDragging: false, previewUrl: '{{ $rawSettings['logo_url'] ?? '' }}', deleteImage: false }">
                 <label class="block text-sm font-medium text-surface-700 dark:text-surface-300">
                     Logo Utama
                 </label>
@@ -59,6 +59,7 @@
                         if (file) {
                             $refs.logoInput.files = $event.dataTransfer.files; 
                             previewUrl = URL.createObjectURL(file);
+                            deleteImage = false;
                         }
                     "
                     class="relative w-full h-48 rounded-2xl border-2 border-dashed transition-all duration-300 ease-out overflow-hidden group"
@@ -76,10 +77,41 @@
                             const file = $event.target.files[0];
                             if (file) {
                                 previewUrl = URL.createObjectURL(file);
+                                deleteImage = false;
                             }
                         "
                     >
                     <input type="hidden" name="logo_url_current" value="{{ $rawSettings['logo_url'] ?? '' }}">
+                    <input type="hidden" name="delete_logo_url" x-bind:value="deleteImage ? '1' : ''">
+
+                    {{-- Delete Button --}}
+                    <button 
+                        x-show="previewUrl"
+                        @click.stop.prevent="
+                            Swal.fire({
+                                title: 'Hapus Logo?',
+                                text: 'Logo akan dihapus setelah menyimpan pengaturan.',
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonColor: '#ef4444',
+                                cancelButtonColor: '#64748b',
+                                confirmButtonText: 'Ya, Hapus',
+                                cancelButtonText: 'Batal',
+                                reverseButtons: true
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    previewUrl = '';
+                                    deleteImage = true;
+                                    $refs.logoInput.value = '';
+                                }
+                            });
+                        "
+                        type="button"
+                        class="absolute top-2 right-2 z-30 p-2 bg-rose-500 text-white rounded-xl shadow-lg hover:bg-rose-600 transition-all hover:scale-110 opacity-0 group-hover:opacity-100"
+                        title="Hapus Logo"
+                    >
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
 
                     {{-- Empty State --}}
                     <div x-show="!previewUrl" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none transition-transform duration-300" :class="isDragging ? 'scale-110' : 'scale-100'">
@@ -104,7 +136,7 @@
             </div>
 
             {{-- Favicon --}}
-            <div class="space-y-4" x-data="{ isDragging: false, previewUrl: '{{ $rawSettings['favicon_url'] ?? '' }}' }">
+            <div class="space-y-4" x-data="{ isDragging: false, previewUrl: '{{ $rawSettings['favicon_url'] ?? '' }}', deleteImage: false }">
                 <label class="block text-sm font-medium text-surface-700 dark:text-surface-300">
                     Favicon
                 </label>
@@ -117,6 +149,7 @@
                         if (file) {
                              $refs.favInput.files = $event.dataTransfer.files;
                              previewUrl = URL.createObjectURL(file);
+                             deleteImage = false;
                         }
                     "
                     class="relative w-32 h-32 rounded-2xl border-2 border-dashed transition-all duration-300 ease-out overflow-hidden group"
@@ -134,10 +167,41 @@
                             const file = $event.target.files[0];
                             if (file) {
                                 previewUrl = URL.createObjectURL(file);
+                                deleteImage = false;
                             }
                         "
                     >
                     <input type="hidden" name="favicon_url_current" value="{{ $rawSettings['favicon_url'] ?? '' }}">
+                    <input type="hidden" name="delete_favicon_url" x-bind:value="deleteImage ? '1' : ''">
+
+                    {{-- Delete Button --}}
+                    <button 
+                        x-show="previewUrl"
+                        @click.stop.prevent="
+                            Swal.fire({
+                                title: 'Hapus Favicon?',
+                                text: 'Favicon akan dihapus setelah menyimpan pengaturan.',
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonColor: '#ef4444',
+                                cancelButtonColor: '#64748b',
+                                confirmButtonText: 'Ya, Hapus',
+                                cancelButtonText: 'Batal',
+                                reverseButtons: true
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    previewUrl = '';
+                                    deleteImage = true;
+                                    $refs.favInput.value = '';
+                                }
+                            });
+                        "
+                        type="button"
+                        class="absolute top-1 right-1 z-30 p-1.5 bg-rose-500 text-white rounded-lg shadow-lg hover:bg-rose-600 transition-all hover:scale-110 opacity-0 group-hover:opacity-100"
+                        title="Hapus Favicon"
+                    >
+                        <i data-lucide="trash-2" class="w-3 h-3"></i>
+                    </button>
 
                     {{-- Empty State --}}
                     <div x-show="!previewUrl" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center p-2">

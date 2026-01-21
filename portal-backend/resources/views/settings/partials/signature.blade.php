@@ -37,7 +37,9 @@
         isDraggingSig: false,
         isDraggingStamp: false,
         sigUrl: '{{ $rawSettings['signature_url'] ?? '' }}',
-        stampUrl: '{{ $rawSettings['stamp_url'] ?? '' }}'
+        stampUrl: '{{ $rawSettings['stamp_url'] ?? '' }}',
+        deleteSig: false,
+        deleteStamp: false
      }"
      x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
     <div class="bg-white dark:bg-surface-900/50 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-surface-200/50 dark:border-surface-800/50 p-4 sm:p-6 lg:p-8">
@@ -146,9 +148,43 @@
                                 x-ref="sigInput"
                                 accept="image/*"
                                 class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                @change="previewImage($event, 'previewSig', 'sigUrl')"
+                                @change="previewImage($event, 'previewSig', 'sigUrl'); deleteSig = false;"
                             >
                             <input type="hidden" name="signature_url_current" value="{{ $rawSettings['signature_url'] ?? '' }}">
+                            <input type="hidden" name="delete_signature_url" x-bind:value="deleteSig ? '1' : ''">
+
+                            {{-- Delete Button --}}
+                            <button 
+                                x-show="sigUrl"
+                                @click.stop.prevent="
+                                    Swal.fire({
+                                        title: 'Hapus Tanda Tangan?',
+                                        text: 'Tanda tangan akan dihapus setelah menyimpan pengaturan.',
+                                        icon: 'warning',
+                                        showCancelButton: true,
+                                        confirmButtonColor: '#ef4444',
+                                        cancelButtonColor: '#64748b',
+                                        confirmButtonText: 'Ya, Hapus',
+                                        cancelButtonText: 'Batal',
+                                        reverseButtons: true
+                                    }).then((result) => {
+                                        if (result.isConfirmed) {
+                                            sigUrl = '';
+                                            deleteSig = true;
+                                            $refs.sigInput.value = '';
+                                            if ($refs.previewSig) {
+                                                $refs.previewSig.src = '';
+                                                $refs.previewSig.style.display = 'none';
+                                            }
+                                        }
+                                    });
+                                "
+                                type="button"
+                                class="absolute top-2 right-2 z-30 p-2 bg-rose-500 text-white rounded-xl shadow-lg hover:bg-rose-600 transition-all hover:scale-110 opacity-0 group-hover:opacity-100"
+                                title="Hapus Tanda Tangan"
+                            >
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
 
                             {{-- Empty State --}}
                             <div x-show="!sigUrl" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none transition-transform duration-300" :class="isDraggingSig ? 'scale-110' : 'scale-100'">
@@ -200,9 +236,43 @@
                                 x-ref="stampInput"
                                 accept="image/*"
                                 class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                @change="previewImage($event, 'previewStamp', 'stampUrl')"
+                                @change="previewImage($event, 'previewStamp', 'stampUrl'); deleteStamp = false;"
                             >
                             <input type="hidden" name="stamp_url_current" value="{{ $rawSettings['stamp_url'] ?? '' }}">
+                            <input type="hidden" name="delete_stamp_url" x-bind:value="deleteStamp ? '1' : ''">
+
+                            {{-- Delete Button --}}
+                            <button 
+                                x-show="stampUrl"
+                                @click.stop.prevent="
+                                    Swal.fire({
+                                        title: 'Hapus Stempel?',
+                                        text: 'Stempel akan dihapus setelah menyimpan pengaturan.',
+                                        icon: 'warning',
+                                        showCancelButton: true,
+                                        confirmButtonColor: '#ef4444',
+                                        cancelButtonColor: '#64748b',
+                                        confirmButtonText: 'Ya, Hapus',
+                                        cancelButtonText: 'Batal',
+                                        reverseButtons: true
+                                    }).then((result) => {
+                                        if (result.isConfirmed) {
+                                            stampUrl = '';
+                                            deleteStamp = true;
+                                            $refs.stampInput.value = '';
+                                            if ($refs.previewStamp) {
+                                                $refs.previewStamp.src = '';
+                                                $refs.previewStamp.style.display = 'none';
+                                            }
+                                        }
+                                    });
+                                "
+                                type="button"
+                                class="absolute top-2 right-2 z-30 p-2 bg-rose-500 text-white rounded-xl shadow-lg hover:bg-rose-600 transition-all hover:scale-110 opacity-0 group-hover:opacity-100"
+                                title="Hapus Stempel"
+                            >
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
 
                             {{-- Empty State --}}
                             <div x-show="!stampUrl" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none transition-transform duration-300" :class="isDraggingStamp ? 'scale-110' : 'scale-100'">

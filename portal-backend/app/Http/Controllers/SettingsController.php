@@ -71,7 +71,24 @@ class SettingsController extends Controller
         $fileFields = ['logo_url', 'favicon_url', 'letterhead_url', 'signature_url', 'stamp_url'];
         
         foreach ($fileFields as $field) {
-            if ($request->hasFile($field)) {
+            $deleteField = 'delete_' . $field;
+            
+            // Check if delete flag is set
+            if ($request->input($deleteField) === '1') {
+                // Delete old file from storage if exists
+                $currentValue = $oldSettings[$field] ?? '';
+                if (!empty($currentValue)) {
+                    $storagePath = str_replace('/storage/', '', $currentValue);
+                    if (Storage::disk('public')->exists($storagePath)) {
+                        Storage::disk('public')->delete($storagePath);
+                    }
+                }
+                // Set field to empty string
+                $data[$field] = '';
+                // Remove delete flag from data
+                unset($data[$deleteField]);
+            } elseif ($request->hasFile($field)) {
+                // Upload new file
                 $file = $request->file($field);
                 $filename = $field . '_' . time() . '.' . $file->getClientOriginalExtension();
                 $path = $file->storeAs('settings', $filename, 'public');
@@ -79,6 +96,11 @@ class SettingsController extends Controller
             } elseif ($request->has($field . '_current')) {
                 // Keep existing file if no new file uploaded
                 $data[$field] = $request->input($field . '_current');
+            }
+            
+            // Remove delete flag from data if still present (not deleted)
+            if (isset($data[$deleteField])) {
+                unset($data[$deleteField]);
             }
         }
 
