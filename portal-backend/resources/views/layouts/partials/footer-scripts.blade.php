@@ -154,40 +154,11 @@
     });
 
     // ============================================
-    // SweetAlert2 Helper Functions
+    // Toast Helper Functions (Using Custom Toast System)
     // ============================================
 
-    // Toast notification
-    const Toast = Swal.mixin({
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-        didOpen: (toast) => {
-            toast.addEventListener('mouseenter', Swal.stopTimer);
-            toast.addEventListener('mouseleave', Swal.resumeTimer);
-        },
-        customClass: {
-            popup: 'rounded-xl'
-        }
-    });
-
-    // Show toast notification
-    function showToast(type, title, message = '') {
-        const iconMap = {
-            'success': 'success',
-            'error': 'error',
-            'warning': 'warning',
-            'info': 'info'
-        };
-        
-        Toast.fire({
-            icon: iconMap[type] || 'info',
-            title: title,
-            text: message
-        });
-    }
+    // Note: Custom Toast is loaded from layouts.partials.custom-toast
+    // showToast, toastSuccess, toastError, toastWarning, toastInfo are available globally
 
     // Show alert dialog
     function showAlert(type, title, message, callback = null) {
@@ -268,17 +239,13 @@
         });
     }
 
-    // Show success message - now uses toast to avoid double confirmation
+    // Show success message - now uses custom toast to avoid double confirmation
     function showSuccess(title, message = '', callback = null) {
         // Mark that a Swal action just completed (prevents loading screen on page reload)
         sessionStorage.setItem('swalActionCompleted', Date.now().toString());
         
-        // Use toast instead of popup
-        Toast.fire({
-            icon: 'success',
-            title: title,
-            text: message
-        });
+        // Use custom toast instead of SweetAlert popup
+        showToast('success', title, message);
         
         // Execute callback immediately if provided
         if (callback) {

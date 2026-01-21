@@ -187,6 +187,9 @@
                             }
                         }
                         
+                        // Close loading modal first
+                        Swal.close();
+                        
                         // Show toast notification instead of popup
                         showToast('success', 'Berhasil!', data.message || 'Pengaturan berhasil disimpan!');
                         

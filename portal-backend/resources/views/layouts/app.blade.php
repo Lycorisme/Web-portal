@@ -86,7 +86,9 @@
         </main>
     </div>
 
-    {{-- Initialize Scripts --}}
+    {{-- Custom Toast Notifications - Must load before footer-scripts --}}
+    @include('layouts.partials.custom-toast')
+
     {{-- Initialize Scripts --}}
     @include('layouts.partials.footer-scripts')
 
