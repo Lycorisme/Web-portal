@@ -187,13 +187,11 @@
                             }
                         }
                         
-                        // Show success message
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil!',
-                            text: data.message || 'Pengaturan berhasil disimpan!',
-                            confirmButtonText: 'OK'
-                        });
+                        // Show toast notification instead of popup
+                        showToast('success', 'Berhasil!', data.message || 'Pengaturan berhasil disimpan!');
+                        
+                        // Mark session to prevent loading screen on subsequent navigations
+                        sessionStorage.setItem('swalActionCompleted', Date.now().toString());
                         
                         // Reinitialize Lucide icons
                         if (typeof lucide !== 'undefined') {

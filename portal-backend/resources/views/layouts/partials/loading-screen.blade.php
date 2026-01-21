@@ -106,12 +106,80 @@
         const loadingScreen = document.getElementById('global-loading-screen');
         const progressText = document.getElementById('loading-progress-text');
         
+        // Check if a Swal action was recently completed (within last 5 seconds)
+        function wasSwalActionRecentlyCompleted() {
+            const lastAction = sessionStorage.getItem('swalActionCompleted');
+            if (lastAction) {
+                const timeDiff = Date.now() - parseInt(lastAction);
+                // If action was within last 5 seconds, skip loading screen
+                if (timeDiff < 5000) {
+                    // Clear the flag after checking
+                    sessionStorage.removeItem('swalActionCompleted');
+                    return true;
+                }
+                // Clean up old entries
+                sessionStorage.removeItem('swalActionCompleted');
+            }
+            return false;
+        }
+        
+        // If a Swal action was recently completed, skip loading screen entirely
+        if (wasSwalActionRecentlyCompleted()) {
+            loadingScreen.style.display = 'none';
+            return;
+        }
+        
+        // Check if SweetAlert loading is active
+        function isSwalLoadingActive() {
+            // Check if Swal exists and is visible with loading state
+            if (typeof Swal !== 'undefined') {
+                const swalContainer = document.querySelector('.swal2-container');
+                const swalLoading = document.querySelector('.swal2-loading');
+                const swalPopup = document.querySelector('.swal2-popup');
+                
+                if (swalContainer && swalPopup) {
+                    // Check if it's a loading popup (has loading icon or specific text)
+                    const swalTitle = swalPopup.querySelector('.swal2-title');
+                    if (swalTitle) {
+                        const titleText = swalTitle.textContent.toLowerCase();
+                        const loadingKeywords = ['menyimpan', 'memproses', 'loading', 'menghapus', 'mengupload', 'memuat'];
+                        if (loadingKeywords.some(keyword => titleText.includes(keyword))) {
+                            return true;
+                        }
+                    }
+                    
+                    // Check if Swal.isLoading() returns true
+                    if (swalLoading || Swal.isLoading()) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        
+        // Hide loading screen immediately if Swal loading is active
+        function checkAndHideIfSwalActive() {
+            if (isSwalLoadingActive()) {
+                hideLoadingScreen();
+                return true;
+            }
+            return false;
+        }
+        
         let progress = 0;
         let targetProgress = 0;
         let animationFrame;
+        let isHidden = false;
         
         // Simulate loading progress
         function updateProgress() {
+            if (isHidden) return;
+            
+            // Check if Swal loading is active - skip loading screen
+            if (checkAndHideIfSwalActive()) {
+                return;
+            }
+            
             // Accelerate progress based on actual loading state
             if (document.readyState === 'loading') {
                 targetProgress = Math.min(targetProgress + 2, 60);
@@ -136,6 +204,9 @@
         }
         
         function hideLoadingScreen() {
+            if (isHidden) return;
+            isHidden = true;
+            
             if (animationFrame) {
                 cancelAnimationFrame(animationFrame);
             }
@@ -151,12 +222,29 @@
             }, 500);
         }
         
+        // Expose global function to manually hide loading screen (for Swal integration)
+        window.hideGlobalLoadingScreen = hideLoadingScreen;
+        
+        // Check Swal state periodically during initial load
+        const swalCheckInterval = setInterval(() => {
+            if (checkAndHideIfSwalActive()) {
+                clearInterval(swalCheckInterval);
+            }
+        }, 100);
+        
+        // Clear interval after 3 seconds
+        setTimeout(() => {
+            clearInterval(swalCheckInterval);
+        }, 3000);
+        
         // Start progress animation
         updateProgress();
         
         // Also listen to document ready states
         document.addEventListener('DOMContentLoaded', function() {
             targetProgress = Math.max(targetProgress, 85);
+            // Check again after DOM is ready
+            checkAndHideIfSwalActive();
         });
         
         window.addEventListener('load', function() {
@@ -165,8 +253,10 @@
         
         // Fallback: force complete after maximum time
         setTimeout(() => {
-            progress = 100;
-            hideLoadingScreen();
+            if (!isHidden) {
+                progress = 100;
+                hideLoadingScreen();
+            }
         }, 3000);
     })();
 </script>

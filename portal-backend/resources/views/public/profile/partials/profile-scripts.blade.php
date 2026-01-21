@@ -23,16 +23,19 @@ function profilePage() {
                 const data = await response.json();
                 
                 if (data.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil!',
-                        text: data.message,
+                    // Use toast instead of popup for success message
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
                         background: '#0f172a',
                         color: '#f8fafc',
-                        confirmButtonColor: '#10b981',
-                        customClass: {
-                            popup: 'rounded-2xl border border-white/10'
-                        }
+                    });
+                    Toast.fire({
+                        icon: 'success',
+                        title: data.message
                     });
                     if (data.user) {
                         document.getElementById('header-name').textContent = data.user.name;
@@ -125,16 +128,22 @@ function profilePage() {
                 const result = await response.json();
                 
                 if (result.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Akun Terhapus',
-                        text: result.message,
+                    // Use toast and redirect immediately
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 2000,
                         background: '#0f172a',
                         color: '#f8fafc',
-                        confirmButtonColor: '#10b981'
-                    }).then(() => {
-                        window.location.href = result.redirect;
                     });
+                    Toast.fire({
+                        icon: 'success',
+                        title: result.message
+                    });
+                    setTimeout(() => {
+                        window.location.href = result.redirect;
+                    }, 1500);
                 } else {
                     Swal.fire({
                         icon: 'error',

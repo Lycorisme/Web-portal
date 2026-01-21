@@ -268,21 +268,22 @@
         });
     }
 
-    // Show success message
+    // Show success message - now uses toast to avoid double confirmation
     function showSuccess(title, message = '', callback = null) {
-        Swal.fire({
+        // Mark that a Swal action just completed (prevents loading screen on page reload)
+        sessionStorage.setItem('swalActionCompleted', Date.now().toString());
+        
+        // Use toast instead of popup
+        Toast.fire({
             icon: 'success',
             title: title,
-            text: message,
-            confirmButtonText: 'OK',
-            customClass: {
-                confirmButton: 'swal2-confirm'
-            }
-        }).then((result) => {
-            if (result.isConfirmed && callback) {
-                callback();
-            }
+            text: message
         });
+        
+        // Execute callback immediately if provided
+        if (callback) {
+            callback();
+        }
     }
 
     // Show error message
@@ -300,6 +301,11 @@
 
     // Show loading
     function showLoading(title = 'Memproses...') {
+        // Hide global loading screen if it's still visible
+        if (typeof window.hideGlobalLoadingScreen === 'function') {
+            window.hideGlobalLoadingScreen();
+        }
+        
         Swal.fire({
             title: title,
             allowOutsideClick: false,
@@ -312,6 +318,8 @@
 
     // Close loading
     function closeLoading() {
+        // Mark that a Swal action just completed (prevents loading screen on page reload)
+        sessionStorage.setItem('swalActionCompleted', Date.now().toString());
         Swal.close();
     }
 

@@ -70,13 +70,6 @@
             </div>
         </div>
 
-        {{-- Pending Photo Notice --}}
-        <div x-show="pendingPhotoFile" x-cloak class="mb-4 px-3 py-2 bg-theme-100 dark:bg-theme-900/30 rounded-lg">
-            <p class="text-xs text-theme-600 dark:text-theme-400 font-medium flex items-center gap-1.5">
-                <i data-lucide="info" class="w-3.5 h-3.5"></i>
-                <span>Klik "Simpan" untuk menyimpan foto baru</span>
-            </p>
-        </div>
 
         {{-- Name & Role --}}
         <h2 class="text-xl sm:text-2xl font-bold text-surface-900 dark:text-white mb-1">
