@@ -11,13 +11,13 @@
                     class="w-5 h-5 text-surface-600 dark:text-surface-400 group-hover:text-theme-600 transition-colors"></i>
             </button>
 
-            {{-- Search Box --}}
-            <div class="hidden sm:flex items-center gap-3 px-4 py-2.5 bg-surface-100 dark:bg-surface-800/50 rounded-xl border border-transparent focus-within:border-theme-500/50 focus-within:ring-2 focus-within:ring-theme-500/20 transition-all duration-200 w-64 lg:w-80">
-                <i data-lucide="search" class="w-4 h-4 text-surface-400"></i>
-                <input type="text" placeholder="Cari sesuatu..."
-                    class="flex-1 bg-transparent outline-none text-sm text-surface-700 dark:text-surface-300 placeholder:text-surface-400">
-                <kbd class="hidden lg:inline-flex items-center px-2 py-0.5 text-xs font-medium text-surface-400 bg-surface-200 dark:bg-surface-700 rounded">⌘K</kbd>
-            </div>
+            {{-- Search Box - Opens Command Palette --}}
+            <button @click="$dispatch('open-command-palette')"
+                class="hidden sm:flex items-center gap-3 px-4 py-2.5 bg-surface-100 dark:bg-surface-800/50 rounded-xl border border-transparent hover:border-theme-500/30 hover:ring-2 hover:ring-theme-500/10 transition-all duration-200 w-64 lg:w-80 group">
+                <i data-lucide="search" class="w-4 h-4 text-surface-400 group-hover:text-theme-500 transition-colors"></i>
+                <span class="flex-1 text-left text-sm text-surface-400 group-hover:text-surface-500 transition-colors">Cari sesuatu...</span>
+                <kbd class="hidden lg:inline-flex items-center px-2 py-0.5 text-xs font-medium text-surface-400 bg-surface-200 dark:bg-surface-700 rounded group-hover:bg-theme-100 group-hover:text-theme-600 dark:group-hover:bg-theme-900/30 dark:group-hover:text-theme-400 transition-colors">⌘K</kbd>
+            </button>
         </div>
 
         <div class="flex items-center gap-2 lg:gap-4">

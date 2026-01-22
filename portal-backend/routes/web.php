@@ -15,6 +15,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\TrashController;
 use App\Http\Controllers\BlockedClientController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\GlobalSearchController;
 
 // =============================================
 // Authentication Routes (Guest Only)
@@ -87,6 +88,9 @@ Route::prefix('p')->name('public.')->group(function () {
 Route::middleware('auth')->group(function () {
     // Dashboard Routes - All authenticated users
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Global Search (Command Palette)
+    Route::get('/global-search', [GlobalSearchController::class, 'search'])->name('global-search');
 
     // Profile Routes - All authenticated users
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');

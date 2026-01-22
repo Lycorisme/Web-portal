@@ -89,6 +89,9 @@
     {{-- Custom Toast Notifications - Must load before footer-scripts --}}
     @include('layouts.partials.custom-toast')
 
+    {{-- Command Palette / Global Search --}}
+    @include('partials.command-palette')
+
     {{-- Initialize Scripts --}}
     @include('layouts.partials.footer-scripts')
 
