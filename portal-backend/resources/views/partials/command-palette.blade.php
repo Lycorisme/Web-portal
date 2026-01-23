@@ -72,20 +72,23 @@
                             <template x-for="(action, index) in quickActions" :key="action.url">
                                 <a :href="action.url"
                                    @mouseenter="selectedIndex = index"
-                                   :class="{ 'bg-theme-50 dark:bg-theme-900/30': selectedIndex === index }"
-                                   class="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors group">
-                                    <div :class="selectedIndex === index ? 'bg-theme-gradient' : 'bg-surface-100 dark:bg-surface-800'"
-                                         class="w-10 h-10 rounded-xl flex items-center justify-center transition-colors">
+                                   :class="{ 
+                                       'bg-theme-500/15 dark:bg-theme-500/25 border-l-4 border-theme-500 pl-3': selectedIndex === index,
+                                       'border-l-4 border-transparent': selectedIndex !== index
+                                   }"
+                                   class="flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-150 group hover:bg-theme-500/10 dark:hover:bg-theme-500/15">
+                                    <div :class="selectedIndex === index ? 'bg-theme-gradient shadow-lg shadow-theme-500/25' : 'bg-surface-200/80 dark:bg-surface-700'"
+                                         class="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200">
                                         <i :data-lucide="action.icon"
-                                           :class="selectedIndex === index ? 'text-white' : 'text-surface-500 dark:text-surface-400'"
+                                           :class="selectedIndex === index ? 'text-white' : 'text-surface-600 dark:text-surface-300'"
                                            class="w-5 h-5"></i>
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <div class="font-medium text-surface-900 dark:text-white" x-text="action.label"></div>
+                                        <div :class="selectedIndex === index ? 'text-theme-600 dark:text-theme-400' : 'text-surface-900 dark:text-white'" class="font-medium transition-colors" x-text="action.label"></div>
                                         <div class="text-sm text-surface-500 dark:text-surface-400" x-text="action.description"></div>
                                     </div>
                                     <div class="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <i data-lucide="corner-down-left" class="w-4 h-4 text-surface-400"></i>
+                                        <i data-lucide="corner-down-left" class="w-4 h-4 text-theme-500"></i>
                                     </div>
                                 </a>
                             </template>
