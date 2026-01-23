@@ -1,18 +1,18 @@
 {{-- Global Loading Screen --}}
 <div 
     id="global-loading-screen" 
-    class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-surface-950 transition-opacity duration-500"
+    class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-surface-50 dark:bg-surface-950 transition-opacity duration-500"
 >
     {{-- Background Glow Effects --}}
-    <div class="absolute top-0 left-0 w-96 h-96 bg-purple-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-pulse"></div>
-    <div class="absolute bottom-0 right-0 w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-pulse" style="animation-delay: 700ms"></div>
-    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-indigo-500 rounded-full mix-blend-multiply filter blur-[100px] opacity-10 animate-pulse" style="animation-delay: 350ms"></div>
+    <div class="absolute top-0 left-0 w-96 h-96 bg-purple-600 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[128px] opacity-20 dark:opacity-15 animate-pulse"></div>
+    <div class="absolute bottom-0 right-0 w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[128px] opacity-20 dark:opacity-15 animate-pulse" style="animation-delay: 700ms"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-indigo-500 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[100px] opacity-10 dark:opacity-10 animate-pulse" style="animation-delay: 350ms"></div>
 
     {{-- Loader Container --}}
     <div class="relative flex items-center justify-center w-32 h-32 mb-8">
         
         {{-- Static Ring --}}
-        <div class="absolute w-full h-full rounded-full border border-white/10"></div>
+        <div class="absolute w-full h-full rounded-full border border-surface-300 dark:border-white/10"></div>
         
         {{-- Outer Spinning Ring --}}
         <div class="absolute w-full h-full rounded-full border-2 border-transparent border-t-indigo-500 border-r-purple-500 loader-spin-slow"></div>
@@ -21,29 +21,41 @@
         <div class="absolute w-20 h-20 rounded-full border-2 border-transparent border-b-cyan-400 border-l-blue-500 loader-spin-reverse"></div>
         
         {{-- Center Glow Dot --}}
-        <div class="absolute w-3 h-3 bg-white rounded-full loader-pulse-glow" style="box-shadow: 0 0 20px rgba(255,255,255,0.8)"></div>
+        <div class="absolute w-3 h-3 bg-indigo-500 dark:bg-white rounded-full loader-pulse-glow"></div>
         
     </div>
 
     {{-- Text Content --}}
     <div class="text-center z-10 relative">
-        <h2 class="text-white text-sm font-light uppercase tracking-[0.3em] mb-3 animate-pulse">
+        <h2 class="text-surface-900 dark:text-white text-sm font-bold uppercase tracking-[0.3em] mb-3 animate-pulse">
             Memuat Sistem
         </h2>
         
         {{-- Bouncing Dots --}}
         <div class="flex items-center justify-center space-x-1.5 mb-4">
-            <span class="block w-1.5 h-1.5 bg-gray-400 rounded-full loader-bounce" style="animation-delay: 0ms"></span>
-            <span class="block w-1.5 h-1.5 bg-gray-400 rounded-full loader-bounce" style="animation-delay: 150ms"></span>
-            <span class="block w-1.5 h-1.5 bg-gray-400 rounded-full loader-bounce" style="animation-delay: 300ms"></span>
+            <span class="block w-1.5 h-1.5 bg-surface-400 dark:bg-gray-400 rounded-full loader-bounce" style="animation-delay: 0ms"></span>
+            <span class="block w-1.5 h-1.5 bg-surface-400 dark:bg-gray-400 rounded-full loader-bounce" style="animation-delay: 150ms"></span>
+            <span class="block w-1.5 h-1.5 bg-surface-400 dark:bg-gray-400 rounded-full loader-bounce" style="animation-delay: 300ms"></span>
         </div>
         
         {{-- Progress Percentage --}}
-        <p class="text-xs text-gray-500 font-mono tabular-nums" id="loading-progress-text">0%</p>
+        <p class="text-xs text-surface-500 dark:text-gray-500 font-mono tabular-nums font-medium" id="loading-progress-text">0%</p>
     </div>
 </div>
 
 <style>
+    /* CSS Variables for Animation */
+    :root {
+        --loader-glow-r: 99;
+        --loader-glow-g: 102;
+        --loader-glow-b: 241; /* indigo-500 */
+    }
+    .dark {
+        --loader-glow-r: 255;
+        --loader-glow-g: 255;
+        --loader-glow-b: 255; /* white */
+    }
+
     /* Loading Screen Animations */
     @keyframes loaderSpinSlow {
         from { transform: rotate(0deg); }
@@ -59,12 +71,12 @@
         0%, 100% { 
             opacity: 1; 
             transform: scale(1);
-            box-shadow: 0 0 20px rgba(255,255,255,0.8);
+            box-shadow: 0 0 20px rgba(var(--loader-glow-r), var(--loader-glow-g), var(--loader-glow-b), 0.8);
         }
         50% { 
             opacity: 0.5; 
             transform: scale(0.95);
-            box-shadow: 0 0 30px rgba(255,255,255,0.4);
+            box-shadow: 0 0 30px rgba(var(--loader-glow-r), var(--loader-glow-g), var(--loader-glow-b), 0.4);
         }
     }
     
