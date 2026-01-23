@@ -1,14 +1,5 @@
-{{-- Command Palette / Global Search - Enhanced Edition --}}
-{{-- Refactored into modular components for better maintainability --}}
-{{-- Main entry point (~50 lines) --}}
+{{-- Command Palette - JavaScript Logic (~200 lines) --}}
 
-{{-- Template (HTML Structure) --}}
-@include('partials.command-palette.template')
-
-{{-- Configuration Data --}}
-@include('partials.command-palette.config')
-
-{{-- Main Script Logic --}}
 <script>
 function commandPalette() {
     return {
@@ -40,9 +31,6 @@ function commandPalette() {
             window.addEventListener('open-command-palette', () => this.open());
             this.trackCurrentPage();
             
-            // Check if cache was cleared (show toast after refresh)
-            this.checkCacheClearedToast();
-            
             document.addEventListener('keydown', (e) => {
                 if (this.isOpen) return;
                 if (e.ctrlKey || e.metaKey) {
@@ -52,18 +40,6 @@ function commandPalette() {
                     }
                 }
             });
-        },
-        
-        checkCacheClearedToast() {
-            const cacheCleared = sessionStorage.getItem('cache_cleared_toast');
-            if (cacheCleared) {
-                sessionStorage.removeItem('cache_cleared_toast');
-                setTimeout(() => {
-                    if (typeof showToast === 'function') {
-                        showToast('success', 'Cache Dihapus', 'Cache lokal browser berhasil dibersihkan');
-                    }
-                }, 500);
-            }
         },
 
         getPlaceholder() {
@@ -235,176 +211,6 @@ function commandPalette() {
                     window.location.href = items[this.selectedIndex].url;
                 }
             }
-        },
-
-        executeCommand(cmd) {
-            if (cmd.url) {
-                window.location.href = cmd.url;
-                return;
-            }
-
-            switch(cmd.action) {
-                case 'toggleDarkMode':
-                    this.toggleDarkMode();
-                    break;
-                case 'copyCurrentUrl':
-                    this.copyToClipboard(window.location.href);
-                    if (typeof showToast === 'function') {
-                        showToast('success', 'URL Disalin', 'URL halaman berhasil disalin ke clipboard');
-                    }
-                    break;
-                case 'toggleFullscreen':
-                    this.toggleFullscreen();
-                    break;
-                case 'refreshPage':
-                    location.reload();
-                    break;
-                case 'printPage':
-                    window.print();
-                    break;
-                case 'clearLocalCache':
-                    this.clearLocalCache();
-                    break;
-                case 'logout':
-                    this.confirmLogout();
-                    break;
-            }
-        },
-        
-        confirmLogout() {
-            this.close();
-            Swal.fire({
-                title: 'Konfirmasi Logout',
-                text: 'Apakah Anda yakin ingin keluar dari sistem?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: 'var(--color-theme-500)',
-                cancelButtonColor: '#6b7280',
-                confirmButtonText: 'Ya, Keluar',
-                cancelButtonText: 'Batal',
-                customClass: {
-                    popup: 'rounded-2xl',
-                    confirmButton: 'rounded-lg px-6',
-                    cancelButton: 'rounded-lg px-6'
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Create and submit logout form with POST method
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = '{{ route("logout") }}';
-                    
-                    const csrfToken = document.createElement('input');
-                    csrfToken.type = 'hidden';
-                    csrfToken.name = '_token';
-                    csrfToken.value = document.querySelector('meta[name="csrf-token"]')?.content || '';
-                    form.appendChild(csrfToken);
-                    
-                    document.body.appendChild(form);
-                    form.submit();
-                }
-            });
-        },
-
-        toggleDarkMode() {
-            this.isDarkMode = !this.isDarkMode;
-            document.documentElement.classList.toggle('dark', this.isDarkMode);
-            localStorage.setItem('darkMode', this.isDarkMode);
-            this.$nextTick(() => lucide.createIcons());
-            
-            if (typeof showToast === 'function') {
-                showToast('success', 'Mode Tampilan', this.isDarkMode ? 'Mode gelap diaktifkan' : 'Mode terang diaktifkan');
-            }
-        },
-
-        setDarkMode(value) {
-            this.isDarkMode = value;
-            document.documentElement.classList.toggle('dark', this.isDarkMode);
-            localStorage.setItem('darkMode', this.isDarkMode);
-            this.$nextTick(() => lucide.createIcons());
-            
-            if (typeof showToast === 'function') {
-                showToast('success', 'Mode Tampilan', value ? 'Mode gelap diaktifkan' : 'Mode terang diaktifkan');
-            }
-        },
-
-        setTheme(themeId) {
-            this.currentTheme = themeId;
-            document.documentElement.setAttribute('data-theme', themeId);
-            localStorage.setItem('theme', themeId);
-            
-            if (typeof showToast === 'function') {
-                showToast('success', 'Tema Diubah', `Tema ${themeId} berhasil diterapkan`);
-            }
-            this.$nextTick(() => lucide.createIcons());
-        },
-
-        async toggleFullscreen() {
-            const overlay = document.getElementById('fullscreen-overlay');
-            
-            // Show transition overlay
-            if (overlay) {
-                overlay.style.display = 'block';
-                requestAnimationFrame(() => {
-                    overlay.style.opacity = '1';
-                });
-            }
-
-            try {
-                if (!document.fullscreenElement) {
-                    await document.documentElement.requestFullscreen();
-                    if (typeof showToast === 'function') {
-                        showToast('info', 'Layar Penuh', 'Mode layar penuh aktif. Tekan ESC untuk keluar.');
-                    }
-                } else {
-                    await document.exitFullscreen();
-                    if (typeof showToast === 'function') {
-                        showToast('info', 'Layar Penuh', 'Mode layar penuh dinonaktifkan');
-                    }
-                }
-            } catch (err) {
-                console.error('Fullscreen error:', err);
-            }
-
-            // Hide transition overlay
-            setTimeout(() => {
-                if (overlay) {
-                    overlay.style.opacity = '0';
-                    setTimeout(() => {
-                        overlay.style.display = 'none';
-                    }, 300);
-                }
-            }, 100);
-            
-            this.close();
-        },
-
-        async clearLocalCache() {
-            this.isProcessing = true;
-            this.processingTitle = 'Menghapus Cache...';
-            this.processingMessage = 'Mohon tunggu, sedang membersihkan data cache browser';
-            this.$nextTick(() => lucide.createIcons());
-
-            // Simulate processing time for visual feedback
-            await new Promise(resolve => setTimeout(resolve, 1500));
-
-            // Set flag to show toast after reload (before clearing storage)
-            sessionStorage.setItem('cache_cleared_toast', 'true');
-            
-            // Clear localStorage only (keep sessionStorage flag)
-            localStorage.clear();
-
-            this.isProcessing = false;
-            this.close();
-
-            // Reload after brief delay
-            setTimeout(() => location.reload(), 300);
-        },
-
-        copyToClipboard(text) {
-            navigator.clipboard.writeText(text).catch(err => {
-                console.error('Failed to copy:', err);
-            });
         },
 
         getFlatItemsCount() {
