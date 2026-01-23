@@ -200,6 +200,54 @@
         --theme-gradient-to: #e11d48;
     }
 
+    /* Scarlet Theme (Red) */
+    [data-theme="scarlet"] {
+        --theme-50: 254 242 242;
+        --theme-100: 254 226 226;
+        --theme-200: 254 202 202;
+        --theme-300: 252 165 165;
+        --theme-400: 248 113 113;
+        --theme-500: 239 68 68;
+        --theme-600: 220 38 38;
+        --theme-700: 185 28 28;
+        --theme-800: 153 27 27;
+        --theme-900: 127 29 29;
+        --theme-gradient-from: #ef4444;
+        --theme-gradient-to: #b91c1c;
+    }
+
+    /* Fuchsia Theme */
+    [data-theme="fuchsia"] {
+        --theme-50: 253 244 255;
+        --theme-100: 250 232 255;
+        --theme-200: 245 208 254;
+        --theme-300: 240 171 252;
+        --theme-400: 232 121 249;
+        --theme-500: 217 70 239;
+        --theme-600: 192 38 211;
+        --theme-700: 162 28 175;
+        --theme-800: 134 25 143;
+        --theme-900: 112 26 117;
+        --theme-gradient-from: #d946ef;
+        --theme-gradient-to: #a21caf;
+    }
+
+    /* Lime Theme */
+    [data-theme="lime"] {
+        --theme-50: 247 254 231;
+        --theme-100: 236 252 203;
+        --theme-200: 217 249 157;
+        --theme-300: 190 242 100;
+        --theme-400: 163 230 53;
+        --theme-500: 132 204 22;
+        --theme-600: 101 163 13;
+        --theme-700: 77 124 15;
+        --theme-800: 63 98 18;
+        --theme-900: 54 83 20;
+        --theme-gradient-from: #84cc16;
+        --theme-gradient-to: #4d7c0f;
+    }
+
     /* Theme-aware utility classes */
     .bg-theme-50 { background-color: rgb(var(--theme-50)); }
     .bg-theme-100 { background-color: rgb(var(--theme-100)); }

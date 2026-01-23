@@ -3,19 +3,7 @@
     <div class="space-y-6">
         
         {{-- Info Banner --}}
-        <div class="bg-gradient-to-r from-violet-500/10 to-purple-500/10 dark:from-violet-500/20 dark:to-purple-500/20 border border-violet-200 dark:border-violet-800/50 rounded-2xl p-4 sm:p-6">
-            <div class="flex items-start gap-4">
-                <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/30">
-                    <i data-lucide="cloud-upload" class="w-6 h-6 text-white"></i>
-                </div>
-                <div class="flex-1">
-                    <h3 class="font-semibold text-violet-900 dark:text-violet-200 mb-1">Konfigurasi Hosting</h3>
-                    <p class="text-sm text-violet-700 dark:text-violet-300/80">
-                        Isi konfigurasi hosting di sini. Setelah deploy, Anda hanya perlu menyalin konfigurasi ke file <code class="px-1.5 py-0.5 bg-violet-200 dark:bg-violet-800 rounded text-xs font-mono">.env</code> di server.
-                    </p>
-                </div>
-            </div>
-        </div>
+
 
         {{-- Application Settings Card --}}
         <div class="bg-white dark:bg-surface-900/50 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-surface-200/50 dark:border-surface-800/50 p-4 sm:p-6 lg:p-8">

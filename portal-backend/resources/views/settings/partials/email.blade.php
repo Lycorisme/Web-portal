@@ -11,20 +11,7 @@
             </div>
         </div>
 
-        {{-- Info Banner --}}
-        <div class="mb-6 p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/30">
-            <div class="flex items-start gap-3">
-                <i data-lucide="info" class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5"></i>
-                <div class="text-xs sm:text-sm text-amber-800 dark:text-amber-300">
-                    <p class="font-medium mb-1">Pilih Driver yang Sesuai:</p>
-                    <ul class="list-disc list-inside space-y-0.5 text-amber-700 dark:text-amber-400">
-                        <li><strong>Resend (Recommended)</strong> - Menggunakan HTTP API, tidak terpengaruh blokir port SMTP. Gratis 3K email/bulan.</li>
-                        <li><strong>SMTP Gmail</strong> - Memerlukan App Password dan port 587/465 harus tidak diblokir.</li>
-                        <li><strong>Log</strong> - Untuk development, email tidak terkirim tapi di-log ke file.</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6" x-data="{ 
             selectedDriver: '{{ $rawSettings['mail_driver'] ?? 'smtp' }}',

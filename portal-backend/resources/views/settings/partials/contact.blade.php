@@ -84,15 +84,7 @@
 
         {{-- Sejarah & Visi Misi --}}
         <div class="bg-white dark:bg-surface-900/50 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-surface-200/50 dark:border-surface-800/50 p-4 sm:p-6 lg:p-8">
-            <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
-                <div class="w-12 sm:w-14 h-12 sm:h-14 rounded-xl sm:rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-500/30 flex-shrink-0">
-                    <i data-lucide="scroll-text" class="w-6 sm:w-7 h-6 sm:h-7 text-white"></i>
-                </div>
-                <div>
-                    <h2 class="text-lg sm:text-xl font-bold text-surface-900 dark:text-white">Profil Organisasi</h2>
-                    <p class="text-xs sm:text-sm text-surface-500 dark:text-surface-400">Sejarah singkat dan visi misi organisasi</p>
-                </div>
-            </div>
+
 
             {{-- Security Notice --}}
             <div class="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 rounded-xl">
@@ -140,15 +132,7 @@ MISI:
 
         {{-- Google Maps --}}
         <div class="bg-white dark:bg-surface-900/50 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-surface-200/50 dark:border-surface-800/50 p-4 sm:p-6 lg:p-8">
-            <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
-                <div class="w-12 sm:w-14 h-12 sm:h-14 rounded-xl sm:rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-500/30 flex-shrink-0">
-                    <i data-lucide="map" class="w-6 sm:w-7 h-6 sm:h-7 text-white"></i>
-                </div>
-                <div>
-                    <h2 class="text-lg sm:text-xl font-bold text-surface-900 dark:text-white">Google Maps</h2>
-                    <p class="text-xs sm:text-sm text-surface-500 dark:text-surface-400">Peta lokasi kantor untuk ditampilkan di website</p>
-                </div>
-            </div>
+
 
             <div class="space-y-4">
                 {{-- Instructions --}}

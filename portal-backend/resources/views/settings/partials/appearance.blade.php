@@ -11,8 +11,14 @@
             </div>
         </div>
 
-        {{-- Theme Preset Grid --}}
-        <div x-data="{ selectedTheme: '{{ $rawSettings['current_theme'] ?? 'indigo' }}' }" class="space-y-4 sm:space-y-6">
+        <div x-data="{ 
+            selectedTheme: '{{ $rawSettings['current_theme'] ?? 'indigo' }}',
+            init() {
+                this.$watch('selectedTheme', (value) => {
+                    document.documentElement.setAttribute('data-theme', value);
+                });
+            }
+        }" class="space-y-4 sm:space-y-6">
             <input type="hidden" name="current_theme" x-model="selectedTheme">
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -285,23 +291,99 @@
                         </div>
                     </div>
                 </label>
+
+                {{-- Scarlet Theme --}}
+                <label @click="selectedTheme = 'scarlet'" 
+                    :class="selectedTheme === 'scarlet' ? 'ring-2 ring-red-500 ring-offset-2 dark:ring-offset-surface-900' : ''"
+                    class="relative cursor-pointer group rounded-2xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 p-5 hover:shadow-lg transition-all duration-300">
+                    <input type="radio" name="theme_preset" value="scarlet" class="sr-only" x-model="selectedTheme">
+                    <div class="flex items-start gap-4">
+                        <div class="space-y-1.5">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-red-700 shadow-lg shadow-red-500/30"></div>
+                            <div class="flex gap-1">
+                                <span class="w-3 h-3 rounded-full bg-red-400"></span>
+                                <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-red-600"></span>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-surface-900 dark:text-white mb-1">Scarlet</h3>
+                            <p class="text-xs text-surface-500 dark:text-surface-400">Bold & Passionate</p>
+                            <div class="mt-3 space-y-2">
+                                <div class="h-2 w-full bg-gradient-to-r from-red-500 to-red-600 rounded-full"></div>
+                                <div class="h-2 w-3/4 bg-red-400 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div x-show="selectedTheme === 'scarlet'" class="absolute top-3 right-3">
+                        <div class="w-6 h-6 bg-accent-emerald rounded-full flex items-center justify-center">
+                            <i data-lucide="check" class="w-4 h-4 text-white"></i>
+                        </div>
+                    </div>
+                </label>
+
+                {{-- Fuchsia Theme --}}
+                <label @click="selectedTheme = 'fuchsia'" 
+                    :class="selectedTheme === 'fuchsia' ? 'ring-2 ring-fuchsia-500 ring-offset-2 dark:ring-offset-surface-900' : ''"
+                    class="relative cursor-pointer group rounded-2xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 p-5 hover:shadow-lg transition-all duration-300">
+                    <input type="radio" name="theme_preset" value="fuchsia" class="sr-only" x-model="selectedTheme">
+                    <div class="flex items-start gap-4">
+                        <div class="space-y-1.5">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-fuchsia-500 to-purple-600 shadow-lg shadow-fuchsia-500/30"></div>
+                            <div class="flex gap-1">
+                                <span class="w-3 h-3 rounded-full bg-fuchsia-400"></span>
+                                <span class="w-3 h-3 rounded-full bg-fuchsia-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-purple-500"></span>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-surface-900 dark:text-white mb-1">Fuchsia</h3>
+                            <p class="text-xs text-surface-500 dark:text-surface-400">Playful & Vibrant</p>
+                            <div class="mt-3 space-y-2">
+                                <div class="h-2 w-full bg-gradient-to-r from-fuchsia-500 to-fuchsia-600 rounded-full"></div>
+                                <div class="h-2 w-3/4 bg-fuchsia-400 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div x-show="selectedTheme === 'fuchsia'" class="absolute top-3 right-3">
+                        <div class="w-6 h-6 bg-accent-emerald rounded-full flex items-center justify-center">
+                            <i data-lucide="check" class="w-4 h-4 text-white"></i>
+                        </div>
+                    </div>
+                </label>
+
+                {{-- Lime Theme --}}
+                <label @click="selectedTheme = 'lime'" 
+                    :class="selectedTheme === 'lime' ? 'ring-2 ring-lime-500 ring-offset-2 dark:ring-offset-surface-900' : ''"
+                    class="relative cursor-pointer group rounded-2xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 p-5 hover:shadow-lg transition-all duration-300">
+                    <input type="radio" name="theme_preset" value="lime" class="sr-only" x-model="selectedTheme">
+                    <div class="flex items-start gap-4">
+                        <div class="space-y-1.5">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-lime-500 to-green-600 shadow-lg shadow-lime-500/30"></div>
+                            <div class="flex gap-1">
+                                <span class="w-3 h-3 rounded-full bg-lime-400"></span>
+                                <span class="w-3 h-3 rounded-full bg-lime-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-surface-900 dark:text-white mb-1">Lime</h3>
+                            <p class="text-xs text-surface-500 dark:text-surface-400">Fresh & Zesty</p>
+                            <div class="mt-3 space-y-2">
+                                <div class="h-2 w-full bg-gradient-to-r from-lime-500 to-lime-600 rounded-full"></div>
+                                <div class="h-2 w-3/4 bg-lime-400 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div x-show="selectedTheme === 'lime'" class="absolute top-3 right-3">
+                        <div class="w-6 h-6 bg-accent-emerald rounded-full flex items-center justify-center">
+                            <i data-lucide="check" class="w-4 h-4 text-white"></i>
+                        </div>
+                    </div>
+                </label>
             </div>
 
-            {{-- Theme Info --}}
-            <div class="mt-6 p-4 bg-surface-50 dark:bg-surface-800/50 rounded-xl border border-surface-200 dark:border-surface-700">
-                <div class="flex items-start gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center flex-shrink-0">
-                        <i data-lucide="info" class="w-5 h-5 text-primary-600"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-medium text-surface-900 dark:text-white mb-1">Tentang Theme Preset</h4>
-                        <p class="text-sm text-surface-500 dark:text-surface-400">
-                            Theme yang dipilih akan mempengaruhi warna button, select, hover state, link, badge, dan elemen UI lainnya di seluruh portal. 
-                            Perubahan akan diterapkan setelah Anda menyimpan pengaturan.
-                        </p>
-                    </div>
-                </div>
-            </div>
+
         </div>
     </div>
 </div>

@@ -56,17 +56,7 @@
         </div>
 
         {{-- Info Alert --}}
-        <div class="mb-6 sm:mb-8 p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/50 rounded-xl">
-            <div class="flex gap-3">
-                <div class="flex-shrink-0">
-                    <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 dark:text-emerald-400"></i>
-                </div>
-                <div class="text-sm text-emerald-800 dark:text-emerald-200">
-                    <p class="font-medium mb-1">Legalitas Dokumen</p>
-                    <p class="text-emerald-700 dark:text-emerald-300">Bagian ini menentukan keabsahan dokumen. Pastikan Nama, NIP, dan Jabatan diisi dengan benar. Gunakan gambar PNG transparan untuk Tanda Tangan dan Stempel agar hasil cetak maksimal.</p>
-                </div>
-            </div>
-        </div>
+
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {{-- Form Column --}}
@@ -370,12 +360,7 @@
                     </div>
 
                     {{-- Info Tip --}}
-                    <div class="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-lg">
-                        <i data-lucide="lightbulb" class="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0"></i>
-                        <p class="text-xs text-amber-700 dark:text-amber-300">
-                            <strong>Tips:</strong> Ukuran yang disarankan adalah 70-100px untuk tanda tangan dan 80-120px untuk stempel agar proporsional di dokumen PDF.
-                        </p>
-                    </div>
+
                 </div>
 
                 {{-- Tembusan --}}

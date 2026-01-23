@@ -29,17 +29,7 @@
         </div>
 
         {{-- Info Alert --}}
-        <div class="mb-6 sm:mb-8 p-4 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800/50 rounded-xl">
-            <div class="flex gap-3">
-                <div class="flex-shrink-0">
-                    <i data-lucide="info" class="w-5 h-5 text-indigo-600 dark:text-indigo-400"></i>
-                </div>
-                <div class="text-sm text-indigo-800 dark:text-indigo-200">
-                    <p class="font-medium mb-1">Standar Kop Surat Profesional</p>
-                    <p class="text-indigo-700 dark:text-indigo-300">Kop surat (letterhead) adalah identitas resmi yang memberikan legitimasi pada dokumen. Pastikan semua informasi diisi dengan lengkap dan benar sesuai standar instansi.</p>
-                </div>
-            </div>
-        </div>
+
 
         {{-- Organization Hierarchy Section --}}
         <div class="mb-8">
