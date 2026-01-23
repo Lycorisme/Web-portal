@@ -88,16 +88,31 @@ function commandPalette() {
             this.calculatorResult = null;
         },
 
+        isTabTransitioning: false,
+
         switchMode(modeId) {
-            this.mode = modeId;
-            this.selectedIndex = 0;
-            this.query = '';
-            this.results = [];
-            this.calculatorResult = null;
-            this.$nextTick(() => {
-                this.$refs.searchInput?.focus();
-                lucide.createIcons();
-            });
+            if (this.mode === modeId || this.isTabTransitioning) return;
+            
+            // Start exit transition
+            this.isTabTransitioning = true;
+            
+            // Wait for exit animation
+            setTimeout(() => {
+                this.mode = modeId;
+                this.selectedIndex = 0;
+                this.query = '';
+                this.results = [];
+                this.calculatorResult = null;
+                
+                // End transition state after update
+                setTimeout(() => {
+                    this.isTabTransitioning = false;
+                    this.$nextTick(() => {
+                        this.$refs.searchInput?.focus();
+                        lucide.createIcons();
+                    });
+                }, 50);
+            }, 200);
         },
 
         nextMode() {

@@ -38,7 +38,8 @@
                        'bg-theme-500/10 dark:bg-theme-500/20 border-l-4 border-theme-500 pl-3': selectedIndex === index,
                        'border-l-4 border-transparent': selectedIndex !== index
                    }"
-                   class="flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-150 group hover:bg-surface-100 dark:hover:bg-surface-800">
+                   class="flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 group hover:bg-surface-100 dark:hover:bg-surface-800 animate-slide-in-right"
+                   :style="`animation-delay: ${index * 50}ms`">
                     <div :class="selectedIndex === index ? 'bg-theme-gradient shadow-lg shadow-theme-500/25' : 'bg-surface-200 dark:bg-surface-700'"
                          class="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200">
                         <i :data-lucide="action.icon"
@@ -125,7 +126,8 @@
                        'bg-theme-500/10 dark:bg-theme-500/20 border-l-4 border-theme-500 pl-3': selectedIndex === index,
                        'border-l-4 border-transparent': selectedIndex !== index
                    }"
-                   class="flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-150 group hover:bg-surface-100 dark:hover:bg-surface-800">
+                   class="flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 group hover:bg-surface-100 dark:hover:bg-surface-800 animate-slide-in-right"
+                   :style="`animation-delay: ${index * 50}ms`">
                     <div :class="selectedIndex === index ? 'bg-theme-gradient shadow-lg shadow-theme-500/25' : 'bg-surface-200 dark:bg-surface-700'"
                          class="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200">
                         <i :data-lucide="action.icon"

@@ -24,7 +24,7 @@ function commandPalette() {
         selectedIndex: 0,
         mode: 'navigate',
         calculatorResult: null,
-        isDarkMode: document.documentElement.classList.contains('dark'),
+
         currentTheme: document.documentElement.getAttribute('data-theme') || 'emerald',
         recentSearches: JSON.parse(localStorage.getItem('recentSearches') || '[]'),
         recentPages: JSON.parse(localStorage.getItem('recentPages') || '[]'),
@@ -45,12 +45,7 @@ function commandPalette() {
             
             document.addEventListener('keydown', (e) => {
                 if (this.isOpen) return;
-                if (e.ctrlKey || e.metaKey) {
-                    if (e.key === 'd' || e.key === 'D') {
-                        e.preventDefault();
-                        this.toggleDarkMode();
-                    }
-                }
+
             });
         },
         
@@ -244,9 +239,7 @@ function commandPalette() {
             }
 
             switch(cmd.action) {
-                case 'toggleDarkMode':
-                    this.toggleDarkMode();
-                    break;
+
                 case 'copyCurrentUrl':
                     this.copyToClipboard(window.location.href);
                     if (typeof showToast === 'function') {
@@ -306,27 +299,7 @@ function commandPalette() {
             });
         },
 
-        toggleDarkMode() {
-            this.isDarkMode = !this.isDarkMode;
-            document.documentElement.classList.toggle('dark', this.isDarkMode);
-            localStorage.setItem('darkMode', this.isDarkMode);
-            this.$nextTick(() => lucide.createIcons());
-            
-            if (typeof showToast === 'function') {
-                showToast('success', 'Mode Tampilan', this.isDarkMode ? 'Mode gelap diaktifkan' : 'Mode terang diaktifkan');
-            }
-        },
 
-        setDarkMode(value) {
-            this.isDarkMode = value;
-            document.documentElement.classList.toggle('dark', this.isDarkMode);
-            localStorage.setItem('darkMode', this.isDarkMode);
-            this.$nextTick(() => lucide.createIcons());
-            
-            if (typeof showToast === 'function') {
-                showToast('success', 'Mode Tampilan', value ? 'Mode gelap diaktifkan' : 'Mode terang diaktifkan');
-            }
-        },
 
         setTheme(themeId) {
             this.currentTheme = themeId;

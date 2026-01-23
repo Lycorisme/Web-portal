@@ -17,7 +17,8 @@
                                'bg-theme-500/10 dark:bg-theme-500/20 border-l-4 border-theme-500 pl-3': isItemSelected(groupIndex, itemIndex),
                                'border-l-4 border-transparent': !isItemSelected(groupIndex, itemIndex)
                            }"
-                           class="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-surface-100 dark:hover:bg-surface-800 transition-all group">
+                           class="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-surface-100 dark:hover:bg-surface-800 transition-all group animate-slide-in-right"
+                           :style="`animation-delay: ${(itemIndex + (groupIndex * 2)) * 50}ms`">
 
                             {{-- Thumbnail/Icon --}}
                             <div class="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 bg-surface-100 dark:bg-surface-800">

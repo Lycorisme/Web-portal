@@ -27,7 +27,7 @@
          class="fixed inset-0 bg-surface-950/60 dark:bg-black/70 backdrop-blur-sm"></div>
 
     {{-- Modal Container --}}
-    <div class="flex min-h-full items-start justify-center p-4 pt-[10vh] sm:pt-[15vh]">
+    <div class="flex min-h-full items-center justify-center p-4">
         <div x-show="isOpen"
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0 scale-95 translate-y-4"
@@ -36,12 +36,19 @@
              x-transition:leave-start="opacity-100 scale-100 translate-y-0"
              x-transition:leave-end="opacity-0 scale-95 translate-y-4"
              @click.outside="close()"
-             class="relative w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white dark:bg-surface-900 shadow-2xl shadow-surface-900/30 dark:shadow-black/50 ring-1 ring-surface-200 dark:ring-surface-700">
+             class="relative w-full max-w-2xl transform overflow-hidden rounded-3xl bg-white/95 dark:bg-surface-900/95 backdrop-blur-xl shadow-2xl shadow-surface-900/40 dark:shadow-black/60 ring-1 ring-white/20 dark:ring-surface-700/50">
+
+            {{-- Top Gradient Accent --}}
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-theme-400 via-theme-500 to-theme-600"></div>
+            
+            {{-- Decorative Glow --}}
+            <div class="absolute -top-20 -right-20 w-40 h-40 bg-theme-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-20 -left-20 w-40 h-40 bg-theme-600/10 rounded-full blur-3xl pointer-events-none"></div>
 
             {{-- Search Header --}}
-            <div class="flex items-center gap-4 px-5 py-4 border-b border-surface-200 dark:border-surface-700">
-                <div class="flex-shrink-0">
-                    <i data-lucide="search" class="w-5 h-5 text-theme-500"></i>
+            <div class="relative flex items-center gap-4 px-6 py-5 border-b border-surface-200/50 dark:border-surface-700/50">
+                <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-theme-gradient flex items-center justify-center shadow-lg shadow-theme-500/25">
+                    <i data-lucide="search" class="w-5 h-5 text-white"></i>
                 </div>
                 <input
                     x-ref="searchInput"
@@ -49,62 +56,69 @@
                     @input.debounce.300ms="handleInput()"
                     type="text"
                     :placeholder="getPlaceholder()"
-                    class="flex-1 bg-transparent text-lg text-surface-900 dark:text-white placeholder:text-surface-400 dark:placeholder:text-surface-500 outline-none">
-                <div class="flex items-center gap-2 flex-shrink-0">
+                    class="flex-1 bg-transparent text-lg font-medium text-surface-900 dark:text-white placeholder:text-surface-400 dark:placeholder:text-surface-500 outline-none">
+                <div class="flex items-center gap-3 flex-shrink-0">
                     <span x-show="isLoading" class="flex items-center">
-                        <svg class="animate-spin h-4 w-4 text-theme-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <svg class="animate-spin h-5 w-5 text-theme-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
                     </span>
-                    <kbd class="hidden sm:inline-flex items-center px-2 py-1 text-xs font-medium text-surface-500 bg-surface-100 dark:bg-surface-800 rounded-lg border border-surface-300 dark:border-surface-600">
+                    <kbd class="hidden sm:inline-flex items-center px-2.5 py-1.5 text-xs font-semibold text-surface-500 bg-surface-100/80 dark:bg-surface-800/80 rounded-lg border border-surface-300/50 dark:border-surface-600/50 shadow-sm">
                         ESC
                     </kbd>
                 </div>
             </div>
 
             {{-- Mode Tabs --}}
-            <div class="flex items-center gap-1 px-4 py-2 border-b border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-800/50 overflow-x-auto scrollbar-hide">
+            <div class="relative flex items-center gap-1.5 px-5 py-3 border-b border-surface-200/50 dark:border-surface-700/50 bg-surface-50/80 dark:bg-surface-800/30 overflow-x-auto scrollbar-hide">
                 <template x-for="(m, idx) in modes" :key="m.id">
                     <button @click="switchMode(m.id)"
                             :class="{ 
-                                'bg-theme-500 text-white shadow-sm': mode === m.id,
-                                'text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-surface-200 hover:bg-surface-200 dark:hover:bg-surface-700': mode !== m.id
+                                'bg-theme-gradient text-white shadow-lg shadow-theme-500/30 scale-105': mode === m.id,
+                                'text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-surface-200 hover:bg-surface-200/80 dark:hover:bg-surface-700/50 hover:scale-102': mode !== m.id
                             }"
-                            class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 whitespace-nowrap">
-                        <i :data-lucide="m.icon" class="w-4 h-4"></i>
+                            class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 ease-out whitespace-nowrap transform">
+                        <i :data-lucide="m.icon" class="w-4 h-4 transition-transform duration-300" :class="mode === m.id ? 'scale-110' : ''"></i>
                         <span x-text="m.label"></span>
                     </button>
                 </template>
             </div>
 
-            {{-- Results Container --}}
+            {{-- Results Container with Tab Transition --}}
             <div class="max-h-[55vh] overflow-y-auto overscroll-contain">
-                @include('partials.command-palette.results')
+                <div class="cp-tab-content"
+                     x-ref="tabContent"
+                     :class="isTabTransitioning ? 'cp-tab-exit' : 'cp-tab-enter'">
+                    @include('partials.command-palette.results')
+                </div>
             </div>
 
             {{-- Footer --}}
-            <div class="flex items-center justify-between px-5 py-3 border-t border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-800/50">
-                <div class="flex items-center gap-4 text-xs text-surface-500 dark:text-surface-400">
+            <div class="relative flex items-center justify-between px-6 py-4 border-t border-surface-200/50 dark:border-surface-700/50 bg-surface-50/80 dark:bg-surface-800/30">
+                <div class="flex items-center gap-5 text-xs text-surface-500 dark:text-surface-400">
                     <div class="flex items-center gap-1.5">
-                        <kbd class="px-1.5 py-0.5 bg-surface-200 dark:bg-surface-700 rounded text-surface-600 dark:text-surface-300">↑</kbd>
-                        <kbd class="px-1.5 py-0.5 bg-surface-200 dark:bg-surface-700 rounded text-surface-600 dark:text-surface-300">↓</kbd>
-                        <span>navigasi</span>
+                        <kbd class="px-2 py-1 bg-surface-200/80 dark:bg-surface-700/80 rounded-md text-surface-600 dark:text-surface-300 font-semibold shadow-sm">↑</kbd>
+                        <kbd class="px-2 py-1 bg-surface-200/80 dark:bg-surface-700/80 rounded-md text-surface-600 dark:text-surface-300 font-semibold shadow-sm">↓</kbd>
+                        <span class="ml-1">navigasi</span>
                     </div>
                     <div class="flex items-center gap-1.5">
-                        <kbd class="px-1.5 py-0.5 bg-surface-200 dark:bg-surface-700 rounded text-surface-600 dark:text-surface-300">↵</kbd>
-                        <span>pilih</span>
+                        <kbd class="px-2 py-1 bg-surface-200/80 dark:bg-surface-700/80 rounded-md text-surface-600 dark:text-surface-300 font-semibold shadow-sm">↵</kbd>
+                        <span class="ml-1">pilih</span>
                     </div>
                     <div class="flex items-center gap-1.5">
-                        <kbd class="px-1.5 py-0.5 bg-surface-200 dark:bg-surface-700 rounded text-surface-600 dark:text-surface-300">Tab</kbd>
-                        <span>ganti mode</span>
+                        <kbd class="px-2 py-1 bg-surface-200/80 dark:bg-surface-700/80 rounded-md text-surface-600 dark:text-surface-300 font-semibold shadow-sm">Tab</kbd>
+                        <span class="ml-1">ganti mode</span>
                     </div>
                 </div>
-                <div class="text-xs text-surface-500 dark:text-surface-400">
-                    <span x-show="totalResults > 0" x-text="totalResults + ' hasil'"></span>
-                    <span x-show="calculatorResult !== null" class="text-theme-500 font-medium">Kalkulator aktif</span>
+                <div class="text-xs font-medium">
+                    <span x-show="totalResults > 0" x-text="totalResults + ' hasil'" class="text-theme-500"></span>
+                    <span x-show="calculatorResult !== null" class="text-theme-500 flex items-center gap-1">
+                        <i data-lucide="calculator" class="w-3 h-3"></i>
+                        Kalkulator aktif
+                    </span>
                 </div>
-                </div>
+            </div>
             </div>
         </div>
     </div>
@@ -356,5 +370,40 @@
     
     .cache-step-active .cache-step {
         animation-play-state: running;
+    }
+    
+    /* Command Palette Tab Transitions */
+    .cp-tab-content {
+        transition: opacity 0.2s ease-out, transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .cp-tab-enter {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+    
+    .cp-tab-exit {
+        opacity: 0;
+        transform: translateX(-8px) scale(0.98);
+    }
+    
+    /* Scrollbar styling for command palette */
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    /* Staggered Item Animation */
+    @keyframes slide-in-right {
+        0% { opacity: 0; transform: translateX(-10px); }
+        100% { opacity: 1; transform: translateX(0); }
+    }
+    
+    .animate-slide-in-right {
+        animation: slide-in-right 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        opacity: 0; /* Star hidden */
     }
 </style>

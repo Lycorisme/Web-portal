@@ -21,26 +21,6 @@
             </template>
         </div>
         
-        {{-- Dark Mode Toggle --}}
-        <div class="mt-4 pt-4 border-t border-surface-200 dark:border-surface-700">
-            <div class="px-3 py-2 text-xs font-semibold text-surface-500 dark:text-surface-400 uppercase tracking-wider flex items-center gap-2">
-                <i data-lucide="moon" class="w-3.5 h-3.5"></i>
-                Mode Tampilan
-            </div>
-            <div class="flex gap-2 mt-2">
-                <button @click="setDarkMode(false)"
-                        :class="!isDarkMode ? 'bg-theme-500 text-white shadow-md' : 'bg-surface-100 dark:bg-surface-800 text-surface-700 dark:text-surface-300 border border-surface-200 dark:border-surface-700'"
-                        class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl transition-all duration-150">
-                    <i data-lucide="sun" class="w-5 h-5"></i>
-                    <span class="font-medium">Light</span>
-                </button>
-                <button @click="setDarkMode(true)"
-                        :class="isDarkMode ? 'bg-theme-500 text-white shadow-md' : 'bg-surface-100 dark:bg-surface-800 text-surface-700 dark:text-surface-300 border border-surface-200 dark:border-surface-700'"
-                        class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl transition-all duration-150">
-                    <i data-lucide="moon" class="w-5 h-5"></i>
-                    <span class="font-medium">Dark</span>
-                </button>
-            </div>
-        </div>
+
     </div>
 </template>

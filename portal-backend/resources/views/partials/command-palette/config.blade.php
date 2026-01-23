@@ -53,7 +53,7 @@ const commandPaletteConfig = {
     ],
 
     systemCommands: [
-        { id: 'toggle-dark', icon: 'sun', iconAlt: 'moon', label: 'Mode Terang', labelAlt: 'Mode Gelap', description: 'Beralih ke mode terang', descriptionAlt: 'Beralih ke mode gelap', shortcut: 'Ctrl+D', action: 'toggleDarkMode', isDynamic: true },
+
         { id: 'copy-url', icon: 'link', label: 'Salin URL', description: 'Salin URL halaman saat ini', shortcut: 'Ctrl+Shift+C', action: 'copyCurrentUrl' },
         { id: 'fullscreen', icon: 'maximize', label: 'Toggle Fullscreen', description: 'Masuk/keluar mode layar penuh', shortcut: 'F11', action: 'toggleFullscreen' },
         { id: 'refresh', icon: 'refresh-cw', label: 'Refresh Halaman', description: 'Muat ulang halaman', shortcut: 'Ctrl+R', action: 'refreshPage' },
