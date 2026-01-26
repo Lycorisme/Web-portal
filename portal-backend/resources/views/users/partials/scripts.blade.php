@@ -36,7 +36,17 @@ function userApp() {
         showPassword: false,
 
         selectedIds: [],
-        selectAll: false,
+        
+        // Computed untuk cek apakah semua item di halaman saat ini sudah dipilih
+        get selectAll() {
+            if (this.users.length === 0) return false;
+            const selectableUsers = this.users.filter(u => u.id !== this.currentUserId);
+            if (selectableUsers.length === 0) return false;
+            return selectableUsers.every(u => this.selectedIds.includes(u.id));
+        },
+        set selectAll(value) {
+            // Setter diperlukan untuk x-model binding
+        },
         showTrash: false,
 
         // Filters
@@ -92,8 +102,7 @@ function userApp() {
 
         async fetchUsers() {
             this.loading = true;
-            this.selectedIds = [];
-            this.selectAll = false;
+            // Tidak reset selectedIds agar persist lintas pagination
 
             try {
                 const params = new URLSearchParams({

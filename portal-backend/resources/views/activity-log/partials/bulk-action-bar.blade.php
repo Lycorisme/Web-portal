@@ -27,7 +27,7 @@
                 
                 {{-- Mobile Close Button --}}
                 <button 
-                    @click="selectedIds = []; selectAll = false;"
+                    @click="selectedIds = [];"
                     class="sm:hidden p-1 text-surface-400 hover:text-surface-600 dark:hover:text-surface-200"
                 >
                     <i data-lucide="x" class="w-5 h-5"></i>
@@ -41,7 +41,7 @@
             <div class="flex items-center gap-2 w-full sm:w-auto">
                 {{-- Cancel (Desktop) --}}
                 <button 
-                    @click="selectedIds = []; selectAll = false;"
+                    @click="selectedIds = [];"
                     class="hidden sm:block px-3 py-2 text-sm font-medium text-surface-500 hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-200 transition-colors"
                 >
                     Batal

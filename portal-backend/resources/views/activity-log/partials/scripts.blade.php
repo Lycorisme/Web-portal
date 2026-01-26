@@ -26,7 +26,15 @@ function activityLogApp() {
 
         // Selection
         selectedIds: [],
-        selectAll: false,
+        
+        // Computed untuk cek apakah semua item di halaman saat ini sudah dipilih
+        get selectAll() {
+            if (this.logs.length === 0) return false;
+            return this.logs.every(log => this.selectedIds.includes(log.id));
+        },
+        set selectAll(value) {
+            // Setter diperlukan untuk x-model binding
+        },
         showTrash: false,
 
         // Filters
@@ -82,8 +90,7 @@ function activityLogApp() {
 
         async fetchLogs() {
             this.loading = true;
-            this.selectedIds = [];
-            this.selectAll = false;
+            // Tidak reset selectedIds agar persist lintas pagination
 
             try {
                 const params = new URLSearchParams({

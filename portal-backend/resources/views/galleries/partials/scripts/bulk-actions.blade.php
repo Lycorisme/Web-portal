@@ -1,11 +1,19 @@
 {{-- Bulk Actions Module --}}
 
-// Selection
+// Selection - hanya mempengaruhi item di halaman saat ini
 toggleSelectAll() {
+    const currentPageIds = this.galleries.map(g => g.id);
+    
     if (this.selectAll) {
-        this.selectedIds = this.galleries.map(g => g.id);
+        // Jika semua sudah terpilih, hapus dari selection
+        this.selectedIds = this.selectedIds.filter(id => !currentPageIds.includes(id));
     } else {
-        this.selectedIds = [];
+        // Jika belum semua terpilih, tambahkan ke selection
+        currentPageIds.forEach(id => {
+            if (!this.selectedIds.includes(id)) {
+                this.selectedIds.push(id);
+            }
+        });
     }
 },
 

@@ -1,12 +1,20 @@
 {{-- Bulk Actions Module --}}
 
-// Select All Toggle
+// Select All Toggle - hanya mempengaruhi item di halaman saat ini
 toggleSelectAll() {
+    const selectableUsers = this.users.filter(u => u.id !== this.currentUserId);
+    const currentPageIds = selectableUsers.map(u => u.id);
+    
     if (this.selectAll) {
-        // Select all except current user
-        this.selectedIds = this.users.filter(u => u.id !== this.currentUserId).map(u => u.id);
+        // Jika semua sudah terpilih, hapus dari selection
+        this.selectedIds = this.selectedIds.filter(id => !currentPageIds.includes(id));
     } else {
-        this.selectedIds = [];
+        // Jika belum semua terpilih, tambahkan ke selection
+        currentPageIds.forEach(id => {
+            if (!this.selectedIds.includes(id)) {
+                this.selectedIds.push(id);
+            }
+        });
     }
 },
 
@@ -32,7 +40,6 @@ async bulkDelete() {
                 const result = await response.json();
                 if (result.success) { 
                     this.selectedIds = []; 
-                    this.selectAll = false; 
                     this.fetchUsers(); 
                     showToast('success', result.message); 
                 } else { 
@@ -71,7 +78,6 @@ async bulkRestore() {
                 const result = await response.json();
                 if (result.success) { 
                     this.selectedIds = []; 
-                    this.selectAll = false; 
                     this.fetchUsers(); 
                     showToast('success', result.message); 
                 } else { 
@@ -110,7 +116,6 @@ async bulkForceDelete() {
                 const result = await response.json();
                 if (result.success) { 
                     this.selectedIds = []; 
-                    this.selectAll = false; 
                     this.fetchUsers(); 
                     showToast('success', result.message); 
                 } else { 

@@ -57,7 +57,15 @@ function galleryApp() {
         viewMode: 'grouped', // 'grouped' or 'individual'
 
         selectedIds: [],
-        selectAll: false,
+        
+        // Computed untuk cek apakah semua item di halaman saat ini sudah dipilih
+        get selectAll() {
+            if (this.galleries.length === 0) return false;
+            return this.galleries.every(g => this.selectedIds.includes(g.id));
+        },
+        set selectAll(value) {
+            // Setter diperlukan untuk x-model binding
+        },
         showTrash: false,
 
         // Filters

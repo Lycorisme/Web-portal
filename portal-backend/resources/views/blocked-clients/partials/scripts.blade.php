@@ -27,7 +27,15 @@ function blockedClientApp() {
         formLoading: false,
 
         selectedIds: [],
-        selectAll: false,
+        
+        // Computed untuk cek apakah semua item di halaman saat ini sudah dipilih
+        get selectAll() {
+            if (this.clients.length === 0) return false;
+            return this.clients.every(c => this.selectedIds.includes(c.id));
+        },
+        set selectAll(value) {
+            // Setter diperlukan untuk x-model binding
+        },
 
         // Filters
         filters: { search: '', status: '', sort_field: 'created_at', sort_direction: 'desc' },
@@ -77,8 +85,7 @@ function blockedClientApp() {
 
         async fetchClients() {
             this.loading = true;
-            this.selectedIds = [];
-            this.selectAll = false;
+            // Tidak reset selectedIds agar persist lintas pagination
 
             try {
                 const params = new URLSearchParams({

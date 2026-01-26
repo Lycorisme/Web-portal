@@ -20,7 +20,15 @@ function categoryApp() {
         formLoading: false,
 
         selectedIds: [],
-        selectAll: false,
+        
+        // Computed untuk cek apakah semua item di halaman saat ini sudah dipilih
+        get selectAll() {
+            if (this.categories.length === 0) return false;
+            return this.categories.every(c => this.selectedIds.includes(c.id));
+        },
+        set selectAll(value) {
+            // Setter diperlukan untuk x-model binding
+        },
         showTrash: false,
 
         // Filters
@@ -76,8 +84,7 @@ function categoryApp() {
 
         async fetchCategories() {
             this.loading = true;
-            this.selectedIds = [];
-            this.selectAll = false;
+            // Tidak reset selectedIds agar persist lintas pagination
 
             try {
                 const params = new URLSearchParams({

@@ -49,14 +49,8 @@ toggleTrash() {
 toggleSelection(id) {
     if (this.selectedIds.includes(id)) {
         this.selectedIds = this.selectedIds.filter(itemId => itemId !== id);
-        this.selectAll = false;
     } else {
         this.selectedIds.push(id);
-        // Check if all items are selected
-        const shownIds = this.galleries.map(g => g.id);
-        const allSelected = shownIds.every(sid => this.selectedIds.includes(sid));
-        if (allSelected && shownIds.length > 0) {
-            this.selectAll = true;
-        }
     }
+    // selectAll sekarang adalah computed property, tidak perlu diatur manual
 },

@@ -20,7 +20,15 @@ function tagApp() {
         formLoading: false,
 
         selectedIds: [],
-        selectAll: false,
+        
+        // Computed untuk cek apakah semua item di halaman saat ini sudah dipilih
+        get selectAll() {
+            if (this.tags.length === 0) return false;
+            return this.tags.every(t => this.selectedIds.includes(t.id));
+        },
+        set selectAll(value) {
+            // Setter diperlukan untuk x-model binding
+        },
         showTrash: false,
 
         // Filters
@@ -76,8 +84,7 @@ function tagApp() {
 
         async fetchTags() {
             this.loading = true;
-            this.selectedIds = [];
-            this.selectAll = false;
+            // Tidak reset selectedIds agar persist lintas pagination
 
             try {
                 const params = new URLSearchParams({

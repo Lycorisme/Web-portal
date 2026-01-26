@@ -1,11 +1,19 @@
 {{-- Bulk Actions Module --}}
 
-// Select All Toggle
+// Select All Toggle - hanya mempengaruhi item di halaman saat ini
 toggleSelectAll() {
+    const currentPageIds = this.clients.map(c => c.id);
+    
     if (this.selectAll) {
-        this.selectedIds = this.clients.map(c => c.id);
+        // Jika semua sudah terpilih, hapus dari selection
+        this.selectedIds = this.selectedIds.filter(id => !currentPageIds.includes(id));
     } else {
-        this.selectedIds = [];
+        // Jika belum semua terpilih, tambahkan ke selection
+        currentPageIds.forEach(id => {
+            if (!this.selectedIds.includes(id)) {
+                this.selectedIds.push(id);
+            }
+        });
     }
 },
 
@@ -31,7 +39,6 @@ async bulkUnblock() {
                 const result = await response.json();
                 if (result.success) { 
                     this.selectedIds = []; 
-                    this.selectAll = false; 
                     this.fetchClients(); 
                     showToast('success', result.message); 
                 } else { 
@@ -70,7 +77,6 @@ async bulkDelete() {
                 const result = await response.json();
                 if (result.success) { 
                     this.selectedIds = []; 
-                    this.selectAll = false; 
                     this.fetchClients(); 
                     showToast('success', result.message); 
                 } else { 
