@@ -42,6 +42,7 @@ async bulkDelete() {
                 const result = await response.json();
 
                 if (result.success) {
+                    this.selectedIds = [];
                     this.fetchArticles();
                     showToast('success', result.message);
                     window.dispatchEvent(new CustomEvent('trash-updated'));
@@ -80,6 +81,7 @@ async bulkRestore() {
                 const result = await response.json();
 
                 if (result.success) {
+                    this.selectedIds = [];
                     this.fetchArticles();
                     showToast('success', result.message);
                     window.dispatchEvent(new CustomEvent('trash-updated'));
@@ -118,6 +120,7 @@ async bulkForceDelete() {
                 const result = await response.json();
 
                 if (result.success) {
+                    this.selectedIds = [];
                     this.fetchArticles();
                     showToast('success', result.message);
                     window.dispatchEvent(new CustomEvent('trash-updated'));

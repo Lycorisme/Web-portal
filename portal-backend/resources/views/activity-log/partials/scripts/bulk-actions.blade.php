@@ -39,7 +39,7 @@ async bulkDelete() {
                     body: JSON.stringify({ ids: this.selectedIds }),
                 });
                 const result = await response.json();
-                if (result.success) { this.fetchLogs(); showToast('success', result.message); } 
+                if (result.success) { this.selectedIds = []; this.fetchLogs(); showToast('success', result.message); } 
                 else { showToast('error', result.message); }
             } catch (error) { console.error('Error:', error); showToast('error', 'Gagal menghapus log'); } 
             finally { closeLoading(); }
@@ -67,7 +67,7 @@ async bulkRestore() {
                     body: JSON.stringify({ ids: this.selectedIds }),
                 });
                 const result = await response.json();
-                if (result.success) { this.fetchLogs(); showToast('success', result.message); } 
+                if (result.success) { this.selectedIds = []; this.fetchLogs(); showToast('success', result.message); } 
                 else { showToast('error', result.message); }
             } catch (error) { console.error('Error:', error); showToast('error', 'Gagal memulihkan log'); } 
             finally { closeLoading(); }
@@ -95,7 +95,7 @@ async bulkForceDelete() {
                     body: JSON.stringify({ ids: this.selectedIds }),
                 });
                 const result = await response.json();
-                if (result.success) { this.fetchLogs(); showToast('success', result.message); } 
+                if (result.success) { this.selectedIds = []; this.fetchLogs(); showToast('success', result.message); } 
                 else { showToast('error', result.message); }
             } catch (error) { console.error('Error:', error); showToast('error', 'Gagal menghapus log'); } 
             finally { closeLoading(); }

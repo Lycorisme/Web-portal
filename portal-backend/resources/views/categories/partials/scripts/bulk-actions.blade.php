@@ -42,6 +42,7 @@ async bulkDelete() {
                 const result = await response.json();
 
                 if (result.success) {
+                    this.selectedIds = [];
                     this.fetchCategories();
                     showToast('success', result.message);
                     window.dispatchEvent(new CustomEvent('trash-updated'));
@@ -78,7 +79,7 @@ async bulkRestore() {
                     body: JSON.stringify({ ids: this.selectedIds }),
                 });
                 const result = await response.json();
-                if (result.success) { this.fetchCategories(); showToast('success', result.message); window.dispatchEvent(new CustomEvent('trash-updated')); } 
+                if (result.success) { this.selectedIds = []; this.fetchCategories(); showToast('success', result.message); window.dispatchEvent(new CustomEvent('trash-updated')); } 
                 else { showToast('error', result.message); }
             } catch (error) { console.error('Error:', error); showToast('error', 'Gagal memulihkan'); } 
             finally { closeLoading(); }
@@ -106,7 +107,7 @@ async bulkForceDelete() {
                     body: JSON.stringify({ ids: this.selectedIds }),
                 });
                 const result = await response.json();
-                if (result.success) { this.fetchCategories(); showToast('success', result.message); window.dispatchEvent(new CustomEvent('trash-updated')); } 
+                if (result.success) { this.selectedIds = []; this.fetchCategories(); showToast('success', result.message); window.dispatchEvent(new CustomEvent('trash-updated')); } 
                 else { showToast('error', result.message); }
             } catch (error) { console.error('Error:', error); showToast('error', 'Gagal menghapus'); } 
             finally { closeLoading(); }
