@@ -23,16 +23,7 @@
             class="fixed inset-0 bg-black/95 backdrop-blur-md"
         ></div>
 
-        {{-- Top Header Bar (Gradient Overlay + Info) --}}
-        <div 
-            class="fixed top-0 inset-x-0 h-24 bg-gradient-to-b from-black/80 to-transparent z-[70] pointer-events-none transition-opacity duration-300"
-            x-show="showPreviewModal"
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-        ></div>
-
-        {{-- Top Left Info (Modern & Clean) --}}
+        {{-- Top Left Info (Modern & Clean) - Includes integrated gradient --}}
         @include('galleries.partials.preview-header-info')
 
 
