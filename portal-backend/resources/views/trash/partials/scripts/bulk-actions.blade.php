@@ -1,9 +1,17 @@
-// Toggle select all
+// Toggle select all - hanya mempengaruhi item di halaman saat ini
 toggleSelectAll() {
+    const currentPageItemKeys = this.items.map(item => JSON.stringify({type: item.type, id: item.id}));
+    
     if (this.selectAll) {
-        this.selectedItems = this.items.map(item => JSON.stringify({type: item.type, id: item.id}));
+        // Jika semua sudah terpilih, hapus semua item di halaman ini dari selection
+        this.selectedItems = this.selectedItems.filter(key => !currentPageItemKeys.includes(key));
     } else {
-        this.selectedItems = [];
+        // Jika belum semua terpilih, tambahkan semua item di halaman ini ke selection
+        currentPageItemKeys.forEach(key => {
+            if (!this.selectedItems.includes(key)) {
+                this.selectedItems.push(key);
+            }
+        });
     }
 },
 
@@ -35,7 +43,6 @@ async bulkRestore() {
         if (result.success) {
             showToast('success', result.message);
             this.selectedItems = [];
-            this.selectAll = false;
             this.fetchItems();
             window.dispatchEvent(new CustomEvent('trash-updated'));
         } else { 
@@ -75,7 +82,6 @@ async bulkForceDelete() {
         if (result.success) {
             showToast('success', result.message);
             this.selectedItems = [];
-            this.selectAll = false;
             this.fetchItems();
             window.dispatchEvent(new CustomEvent('trash-updated'));
         } else { 

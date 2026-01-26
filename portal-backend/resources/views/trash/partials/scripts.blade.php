@@ -12,9 +12,20 @@ function trashApp() {
         activeMenuButton: null,
         menuPosition: { top: 0, left: 0, placement: 'bottom' },
         
-        // Selection
+        // Selection - menggunakan Map untuk menyimpan item berdasarkan unique key (type-id)
         selectedItems: [],
-        selectAll: false,
+        
+        // Computed untuk cek apakah semua item di halaman saat ini sudah dipilih
+        get selectAll() {
+            if (this.items.length === 0) return false;
+            return this.items.every(item => 
+                this.selectedItems.includes(JSON.stringify({type: item.type, id: item.id}))
+            );
+        },
+        set selectAll(value) {
+            // Setter ini diperlukan untuk x-model binding
+            // Logika toggle akan ditangani oleh toggleSelectAll()
+        },
 
         // Filters
         filters: { search: '', type: 'all' },
@@ -61,8 +72,7 @@ function trashApp() {
 
         async fetchItems() {
             this.loading = true;
-            this.selectedItems = [];
-            this.selectAll = false;
+            // Tidak reset selectedItems agar persist lintas pagination
 
             try {
                 const params = new URLSearchParams({
