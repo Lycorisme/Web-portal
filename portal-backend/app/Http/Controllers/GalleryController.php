@@ -97,6 +97,7 @@ class GalleryController extends Controller
                 'created_at' => $gallery->created_at->format('d M Y H:i'),
                 'created_at_human' => $gallery->created_at->diffForHumans(),
                 'deleted_at' => $gallery->deleted_at,
+                'meta_data' => $gallery->meta_data,
             ];
         });
 
@@ -277,6 +278,7 @@ class GalleryController extends Controller
                 'created_at' => $representative->created_at->format('d M Y H:i'),
                 'created_at_human' => $representative->created_at->diffForHumans(),
                 'deleted_at' => $representative->deleted_at,
+                'meta_data' => $representative->meta_data,
             ];
         }
 
@@ -455,6 +457,9 @@ class GalleryController extends Controller
                 
                 $data['thumbnail_path'] = $thumbnailPath;
 
+                // Extract Metadata
+                $data['meta_data'] = $this->extractImageMeta($originalPath);
+
                 $gallery = Gallery::create($data);
                 $createdCount++;
 
@@ -533,6 +538,9 @@ class GalleryController extends Controller
                 $this->createThumbnail($originalPath, $thumbFullPath, 400, 300);
                 
                 $data['thumbnail_path'] = $thumbnailPath;
+
+                // Extract Metadata
+                $data['meta_data'] = $this->extractImageMeta($originalPath);
             }
 
             // Handle video thumbnail from YouTube/Vimeo
@@ -593,6 +601,7 @@ class GalleryController extends Controller
                 'uploader' => $gallery->uploader ? $gallery->uploader->name : null,
                 'created_at' => $gallery->created_at->format('d M Y H:i:s'),
                 'updated_at' => $gallery->updated_at->format('d M Y H:i:s'),
+                'meta_data' => $gallery->meta_data,
             ],
         ]);
     }
@@ -653,6 +662,9 @@ class GalleryController extends Controller
                 $this->createThumbnail($originalPath, $thumbFullPath, 400, 300);
                 
                 $data['thumbnail_path'] = $thumbnailPath;
+
+                // Extract Metadata
+                $data['meta_data'] = $this->extractImageMeta($originalPath);
             }
 
             $oldValues = $gallery->getOriginal();
@@ -1050,5 +1062,94 @@ class GalleryController extends Controller
         }
         
         return null;
+    }
+    /**
+     * Extract Image Metadata (EXIF)
+     */
+    private function extractImageMeta(string $filePath): array
+    {
+        $meta = [
+            'file_size' => 0,
+            'mime_type' => '',
+            'width' => 0,
+            'height' => 0,
+            'camera_make' => null,
+            'camera_model' => null,
+            'exposure_time' => null,
+            'aperture' => null,
+            'iso' => null,
+            'focal_length' => null,
+            'taken_at' => null,
+            'software' => null,
+            'lens_model' => null,
+        ];
+
+        if (!file_exists($filePath)) {
+            return $meta;
+        }
+
+        // Basic File Info
+        $meta['file_size'] = filesize($filePath);
+        $imageSize = getimagesize($filePath);
+        if ($imageSize) {
+            $meta['width'] = $imageSize[0];
+            $meta['height'] = $imageSize[1];
+            $meta['mime_type'] = $imageSize['mime'];
+        }
+
+        // EXIF Data
+        try {
+            // Suppress warnings for files without EXIF
+            $exif = @exif_read_data($filePath);
+            
+            if ($exif) {
+                $meta['camera_make'] = $exif['Make'] ?? null;
+                $meta['camera_model'] = $exif['Model'] ?? null;
+                $meta['software'] = $exif['Software'] ?? null;
+                $meta['taken_at'] = $exif['DateTimeOriginal'] ?? ($exif['DateTime'] ?? null);
+                
+                // ISO
+                $meta['iso'] = $exif['ISOSpeedRatings'] ?? null;
+                
+                // Aperture (FNumber is often a rational 22/5)
+                if (isset($exif['FNumber'])) {
+                    $meta['aperture'] = $this->evalRational($exif['FNumber']);
+                } elseif (isset($exif['ApertureValue'])) {
+                    $meta['aperture'] = $this->evalRational($exif['ApertureValue']);
+                }
+
+                // Shutter Speed (ExposureTime is often 10/600)
+                if (isset($exif['ExposureTime'])) {
+                    $meta['exposure_time'] = $exif['ExposureTime']; // Keep as fraction string "1/60"
+                }
+
+                // Focal Length
+                if (isset($exif['FocalLength'])) {
+                    $meta['focal_length'] = $this->evalRational($exif['FocalLength']);
+                }
+
+                // Lens Info (This varies by camera manufacturer)
+                $meta['lens_model'] = $exif['UndefinedTag:0xA434'] ?? ($exif['LensModel'] ?? null);
+            }
+        } catch (\Exception $e) {
+            // Accessing EXIF failed, just return basic info
+        }
+
+        return $meta;
+    }
+
+    /**
+     * Helper to evaluate rational numbers like "22/5" -> 4.4
+     */
+    private function evalRational($rational)
+    {
+        if (is_array($rational)) return null;
+        
+        $parts = explode('/', $rational);
+        if (count($parts) === 2) {
+            if ($parts[1] == 0) return 0;
+            return round($parts[0] / $parts[1], 1);
+        }
+        return $rational;
     }
 }

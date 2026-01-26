@@ -155,19 +155,118 @@
             </div>
 
             {{-- 5. Camera Info Placeholder --}}
-            <div>
-                <h5 class="text-xs text-white/40 uppercase tracking-wider font-bold mb-3 flex items-center gap-2">
-                    <i data-lucide="aperture" class="w-3 h-3"></i>
-                    Info Kamera
-                </h5>
-                <div class="p-4 rounded-2xl bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/5 flex items-center gap-4 opacity-60">
-                    <i data-lucide="camera-off" class="w-8 h-8 text-white/20"></i>
-                    <div>
-                        <p class="text-sm font-medium text-white/50">Data EXIF tidak tersedia</p>
-                        <p class="text-xs text-white/30">Kamera atau lensa tidak terdeteksi</p>
+            {{-- 5. Camera Info --}}
+            <template x-if="previewItem.meta_data && (previewItem.meta_data.camera_model || previewItem.meta_data.camera_make)">
+                <div>
+                    <h5 class="text-xs text-white/40 uppercase tracking-wider font-bold mb-3 flex items-center gap-2">
+                        <i data-lucide="camera" class="w-3 h-3"></i>
+                        Info Kamera
+                    </h5>
+                    <div class="p-4 rounded-xl bg-surface-800/50 border border-white/5 space-y-4">
+                        {{-- Camera Model --}}
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-white/70">
+                                <i data-lucide="camera" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-white/40 font-medium">Kamera</p>
+                                <p class="text-sm font-medium text-white shadow-black drop-shadow-sm" x-text="[previewItem.meta_data.camera_make, previewItem.meta_data.camera_model].filter(Boolean).join(' ')"></p>
+                            </div>
+                        </div>
+
+                        {{-- Lens Model (if available) --}}
+                        <template x-if="previewItem.meta_data.lens_model">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-white/70">
+                                    <i data-lucide="aperture" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-white/40 font-medium">Lensa</p>
+                                    <p class="text-sm font-medium text-white shadow-black drop-shadow-sm" x-text="previewItem.meta_data.lens_model"></p>
+                                </div>
+                            </div>
+                        </template>
+
+                        {{-- Shooting Settings --}}
+                        <div class="grid grid-cols-4 gap-2 pt-2 border-t border-white/5">
+                            <template x-if="previewItem.meta_data.focal_length">
+                                <div class="text-center">
+                                    <p class="text-[10px] text-white/40 uppercase">Focal</p>
+                                    <p class="text-xs font-bold text-white" x-text="previewItem.meta_data.focal_length + 'mm'"></p>
+                                </div>
+                            </template>
+                            <template x-if="previewItem.meta_data.aperture">
+                                <div class="text-center">
+                                    <p class="text-[10px] text-white/40 uppercase">Aperture</p>
+                                    <p class="text-xs font-bold text-white" x-text="'f/' + previewItem.meta_data.aperture"></p>
+                                </div>
+                            </template>
+                            <template x-if="previewItem.meta_data.exposure_time">
+                                <div class="text-center">
+                                    <p class="text-[10px] text-white/40 uppercase">Shutter</p>
+                                    <p class="text-xs font-bold text-white" x-text="previewItem.meta_data.exposure_time + 's'"></p>
+                                </div>
+                            </template>
+                            <template x-if="previewItem.meta_data.iso">
+                                <div class="text-center">
+                                    <p class="text-[10px] text-white/40 uppercase">ISO</p>
+                                    <p class="text-xs font-bold text-white" x-text="previewItem.meta_data.iso"></p>
+                                </div>
+                            </template>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </template>
+
+            {{-- 6. File Info --}}
+            <template x-if="previewItem.meta_data">
+                <div>
+                    <h5 class="text-xs text-white/40 uppercase tracking-wider font-bold mb-3 flex items-center gap-2">
+                        <i data-lucide="hard-drive" class="w-3 h-3"></i>
+                        Info File
+                    </h5>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="p-3 rounded-xl bg-surface-800/50 border border-white/5">
+                            <p class="text-xs text-white/40 mb-1">Dimensi</p>
+                            <p class="text-sm font-bold text-white font-mono" x-text="previewItem.meta_data.width + ' x ' + previewItem.meta_data.height + ' px'"></p>
+                        </div>
+                        <div class="p-3 rounded-xl bg-surface-800/50 border border-white/5">
+                            <p class="text-xs text-white/40 mb-1">Ukuran</p>
+                            <p class="text-sm font-bold text-white font-mono" x-text="formatBytes(previewItem.meta_data.file_size)"></p>
+                        </div>
+                        <div class="p-3 rounded-xl bg-surface-800/50 border border-white/5">
+                            <p class="text-xs text-white/40 mb-1">Format</p>
+                            <p class="text-sm font-bold text-white font-mono uppercase" x-text="previewItem.meta_data.mime_type ? previewItem.meta_data.mime_type.split('/')[1] : 'UNK'"></p>
+                        </div>
+                        <template x-if="previewItem.meta_data.software">
+                            <div class="p-3 rounded-xl bg-surface-800/50 border border-white/5">
+                                <p class="text-xs text-white/40 mb-1">Software</p>
+                                <p class="text-sm font-bold text-white truncate" x-text="previewItem.meta_data.software"></p>
+                            </div>
+                        </template>
+                        <template x-if="previewItem.meta_data.taken_at">
+                            <div class="col-span-2 p-3 rounded-xl bg-surface-800/50 border border-white/5">
+                                <p class="text-xs text-white/40 mb-1">Diambil Pada</p>
+                                <p class="text-sm font-bold text-white" x-text="formatDateIndo(previewItem.meta_data.taken_at)"></p>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </template>
+
+            {{-- Fallback if no meta data --}}
+            <template x-if="!previewItem.meta_data && previewItem.media_type === 'image'">
+                <div>
+                    <h5 class="text-xs text-white/40 uppercase tracking-wider font-bold mb-3 flex items-center gap-2">
+                        <i data-lucide="info" class="w-3 h-3"></i>
+                        Info Tambahan
+                    </h5>
+                    <div class="p-4 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center gap-4 opacity-60">
+                        <i data-lucide="alert-circle" class="w-5 h-5 text-white/20"></i>
+                        <p class="text-xs text-white/50">Tidak ada data EXIF detail yang tersedia untuk gambar ini.</p>
+                    </div>
+                </div>
+            </template>
 
         </div>
 

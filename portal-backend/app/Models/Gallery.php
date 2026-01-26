@@ -26,6 +26,7 @@ class Gallery extends Model
         'sort_order',
         'uploaded_by',
         'published_at',
+        'meta_data',
     ];
 
     protected $casts = [
@@ -34,6 +35,7 @@ class Gallery extends Model
         'sort_order' => 'integer',
         'event_date' => 'date',
         'published_at' => 'datetime',
+        'meta_data' => 'array',
     ];
 
     /**
