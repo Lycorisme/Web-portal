@@ -1,4 +1,38 @@
 {{-- Image/Video Preview Modal (Lightbox) --}}
+
+{{-- Slide Animation Styles --}}
+<style>
+    @keyframes slideFromRight {
+        from {
+            opacity: 0;
+            transform: translateX(80px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+        }
+    }
+    
+    @keyframes slideFromLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-80px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+        }
+    }
+    
+    .preview-slide-animation.slide-from-right {
+        animation: slideFromRight 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    
+    .preview-slide-animation.slide-from-left {
+        animation: slideFromLeft 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+</style>
+
 <template x-teleport="body">
     <div 
         x-show="showPreviewModal"
@@ -107,7 +141,7 @@
         </div>
 
         {{-- Content Container - z-index higher to allow full zoom --}}
-        <div class="fixed inset-0 flex items-center justify-center z-[65] pointer-events-none px-4 sm:px-16">
+        <div class="fixed inset-0 flex items-center justify-center z-[65] pointer-events-none px-4 sm:px-16 overflow-hidden">
             <div 
                 x-show="showPreviewModal && previewItem"
                 class="w-full h-full pointer-events-auto relative flex items-center justify-center"
@@ -115,10 +149,10 @@
             >
                 <template x-if="previewItem">
                     <div 
-                        x-key="previewItem.id"
-                        class="relative flex items-center justify-center"
+                        :key="previewItem.id"
+                        class="relative flex items-center justify-center preview-slide-animation"
+                        :class="previewDirection === 'next' ? 'slide-from-right' : 'slide-from-left'"
                         :style="`transform: scale(${zoomScale}) translate(${panX}px, ${panY}px); transition: transform ${isSliderDragging ? '0ms' : '300ms'} cubic-bezier(0.4, 0, 0.2, 1);`"
-                        x-bind="previewTransition"
                     >
                         {{-- Image Preview with Lazy Loading --}}
                         <template x-if="previewItem.media_type === 'image'">

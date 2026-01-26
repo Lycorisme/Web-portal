@@ -133,11 +133,16 @@ toggleInfoModal() {
 get previewTransition() {
     const isNext = this.previewDirection === 'next';
     return {
-        ['x-transition:enter']: 'transition ease-[cubic-bezier(0.33,1,0.68,1)] duration-500',
-        ['x-transition:enter-start']: isNext ? 'opacity-100 translate-x-full' : 'opacity-100 -translate-x-full',
-        ['x-transition:enter-end']: 'opacity-100 translate-x-0',
-        ['x-transition:leave']: 'transition ease-[cubic-bezier(0.33,1,0.68,1)] duration-500 absolute top-0 left-0 w-full z-0',
-        ['x-transition:leave-start']: 'opacity-100 translate-x-0',
-        ['x-transition:leave-end']: isNext ? 'opacity-100 -translate-x-full' : 'opacity-100 translate-x-full',
+        // Smoother push transition with spring-like easing
+        ['x-transition:enter']: 'transition-all ease-[cubic-bezier(0.22,1,0.36,1)] duration-400',
+        ['x-transition:enter-start']: isNext 
+            ? 'opacity-0 translate-x-[100%] scale-95' 
+            : 'opacity-0 -translate-x-[100%] scale-95',
+        ['x-transition:enter-end']: 'opacity-100 translate-x-0 scale-100',
+        ['x-transition:leave']: 'transition-all ease-[cubic-bezier(0.22,1,0.36,1)] duration-400 absolute inset-0',
+        ['x-transition:leave-start']: 'opacity-100 translate-x-0 scale-100',
+        ['x-transition:leave-end']: isNext 
+            ? 'opacity-0 -translate-x-[100%] scale-95' 
+            : 'opacity-0 translate-x-[100%] scale-95',
     };
 },
