@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\CheckRole::class,
             'security' => \App\Http\Middleware\CheckSecurityAccess::class,
             'maintenance' => \App\Http\Middleware\CheckMaintenanceMode::class,
+            'blocked.client' => \App\Http\Middleware\CheckBlockedClient::class,
         ]);
         
         // Apply maintenance check to all public web routes

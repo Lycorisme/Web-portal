@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\ActivityLog;
 use App\Models\SiteSetting;
+use App\Models\BlockedClient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -261,6 +262,29 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
+        // ============================================
+        // SECURITY LAYER 1: Honeypot Bot Detection
+        // ============================================
+        if ($request->filled('website_url')) {
+            ActivityLog::create([
+                'user_id' => null,
+                'action' => 'bot_detected',
+                'description' => "Bot terdeteksi via honeypot pada login. Email: {$request->input('email')}",
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'url' => $request->fullUrl(),
+                'level' => ActivityLog::LEVEL_WARNING,
+            ]);
+            
+            // Track suspicious activity and potentially auto-block
+            $this->trackSuspiciousActivity($request, 'honeypot_triggered');
+            
+            // Return generic error to not reveal detection
+            throw ValidationException::withMessages([
+                'email' => ['Terjadi kesalahan. Silakan coba lagi.'],
+            ]);
+        }
+
         $request->validate([
             'email' => 'required|email',
             'password' => 'required|string',
@@ -288,9 +312,11 @@ class AuthController extends Controller
                 'created_at' => now(),
             ]);
 
+            // Redirect with lockout time for countdown modal
+            $lockedUntil = now()->addSeconds($seconds)->timestamp;
             throw ValidationException::withMessages([
                 'email' => ["Terlalu banyak percobaan login. Silakan coba lagi dalam {$seconds} detik."],
-            ]);
+            ])->redirectTo(route('login') . '?lockout_until=' . $lockedUntil);
         }
 
         // Check if user exists
@@ -330,9 +356,11 @@ class AuthController extends Controller
                 'created_at' => now(),
             ]);
 
+            // Redirect with lockout time for countdown modal
+            $lockedUntil = $user->locked_until->timestamp;
             throw ValidationException::withMessages([
                 'email' => ["Akun Anda terkunci. Silakan coba lagi dalam {$remainingMinutes} menit."],
-            ]);
+            ])->redirectTo(route('login') . '?lockout_until=' . $lockedUntil);
         }
 
         // Attempt login
@@ -357,9 +385,11 @@ class AuthController extends Controller
                     'created_at' => now(),
                 ]);
 
+                // Redirect with lockout time for countdown modal
+                $lockedUntil = $user->locked_until->timestamp;
                 throw ValidationException::withMessages([
                     'email' => ["Akun Anda telah dikunci selama {$this->decayMinutes} menit karena terlalu banyak percobaan login gagal."],
-                ]);
+                ])->redirectTo(route('login') . '?lockout_until=' . $lockedUntil);
             }
 
             ActivityLog::create([
@@ -373,9 +403,12 @@ class AuthController extends Controller
                 'created_at' => now(),
             ]);
 
+            // Calculate remaining attempts for UI feedback
+            $remainingAttempts = max(0, $this->maxAttempts - $failedCount);
+            
             throw ValidationException::withMessages([
                 'email' => ['Email atau password salah.'],
-            ]);
+            ])->redirectTo(route('login') . '?remaining=' . $remainingAttempts);
         }
 
         // Login successful
@@ -444,5 +477,50 @@ class AuthController extends Controller
     protected function throttleKey(Request $request): string
     {
         return strtolower($request->input('email')) . '|' . $request->ip();
+    }
+
+    /**
+     * Track suspicious activity and auto-block if threshold reached.
+     * This provides defense-in-depth against automated attacks.
+     */
+    protected function trackSuspiciousActivity(Request $request, string $reason): void
+    {
+        $blockedClient = BlockedClient::firstOrCreate(
+            ['ip_address' => $request->ip()],
+            [
+                'user_agent' => $request->userAgent(), 
+                'blocked_route' => 'login',
+                'attempt_count' => 0,
+            ]
+        );
+        
+        $blockedClient->incrementAttempt();
+        
+        // Auto-block after 10 suspicious attempts (cumulative)
+        if ($blockedClient->shouldBlock(10)) {
+            $blockedClient->block(
+                "Auto-blocked: {$reason}. Total attempts: {$blockedClient->attempt_count}", 
+                60 * 24 // Block for 24 hours
+            );
+            
+            ActivityLog::create([
+                'user_id' => null,
+                'action' => 'ip_auto_blocked',
+                'description' => "IP {$request->ip()} di-block otomatis: {$reason}",
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'level' => ActivityLog::LEVEL_DANGER,
+            ]);
+        }
+    }
+
+    /**
+     * Get remaining login attempts for an IP/email combination.
+     */
+    public function getRemainingAttempts(Request $request): int
+    {
+        $throttleKey = $this->throttleKey($request);
+        $attempts = RateLimiter::attempts($throttleKey);
+        return max(0, $this->maxAttempts - $attempts);
     }
 }

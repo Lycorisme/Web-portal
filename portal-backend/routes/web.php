@@ -1,6 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Http\Request;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ActivityLogController;
@@ -18,18 +21,53 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\GlobalSearchController;
 
 // =============================================
+// Rate Limiters for Authentication Routes
+// =============================================
+RateLimiter::for('login', function (Request $request) {
+    // 10 login attempts per minute per IP
+    return Limit::perMinute(10)->by($request->ip())->response(function () {
+        return redirect()->route('login')
+            ->withErrors(['email' => 'Terlalu banyak percobaan login. Silakan tunggu 1 menit.']);
+    });
+});
+
+RateLimiter::for('register', function (Request $request) {
+    // 5 registration attempts per minute per IP
+    return Limit::perMinute(5)->by($request->ip())->response(function () {
+        return redirect()->route('login')
+            ->withErrors(['email' => 'Terlalu banyak percobaan registrasi. Silakan tunggu 1 menit.']);
+    });
+});
+
+RateLimiter::for('password-reset', function (Request $request) {
+    // 3 password reset attempts per minute per IP
+    return Limit::perMinute(3)->by($request->ip())->response(function () {
+        return back()->withErrors(['email' => 'Terlalu banyak permintaan reset password. Silakan tunggu.']);
+    });
+});
+
+// =============================================
 // Authentication Routes (Guest Only)
 // =============================================
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/register', [AuthController::class, 'register'])->name('register');
+    
+    // Login with rate limiting and blocked client check
+    Route::post('/login', [AuthController::class, 'login'])
+        ->middleware(['throttle:login', 'blocked.client']);
+    
+    // Register with rate limiting and blocked client check
+    Route::post('/register', [AuthController::class, 'register'])
+        ->name('register')
+        ->middleware(['throttle:register', 'blocked.client']);
 
-    // Password Reset Routes (OTP based)
-    Route::post('/password/send-otp', [\App\Http\Controllers\PasswordResetController::class, 'sendOtp'])->name('password.send-otp');
-    Route::post('/password/verify-otp', [\App\Http\Controllers\PasswordResetController::class, 'verifyOtp'])->name('password.verify-otp');
-    Route::post('/password/reset', [\App\Http\Controllers\PasswordResetController::class, 'resetPassword'])->name('password.reset');
-    Route::post('/password/resend-otp', [\App\Http\Controllers\PasswordResetController::class, 'resendOtp'])->name('password.resend-otp');
+    // Password Reset Routes (OTP based) with rate limiting
+    Route::middleware(['throttle:password-reset', 'blocked.client'])->group(function () {
+        Route::post('/password/send-otp', [\App\Http\Controllers\PasswordResetController::class, 'sendOtp'])->name('password.send-otp');
+        Route::post('/password/verify-otp', [\App\Http\Controllers\PasswordResetController::class, 'verifyOtp'])->name('password.verify-otp');
+        Route::post('/password/reset', [\App\Http\Controllers\PasswordResetController::class, 'resetPassword'])->name('password.reset');
+        Route::post('/password/resend-otp', [\App\Http\Controllers\PasswordResetController::class, 'resendOtp'])->name('password.resend-otp');
+    });
 
     // Email Verification Routes
     Route::get('/verify-email', [AuthController::class, 'showVerifyForm'])->name('verification.notice');
