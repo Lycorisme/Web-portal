@@ -1,7 +1,7 @@
 {{-- Album & Location --}}
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
     {{-- Album with Autocomplete --}}
-    <div class="album-autocomplete relative">
+    <div class="album-autocomplete relative" @click.away="showAlbumDropdown = false">
         <label class="block text-sm font-semibold text-surface-700 dark:text-surface-300 mb-2">
             Album
         </label>
@@ -9,15 +9,21 @@
             <input 
                 type="text"
                 x-model="formData.album"
+                @click="showAlbumDropdown = !showAlbumDropdown"
                 @focus="showAlbumDropdown = true"
                 @input="showAlbumDropdown = true"
+                @keydown.escape="showAlbumDropdown = false"
                 placeholder="Nama album/event"
                 autocomplete="off"
                 class="w-full px-4 py-3 pr-10 bg-surface-50 dark:bg-surface-800 border-2 border-surface-200 dark:border-surface-700 rounded-xl text-sm text-surface-900 dark:text-white placeholder-surface-400 focus:ring-0 focus:border-theme-500 transition-all"
             >
-            <div class="absolute right-3 top-1/2 -translate-y-1/2 text-surface-400">
-                <i data-lucide="folder" class="w-4 h-4"></i>
-            </div>
+            <button 
+                type="button" 
+                @click.stop="showAlbumDropdown = !showAlbumDropdown"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-surface-400 hover:text-surface-600 dark:hover:text-surface-300 transition-colors cursor-pointer"
+            >
+                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-200" :class="showAlbumDropdown ? 'rotate-180' : ''"></i>
+            </button>
         </div>
         
         {{-- Album Dropdown --}}
