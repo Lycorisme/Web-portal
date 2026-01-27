@@ -45,13 +45,19 @@
                         </div>
                     </div>
 
-                    {{-- Group/Album Badge (shows count) --}}
+                    {{-- ========== SMART COLLECTION BADGE (Album) ========== --}}
                     <template x-if="item.is_group && item.group_count > 1">
                         <div class="absolute top-3 right-3 z-[40]">
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-theme-500 text-white shadow-lg backdrop-blur-sm">
-                                <i data-lucide="images" class="w-3.5 h-3.5"></i>
-                                <span x-text="item.group_count"></span>
-                            </span>
+                            <div class="flex flex-col items-end gap-1.5">
+                                {{-- Album Badge with Gradient --}}
+                                <span class="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white shadow-lg shadow-violet-500/30 backdrop-blur-sm ring-2 ring-white/20">
+                                    <i data-lucide="layers" class="w-4 h-4"></i>
+                                    <span class="flex flex-col leading-tight">
+                                        <span class="text-[10px] opacity-80 uppercase tracking-wider">Album</span>
+                                        <span x-text="item.group_count + ' Foto'" class="text-sm font-bold"></span>
+                                    </span>
+                                </span>
+                            </div>
                         </div>
                     </template>
 
@@ -59,12 +65,12 @@
                     <template x-if="!item.is_group || item.group_count === 1">
                         <div class="absolute top-3 right-3 z-[40]">
                             <span 
-                                class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold backdrop-blur-sm transition-transform duration-300 group-hover:scale-105"
+                                class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-bold backdrop-blur-md transition-all duration-300 group-hover:scale-105 ring-1"
                                 :class="item.media_type === 'video' 
-                                    ? 'bg-rose-500/90 text-white' 
-                                    : 'bg-white/90 dark:bg-surface-800/90 text-surface-700 dark:text-surface-300'"
+                                    ? 'bg-gradient-to-r from-rose-500 to-orange-500 text-white shadow-lg shadow-rose-500/30 ring-white/20' 
+                                    : 'bg-white/95 dark:bg-surface-800/95 text-surface-700 dark:text-surface-200 shadow-md ring-surface-200/50 dark:ring-surface-600/50'"
                             >
-                                <i :data-lucide="item.media_type === 'video' ? 'play' : 'image'" class="w-3 h-3"></i>
+                                <i :data-lucide="item.media_type === 'video' ? 'play-circle' : 'image'" class="w-4 h-4"></i>
                                 <span x-text="item.media_type === 'video' ? 'Video' : 'Gambar'"></span>
                             </span>
                         </div>
@@ -72,34 +78,69 @@
 
                     {{-- Featured Badge --}}
                     <template x-if="item.is_featured">
-                        <div class="absolute top-12 right-3 z-[40]">
-                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold bg-amber-500/90 text-white backdrop-blur-sm">
+                        <div class="absolute top-14 right-3 z-[40]" :class="item.is_group && item.group_count > 1 ? 'top-[4.5rem]' : 'top-14'">
+                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold bg-gradient-to-r from-amber-400 to-orange-500 text-white backdrop-blur-sm shadow-lg shadow-amber-500/30">
                                 <i data-lucide="star" class="w-3 h-3"></i>
                                 Featured
                             </span>
                         </div>
                     </template>
 
-                    {{-- Grouped Stack Preview --}}
+                    {{-- ========== SMART COLLECTION: Collage Preview ========== --}}
                     <template x-if="item.is_group && item.group_count > 1">
-                        <div class="absolute inset-0">
-                            {{-- Back Card --}}
-                            <div class="absolute inset-4 -rotate-6 bg-surface-50 dark:bg-surface-700 rounded-lg shadow-sm border border-surface-200 dark:border-surface-600 z-0 transform translate-x-2 translate-y-1"></div>
-                            {{-- Middle Card --}}
-                            <div class="absolute inset-4 -rotate-3 bg-surface-100 dark:bg-surface-700 rounded-lg shadow-md border border-surface-200 dark:border-surface-600 z-10 transform translate-x-1 translate-y-0.5"></div>
-                            {{-- Front Card (Main Image) --}}
-                            <div class="absolute inset-0 z-20">
-                                <template x-if="item.thumbnail_url || item.image_url">
+                        <div class="absolute inset-0 overflow-hidden">
+                            {{-- Collage Grid Layout --}}
+                            <div class="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-0.5 p-0.5 bg-surface-200 dark:bg-surface-600">
+                                {{-- Main Large Image (Top Left + Bottom Left) --}}
+                                <div class="row-span-2 relative overflow-hidden">
                                     <img 
-                                        :src="item.thumbnail_url || item.image_url" 
+                                        :src="item.preview_thumbnails?.[0] || item.thumbnail_url || item.image_url" 
                                         :alt="item.title"
-                                        class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 shadow-xl"
+                                        class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                                         loading="lazy"
                                     >
-                                </template>
+                                </div>
+                                {{-- Top Right --}}
+                                <div class="relative overflow-hidden">
+                                    <template x-if="item.preview_thumbnails?.[1]">
+                                        <img 
+                                            :src="item.preview_thumbnails[1]" 
+                                            :alt="item.title"
+                                            class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                                            loading="lazy"
+                                        >
+                                    </template>
+                                    <template x-if="!item.preview_thumbnails?.[1]">
+                                        <div class="w-full h-full bg-surface-100 dark:bg-surface-700 flex items-center justify-center">
+                                            <i data-lucide="image" class="w-6 h-6 text-surface-400"></i>
+                                        </div>
+                                    </template>
+                                </div>
+                                {{-- Bottom Right (with +N overlay if more than 4) --}}
+                                <div class="relative overflow-hidden">
+                                    <template x-if="item.preview_thumbnails?.[2]">
+                                        <img 
+                                            :src="item.preview_thumbnails[2]" 
+                                            :alt="item.title"
+                                            class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                                            loading="lazy"
+                                        >
+                                    </template>
+                                    <template x-if="!item.preview_thumbnails?.[2]">
+                                        <div class="w-full h-full bg-surface-100 dark:bg-surface-700 flex items-center justify-center">
+                                            <i data-lucide="image" class="w-6 h-6 text-surface-400"></i>
+                                        </div>
+                                    </template>
+                                    {{-- +N Overlay for remaining photos --}}
+                                    <template x-if="item.group_count > 3">
+                                        <div class="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center">
+                                            <span class="text-white font-bold text-lg" x-text="'+' + (item.group_count - 3)"></span>
+                                        </div>
+                                    </template>
+                                </div>
                             </div>
-                            {{-- Stack Effect Gradient Overlay (Optional) --}}
-                            <div class="absolute inset-0 z-30 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            {{-- Hover Gradient Overlay --}}
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                         </div>
                     </template>
 
@@ -180,31 +221,44 @@
 
                 {{-- Content --}}
                 <div class="p-4">
-                    {{-- Title --}}
-                    <h3 
-                        class="text-sm font-semibold text-surface-900 dark:text-white mb-1 line-clamp-1 transition-colors duration-300"
-                        :class="{'line-through opacity-60': item.deleted_at}"
-                        x-text="item.title"
-                    ></h3>
+                    {{-- Title with Album Icon for groups --}}
+                    <div class="flex items-start gap-2 mb-1.5">
+                        <template x-if="item.is_group && item.group_count > 1">
+                            <div class="flex-shrink-0 w-6 h-6 rounded-lg bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 flex items-center justify-center mt-0.5">
+                                <i data-lucide="folder-open" class="w-3.5 h-3.5 text-violet-500 dark:text-violet-400"></i>
+                            </div>
+                        </template>
+                        <h3 
+                            class="text-sm font-semibold text-surface-900 dark:text-white line-clamp-1 transition-colors duration-300 flex-1"
+                            :class="{'line-through opacity-60': item.deleted_at}"
+                            x-text="item.title"
+                        ></h3>
+                    </div>
 
                     {{-- Album & Date --}}
-                    <div class="flex items-center gap-2 text-xs text-surface-500 dark:text-surface-400 mb-2 flex-wrap">
+                    <div class="flex items-center gap-2 text-xs text-surface-500 dark:text-surface-400 mb-2.5 flex-wrap">
                         <template x-if="item.album">
-                            <span class="inline-flex items-center gap-1">
-                                <i data-lucide="folder" class="w-3 h-3"></i>
+                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-surface-100 dark:bg-surface-700/50">
+                                <i data-lucide="hash" class="w-3 h-3 opacity-60"></i>
                                 <span x-text="item.album" class="truncate max-w-[80px]"></span>
                             </span>
                         </template>
                         <template x-if="item.event_date">
                             <span class="inline-flex items-center gap-1">
-                                <i data-lucide="calendar" class="w-3 h-3"></i>
+                                <i data-lucide="calendar" class="w-3 h-3 opacity-60"></i>
                                 <span x-text="item.event_date"></span>
+                            </span>
+                        </template>
+                        <template x-if="item.location">
+                            <span class="inline-flex items-center gap-1">
+                                <i data-lucide="map-pin" class="w-3 h-3 opacity-60"></i>
+                                <span x-text="item.location" class="truncate max-w-[60px]"></span>
                             </span>
                         </template>
                     </div>
 
                     {{-- Status Badges --}}
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 flex-wrap">
                         <span 
                             class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium transition-all duration-300"
                             :class="item.is_published 
@@ -215,11 +269,19 @@
                             <span x-text="item.is_published ? 'Published' : 'Draft'"></span>
                         </span>
 
-                        {{-- Group indicator badge --}}
+                        {{-- Smart Collection indicator --}}
                         <template x-if="item.is_group && item.group_count > 1">
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-theme-100 text-theme-700 dark:bg-theme-500/20 dark:text-theme-400">
-                                <i data-lucide="layers" class="w-3 h-3"></i>
-                                <span x-text="item.group_count + ' foto'"></span>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 text-violet-600 dark:text-violet-400 border border-violet-200/50 dark:border-violet-500/20">
+                                <i data-lucide="sparkles" class="w-3 h-3"></i>
+                                <span>Koleksi</span>
+                            </span>
+                        </template>
+
+                        {{-- Video badge --}}
+                        <template x-if="item.media_type === 'video' && (!item.is_group || item.group_count === 1)">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400">
+                                <i data-lucide="video" class="w-3 h-3"></i>
+                                <span>Video</span>
                             </span>
                         </template>
                     </div>
