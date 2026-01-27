@@ -151,6 +151,28 @@ function galleryApp() {
             this.$watch('showFormModal', value => { document.body.classList.toggle('overflow-hidden', value); });
             this.$watch('showPreviewModal', value => { document.body.classList.toggle('overflow-hidden', value); });
             this.$watch('showAlbumModal', value => { document.body.classList.toggle('overflow-hidden', value); });
+            
+            // Refresh Lucide icons when selection changes
+            this.$watch('selectedIds.length', () => { this.$nextTick(() => { lucide.createIcons(); }); });
+
+            // Keyboard shortcut: Ctrl+A to select all
+            document.addEventListener('keydown', (e) => {
+                // Don't trigger if typing in input, textarea, or contenteditable
+                const activeEl = document.activeElement;
+                const isTyping = activeEl && (
+                    activeEl.tagName === 'INPUT' || 
+                    activeEl.tagName === 'TEXTAREA' || 
+                    activeEl.isContentEditable
+                );
+                
+                // Don't trigger if any modal is open
+                const modalOpen = this.showFormModal || this.showDetailModal || this.showPreviewModal || this.showAlbumModal;
+                
+                if (e.ctrlKey && e.key === 'a' && !isTyping && !modalOpen) {
+                    e.preventDefault();
+                    this.toggleSelectAll();
+                }
+            });
         },
 
         async fetchAlbums(search = '') {

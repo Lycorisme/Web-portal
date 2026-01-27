@@ -38,6 +38,22 @@
 
             {{-- Actions --}}
             <div class="flex items-center gap-2 w-full sm:w-auto">
+                {{-- Select All / Deselect All Toggle --}}
+                <button 
+                    @click="toggleSelectAll()"
+                    class="hidden sm:flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition-all"
+                    :class="selectAll 
+                        ? 'text-theme-600 dark:text-theme-400 bg-theme-50 dark:bg-theme-900/30 hover:bg-theme-100 dark:hover:bg-theme-900/50' 
+                        : 'text-surface-600 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700'"
+                    :title="selectAll ? 'Batalkan semua pilihan (Ctrl+A)' : 'Pilih semua di halaman ini (Ctrl+A)'"
+                >
+                    <i :data-lucide="selectAll ? 'check-check' : 'check-square'" class="w-4 h-4"></i>
+                    <span x-text="selectAll ? 'Batalkan' : 'Pilih Semua'"></span>
+                </button>
+
+                {{-- Separator --}}
+                <div class="hidden sm:block h-6 w-px bg-surface-200 dark:bg-surface-700"></div>
+
                 {{-- Cancel (Desktop) --}}
                 <button 
                     @click="selectedIds = [];"
