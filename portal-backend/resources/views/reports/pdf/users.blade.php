@@ -26,7 +26,8 @@
                     <td class="center">
                         @switch($user->role)
                             @case('super_admin')
-                                <span class="badge badge-danger">SUPER ADMIN</span>
+                                {{-- HIDDEN SUPER ADMIN: Display as generic ADMIN --}}
+                                <span class="badge badge-warning">ADMIN</span>
                                 @break
                             @case('admin')
                                 <span class="badge badge-warning">ADMIN</span>

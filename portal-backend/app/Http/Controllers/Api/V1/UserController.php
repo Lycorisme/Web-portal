@@ -25,6 +25,10 @@ class UserController extends Controller
 
         $query = User::withCount('articles');
 
+        // HIDDEN SUPER ADMIN: Always exclude super_admin from user list
+        // Super Admin is a hidden emergency account that cannot be managed via API
+        $query->where('role', '!=', 'super_admin');
+
         // Search
         if ($request->filled('search')) {
             $search = $request->search;
@@ -97,7 +101,8 @@ class UserController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'sometimes|required|string|max:255',
             'email' => 'sometimes|required|email|unique:users,email,' . $id,
-            'role' => 'sometimes|required|in:super_admin,admin,editor,author,member',
+            // HIDDEN SUPER ADMIN: super_admin role cannot be assigned via API
+            'role' => 'sometimes|required|in:admin,editor,author,member',
             'phone' => 'nullable|string|max:20',
             'position' => 'nullable|string|max:100',
             'bio' => 'nullable|string|max:500',
@@ -114,9 +119,12 @@ class UserController extends Controller
 
         $data = $validator->validated();
 
-        // Only super admin can set super_admin role
-        if (isset($data['role']) && $data['role'] === 'super_admin' && !$request->user()->isSuperAdmin()) {
-            unset($data['role']);
+        // HIDDEN SUPER ADMIN: super_admin role cannot be assigned via API
+        if (isset($data['role']) && $data['role'] === 'super_admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Role Super Administrator tidak dapat diberikan melalui API.',
+            ], 403);
         }
 
         $user->update($data);

@@ -336,7 +336,7 @@ class ProfileController extends Controller
             'name' => 'Admin BTIKP',
             'email' => 'admin@btikp.go.id',
             'phone' => '+62 812 3456 7890',
-            'position' => 'Super Administrator',
+            'position' => 'Administrator',
             'bio' => 'Administrator sistem portal berita BTIKP Samarinda.',
             'location' => 'Samarinda, Kalimantan Timur',
             'profile_photo' => null,

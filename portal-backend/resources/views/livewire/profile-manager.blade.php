@@ -70,7 +70,8 @@
                         <span class="text-sm font-medium text-theme-600 dark:text-theme-400">
                             @switch($role)
                                 @case('super_admin')
-                                    Super Administrator
+                                    {{-- HIDDEN SUPER ADMIN: Display as generic Administrator --}}
+                                    Administrator
                                     @break
                                 @case('admin')
                                     Administrator

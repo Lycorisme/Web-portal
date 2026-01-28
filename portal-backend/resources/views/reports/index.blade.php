@@ -141,7 +141,6 @@
                         <select x-model="forms.users.role" 
                             class="w-full px-3 py-2 text-sm border border-surface-300 dark:border-surface-600 rounded-lg bg-white dark:bg-surface-700 text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-theme-primary">
                             <option value="">Semua Role</option>
-                            <option value="super_admin">Super Admin</option>
                             <option value="admin">Admin</option>
                             <option value="editor">Editor</option>
                             <option value="author">Author</option>

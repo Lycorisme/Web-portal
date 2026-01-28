@@ -168,7 +168,6 @@
                                 <option value="author">Penulis</option>
                                 <option value="editor">Editor</option>
                                 <option value="admin">Admin</option>
-                                <option value="super_admin">Super Admin</option>
                             </select>
                             <template x-if="formErrors.role">
                                 <p class="mt-1 text-xs text-rose-500" x-text="formErrors.role[0]"></p>
