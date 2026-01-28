@@ -4,10 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Article;
 use App\Models\Category;
+use App\Models\User;
 use App\Models\ActivityLog;
+use App\Mail\NewArticleMail;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class ArticleController extends Controller
 {
@@ -281,6 +285,11 @@ class ArticleController extends Controller
                 $article->toArray(),
                 ActivityLog::LEVEL_INFO
             );
+
+            // Send email notification to all members if article is published
+            if ($article->status === 'published') {
+                $this->sendNewArticleNotification($article);
+            }
 
             return response()->json([
                 'success' => true,
@@ -729,6 +738,11 @@ class ArticleController extends Controller
                 ActivityLog::LEVEL_INFO
             );
 
+            // Send email notification to all members when article is published
+            if ($newStatus === 'published' && $oldStatus !== 'published') {
+                $this->sendNewArticleNotification($article);
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Status berita berhasil diubah.',
@@ -740,5 +754,41 @@ class ArticleController extends Controller
                 'message' => 'Gagal mengubah status: ' . $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * Send email notification to all members about new article.
+     */
+    private function sendNewArticleNotification(Article $article): void
+    {
+        // Get all members
+        $members = User::where('role', 'member')->get();
+        
+        if ($members->isEmpty()) {
+            Log::info('No members to notify for article: ' . $article->title);
+            return;
+        }
+
+        $successCount = 0;
+        $failCount = 0;
+
+        foreach ($members as $member) {
+            try {
+                Mail::to($member->email)->send(new NewArticleMail($article, $member));
+                $successCount++;
+            } catch (\Exception $e) {
+                $failCount++;
+                Log::warning("Failed to send article notification to {$member->email}", [
+                    'article_id' => $article->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
+
+        Log::info("Article notification sent for: {$article->title}", [
+            'total_members' => $members->count(),
+            'success' => $successCount,
+            'failed' => $failCount
+        ]);
     }
 }
