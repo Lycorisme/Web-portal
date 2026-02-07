@@ -42,15 +42,26 @@
             <span>Unblock</span>
         </button>
 
-        {{-- Block Button (Only for Unblocked) --}}
+        {{-- Forward to Block Button (Only for Under Review IPs) --}}
         <button 
-            x-show="activeMenuClient && !activeMenuClient.is_blocked"
+            x-show="activeMenuClient && !activeMenuClient.is_blocked && activeMenuClient.attempt_count > 0"
+            @click="openEditModal(activeMenuClient); closeMenu()"
+            class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors group"
+        >
+            <i data-lucide="gavel" class="w-4 h-4 group-hover:scale-110 transition-transform"></i>
+            <span>Putuskan Blokir</span>
+        </button>
+
+        {{-- Block Button (Only for Unblocked with no attempts - clean IPs) --}}
+        <button 
+            x-show="activeMenuClient && !activeMenuClient.is_blocked && activeMenuClient.attempt_count === 0"
             @click="reblockClient(activeMenuClient); closeMenu()"
             class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors group"
         >
             <i data-lucide="shield-ban" class="w-4 h-4 group-hover:scale-110 transition-transform"></i>
-            <span>Blokir Lagi</span>
+            <span>Blokir</span>
         </button>
+
 
         <div class="h-px bg-surface-100 dark:bg-surface-700/50 my-1 mx-2"></div>
 

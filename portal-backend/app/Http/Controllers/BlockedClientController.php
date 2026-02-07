@@ -28,7 +28,12 @@ class BlockedClientController extends Controller
             if ($request->status === 'blocked') {
                 $query->where('is_blocked', true);
             } elseif ($request->status === 'unblocked') {
-                $query->where('is_blocked', false);
+                $query->where('is_blocked', false)
+                      ->where('attempt_count', 0);
+            } elseif ($request->status === 'review') {
+                // IP yang sedang ditinjau (tercatat tapi belum diblokir)
+                $query->where('is_blocked', false)
+                      ->where('attempt_count', '>', 0);
             } elseif ($request->status === 'expired') {
                 $query->where('is_blocked', true)
                       ->whereNotNull('blocked_until')
@@ -38,6 +43,7 @@ class BlockedClientController extends Controller
                       ->whereNull('blocked_until');
             }
         }
+
 
         // Search filter
         if ($request->filled('search')) {

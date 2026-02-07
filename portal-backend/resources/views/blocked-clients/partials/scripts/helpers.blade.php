@@ -30,12 +30,31 @@ isExpired(client) {
     return new Date(client.blocked_until) < new Date();
 },
 
+// Check if IP is under review (tracked but not blocked)
+isUnderReview(client) {
+    return !client.is_blocked && client.attempt_count > 0;
+},
+
 // Get status label
 getStatusLabel(client) {
+    // IP yang tercatat tapi belum di-block = Ditinjau
+    if (!client.is_blocked && client.attempt_count > 0) return 'Ditinjau';
     if (!client.is_blocked) return 'Tidak Terblokir';
     if (this.isExpired(client)) return 'Expired';
     if (!client.blocked_until) return 'Permanen';
     return 'Terblokir';
+},
+
+// Get expired column text
+getExpiredText(client) {
+    // IP yang sedang ditinjau (belum diblokir)
+    if (!client.is_blocked && client.attempt_count > 0) {
+        return 'Menunggu Keputusan';
+    }
+    if (!client.is_blocked) return '-';
+    if (!client.blocked_until) return 'Permanen';
+    if (this.isExpired(client)) return 'Expired';
+    return this.formatDate(client.blocked_until);
 },
 
 // Format date

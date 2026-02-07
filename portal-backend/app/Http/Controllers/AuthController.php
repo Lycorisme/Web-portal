@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\ActivityLog;
 use App\Models\SiteSetting;
 use App\Models\BlockedClient;
+use App\Services\SuspiciousActivityTracker;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -14,6 +15,12 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    protected SuspiciousActivityTracker $tracker;
+
+    public function __construct(SuspiciousActivityTracker $tracker)
+    {
+        $this->tracker = $tracker;
+    }
     /**
      * Handle registration request
      */
@@ -402,6 +409,17 @@ class AuthController extends Controller
                 'level' => ActivityLog::LEVEL_WARNING,
                 'created_at' => now(),
             ]);
+
+            // Track suspicious activity for admin review (after 3+ failed attempts)
+            if ($failedCount >= 3) {
+                $this->tracker->track(
+                    $request,
+                    SuspiciousActivityTracker::TYPE_LOGIN_BRUTE_FORCE,
+                    "Login gagal {$failedCount}x untuk email: {$request->email}",
+                    $failedCount >= 5 ? SuspiciousActivityTracker::LEVEL_HIGH : SuspiciousActivityTracker::LEVEL_MEDIUM,
+                    '/login'
+                );
+            }
 
             // Calculate remaining attempts for UI feedback
             $remainingAttempts = max(0, $this->maxAttempts - $failedCount);

@@ -7,6 +7,7 @@ use App\Models\OtpCode;
 use App\Models\ActivityLog;
 use App\Models\SiteSetting;
 use App\Mail\OtpVerificationMail;
+use App\Services\SuspiciousActivityTracker;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -33,11 +34,22 @@ class PasswordResetController extends Controller
         $throttleKey = 'otp-request:' . $email;
         if (RateLimiter::tooManyAttempts($throttleKey, 3)) {
             $seconds = RateLimiter::availableIn($throttleKey);
+            
+            // Track suspicious activity for admin review
+            app(SuspiciousActivityTracker::class)->track(
+                $request,
+                SuspiciousActivityTracker::TYPE_PASSWORD_RESET_ABUSE,
+                "Spam permintaan reset password untuk: {$email}",
+                SuspiciousActivityTracker::LEVEL_MEDIUM,
+                '/password/send-otp'
+            );
+            
             return response()->json([
                 'success' => false,
                 'message' => "Terlalu banyak permintaan. Coba lagi dalam " . ceil($seconds / 60) . " menit.",
             ], 429);
         }
+
 
         // Check if email exists in database
         $user = User::where('email', $email)->first();

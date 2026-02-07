@@ -64,8 +64,20 @@ class ArticleComment extends Model
             // Check for spam content
             if (self::isSpamContent($comment->comment_text)) {
                 $comment->status = 'spam';
+                
+                // Track suspicious activity for admin review
+                if (request()) {
+                    app(\App\Services\SuspiciousActivityTracker::class)->track(
+                        request(),
+                        \App\Services\SuspiciousActivityTracker::TYPE_ILLEGAL_CONTENT,
+                        "Konten spam/ilegal terdeteksi: " . \Illuminate\Support\Str::limit($comment->comment_text, 50),
+                        \App\Services\SuspiciousActivityTracker::LEVEL_MEDIUM,
+                        request()->path()
+                    );
+                }
             }
         });
+
 
         // Log activity for deletion
         static::deleted(function ($comment) {

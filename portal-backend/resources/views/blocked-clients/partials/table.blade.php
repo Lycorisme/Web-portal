@@ -55,7 +55,8 @@
                         :class="{
                             'bg-rose-50/70 dark:bg-rose-900/10': client.is_blocked && !isExpired(client),
                             'bg-amber-50/50 dark:bg-amber-900/10': client.is_blocked && isExpired(client),
-                            'bg-emerald-50/30 dark:bg-emerald-900/10': !client.is_blocked
+                            'bg-cyan-50/50 dark:bg-cyan-900/10': isUnderReview(client),
+                            'bg-emerald-50/30 dark:bg-emerald-900/10': !client.is_blocked && !isUnderReview(client)
                         }"
                     >
                         {{-- Checkbox --}}
@@ -72,8 +73,12 @@
                         <td class="px-4 py-3 whitespace-nowrap">
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm"
-                                     :class="client.is_blocked ? 'bg-gradient-to-br from-rose-400 to-rose-600' : 'bg-gradient-to-br from-emerald-400 to-emerald-600'">
-                                    <i :data-lucide="client.is_blocked ? 'shield-ban' : 'shield-check'" class="w-5 h-5 text-white"></i>
+                                     :class="{
+                                        'bg-gradient-to-br from-rose-400 to-rose-600': client.is_blocked,
+                                        'bg-gradient-to-br from-cyan-400 to-cyan-600': isUnderReview(client),
+                                        'bg-gradient-to-br from-emerald-400 to-emerald-600': !client.is_blocked && !isUnderReview(client)
+                                     }">
+                                    <i :data-lucide="client.is_blocked ? 'shield-ban' : (isUnderReview(client) ? 'eye' : 'shield-check')" class="w-5 h-5 text-white"></i>
                                 </div>
                                 <div>
                                     <span class="text-sm font-mono font-semibold text-surface-900 dark:text-white block" x-text="client.ip_address"></span>
@@ -109,17 +114,28 @@
                                 :class="{
                                     'bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400': client.is_blocked && !isExpired(client),
                                     'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400': client.is_blocked && isExpired(client),
-                                    'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400': !client.is_blocked
+                                    'bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-400': isUnderReview(client),
+                                    'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400': !client.is_blocked && !isUnderReview(client)
                                 }"
                             >
-                                <i :data-lucide="client.is_blocked ? (isExpired(client) ? 'clock' : 'shield-ban') : 'shield-check'" class="w-3 h-3"></i>
+                                <i :data-lucide="client.is_blocked ? (isExpired(client) ? 'clock' : 'shield-ban') : (isUnderReview(client) ? 'eye' : 'shield-check')" class="w-3 h-3"></i>
                                 <span x-text="getStatusLabel(client)"></span>
                             </span>
                         </td>
 
-                        {{-- Blocked Until --}}
+                        {{-- Blocked Until / Expired --}}
                         <td class="px-4 py-3 whitespace-nowrap">
-                            <template x-if="client.blocked_until">
+                            {{-- IP Ditinjau (Under Review) --}}
+                            <template x-if="isUnderReview(client)">
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-cyan-100 dark:bg-cyan-500/20 rounded-lg">
+                                        <i data-lucide="hourglass" class="w-3 h-3 text-cyan-600 dark:text-cyan-400"></i>
+                                        <span class="text-xs font-medium text-cyan-700 dark:text-cyan-400">Menunggu Keputusan</span>
+                                    </span>
+                                </div>
+                            </template>
+                            {{-- IP Terblokir dengan waktu --}}
+                            <template x-if="!isUnderReview(client) && client.is_blocked && client.blocked_until">
                                 <div>
                                     <span class="text-sm text-surface-700 dark:text-surface-300" x-text="formatDate(client.blocked_until)"></span>
                                     <span 
@@ -129,8 +145,13 @@
                                     ></span>
                                 </div>
                             </template>
-                            <template x-if="!client.blocked_until">
+                            {{-- IP Terblokir Permanen --}}
+                            <template x-if="!isUnderReview(client) && client.is_blocked && !client.blocked_until">
                                 <span class="text-sm text-rose-600 dark:text-rose-400 font-medium">Permanen</span>
+                            </template>
+                            {{-- IP Tidak Terblokir (bukan ditinjau) --}}
+                            <template x-if="!isUnderReview(client) && !client.is_blocked">
+                                <span class="text-sm text-surface-400">-</span>
                             </template>
                         </td>
 

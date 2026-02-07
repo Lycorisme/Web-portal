@@ -68,12 +68,14 @@
                     class="w-full px-3 py-2.5 bg-surface-50 dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-xl text-sm text-surface-900 dark:text-white focus:ring-2 focus:ring-theme-500 focus:border-transparent transition-all"
                 >
                     <option value="">Semua Status</option>
+                    <option value="review">Ditinjau</option>
                     <option value="blocked">Terblokir</option>
                     <option value="unblocked">Tidak Terblokir</option>
                     <option value="permanent">Permanen</option>
                     <option value="expired">Expired</option>
                 </select>
             </div>
+
 
             {{-- Sort By --}}
             <div>
