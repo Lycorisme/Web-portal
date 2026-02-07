@@ -92,35 +92,35 @@
             <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Kelola Berita</span>
         </a>
 
-        {{-- 3. Kategori Berita --}}
+        {{-- 3. Kategori --}}
         @if(auth()->user()->canManageCategories())
         <a href="{{ route('categories') }}" wire:navigate
             class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('categories*') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
             :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
-            :title="!sidebarOpen ? 'Kategori Berita' : ''">
+            :title="!sidebarOpen ? 'Kategori' : ''">
             <i data-lucide="folder-tree" class="w-5 h-5 flex-shrink-0"></i>
-            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Kategori Berita</span>
+            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Kategori</span>
         </a>
         @endif
 
-        {{-- 4. Kelola Tag --}}
+        {{-- 4. Tag --}}
         @if(auth()->user()->canManageTags())
         <a href="{{ route('tags') }}" wire:navigate
             class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('tags*') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
             :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
-            :title="!sidebarOpen ? 'Kelola Tag' : ''">
+            :title="!sidebarOpen ? 'Tag' : ''">
             <i data-lucide="tags" class="w-5 h-5 flex-shrink-0"></i>
-            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Kelola Tag</span>
+            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Tag</span>
         </a>
         @endif
 
-        {{-- 5. Galeri Kegiatan --}}
+        {{-- 5. Galeri --}}
         <a href="{{ route('galleries') }}" wire:navigate
             class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('galleries*') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
             :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
-            :title="!sidebarOpen ? 'Galeri Kegiatan' : ''">
+            :title="!sidebarOpen ? 'Galeri' : ''">
             <i data-lucide="image" class="w-5 h-5 flex-shrink-0"></i>
-            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Galeri Kegiatan</span>
+            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Galeri</span>
         </a>
 
         {{-- Keamanan & Monitoring --}}
@@ -131,22 +131,22 @@
             class="px-3 text-xs font-semibold text-surface-400 dark:text-surface-500 uppercase tracking-wider mb-3 transition-opacity duration-300">
             Keamanan</p>
 
-        {{-- 6. Security Audit (Activity Log) --}}
+        {{-- 6. Activity Log --}}
         <a href="{{ route('activity-log') }}" wire:navigate
             class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('activity-log*') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
             :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
-            :title="!sidebarOpen ? 'Security Audit' : ''">
+            :title="!sidebarOpen ? 'Activity Log' : ''">
             <i data-lucide="shield-check" class="w-5 h-5 flex-shrink-0"></i>
-            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Security Audit</span>
+            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Activity Log</span>
         </a>
 
-        {{-- 7. Monitoring Akses (Blocked IPs) --}}
+        {{-- 7. Blokir IPs --}}
         <a href="{{ route('blocked-clients') }}" wire:navigate
             class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('blocked-clients*') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
             :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
-            :title="!sidebarOpen ? 'Monitoring Akses' : ''">
+            :title="!sidebarOpen ? 'Blokir IPs' : ''">
             <i data-lucide="shield-ban" class="w-5 h-5 flex-shrink-0"></i>
-            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Monitoring Akses</span>
+            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Blokir IPs</span>
             <span x-show="sidebarOpen && blockedCount > 0" x-cloak
                 class="ml-auto bg-accent-amber/20 text-accent-amber text-xs font-semibold px-2 py-0.5 rounded-full"
                 x-text="blockedCount"></span>
@@ -180,14 +180,14 @@
         </a>
         @endif
 
-        {{-- 10. Manajemen User --}}
+        {{-- 10. Management User --}}
         @if(auth()->user()->canManageUsers())
         <a href="{{ route('users') }}" wire:navigate
             class="flex items-center rounded-xl transition-all duration-200 group {{ request()->routeIs('users*') ? 'bg-theme-gradient text-white shadow-theme' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/50' }}"
             :class="sidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center p-3'"
-            :title="!sidebarOpen ? 'Manajemen User' : ''">
+            :title="!sidebarOpen ? 'Management User' : ''">
             <i data-lucide="users" class="w-5 h-5 flex-shrink-0"></i>
-            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Manajemen User</span>
+            <span x-show="sidebarOpen" x-cloak class="font-medium whitespace-nowrap">Management User</span>
         </a>
         @endif
 
