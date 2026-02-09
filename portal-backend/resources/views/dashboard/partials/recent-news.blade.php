@@ -18,7 +18,7 @@
         @forelse($recentArticles as $article)
         <div 
             class="group p-4 hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors flex gap-4 items-start cursor-pointer"
-            @click="openArticleModal({{ $article->id }})"
+            @click="openArticleModal('{{ $article->id }}')"
         >
              {{-- Thumbnail --}}
              <div class="shrink-0 w-20 h-16 sm:w-24 sm:h-20 bg-surface-100 dark:bg-surface-800 rounded-lg overflow-hidden relative">

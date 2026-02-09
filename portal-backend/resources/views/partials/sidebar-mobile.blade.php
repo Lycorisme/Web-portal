@@ -1,13 +1,13 @@
-{{-- Sidebar Component --}}
+{{-- Mobile Sidebar Component --}}
 @php
     $siteName = \App\Models\SiteSetting::get('site_name', 'BTIKP');
     $siteTagline = \App\Models\SiteSetting::get('site_tagline', 'Portal Admin');
     $logoUrl = \App\Models\SiteSetting::get('logo_url', '');
 @endphp
 
-{{-- Desktop Sidebar --}}
+{{-- Mobile Sidebar (Fixed positioning) --}}
 <aside 
-    id="admin-sidebar"
+    id="admin-sidebar-mobile"
     x-data="{ 
         trashedCount: {{ $trashedCount ?? 0 }},
         blockedCount: 0,
@@ -36,7 +36,8 @@
         document.addEventListener('livewire:navigated', () => { fetchTrashCount(); fetchBlockedCount(); });
         window.addEventListener('trash-updated', () => fetchTrashCount());
     "
-    class="sticky top-0 w-full h-screen transition-all duration-300 ease-out z-50 flex flex-col overflow-hidden"
+    :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+    class="fixed left-0 top-0 w-72 h-screen bg-white/95 dark:bg-surface-900/95 backdrop-blur-xl border-r border-surface-200/50 dark:border-surface-800/50 transition-all duration-300 ease-out z-50 flex flex-col shadow-xl shadow-surface-900/5 overflow-hidden"
     x-cloak>
 
     {{-- Logo Section --}}

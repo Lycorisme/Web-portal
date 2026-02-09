@@ -71,6 +71,11 @@ class ArticleController extends Controller
         $perPage = $request->get('per_page', 15);
         $articles = $query->paginate($perPage);
 
+        // If no articles and not searching/filtering, return dummy data for demo
+        if ($articles->isEmpty() && !$request->filled('search') && !$request->filled('article_status') && !$request->filled('category_id') && $request->status !== 'trash') {
+            return $this->getDummyArticlesResponse();
+        }
+
         // Transform data for frontend
         $data = $articles->getCollection()->map(function ($article) {
             return [
@@ -121,6 +126,118 @@ class ArticleController extends Controller
             ],
         ]);
 
+    }
+
+    /**
+     * Get dummy articles response for demo purposes.
+     */
+    private function getDummyArticlesResponse(): JsonResponse
+    {
+        $user = auth()->user();
+        
+        $dummyData = [
+            [
+                'id' => 'demo-1',
+                'title' => 'Peluncuran Program Digitalisasi UMKM Tahun 2026',
+                'slug' => 'peluncuran-program-digitalisasi-umkm-2026',
+                'excerpt' => 'Program digitalisasi UMKM untuk meningkatkan daya saing usaha...',
+                'content' => 'Program digitalisasi UMKM yang diinisiasi oleh pemerintah bertujuan untuk meningkatkan daya saing usaha mikro, kecil, dan menengah di era digital. Program ini mencakup pelatihan e-commerce, pembukuan digital, dan pemasaran online.',
+                'thumbnail' => '/storage/galleries/1767844442_695f2a5a8d11c.jpg',
+                'category_id' => 1,
+                'category_name' => 'Teknologi',
+                'category_color' => '#6366f1',
+                'category_icon' => 'cpu',
+                'read_time' => 5,
+                'status' => 'published',
+                'author_id' => $user->id,
+                'author_name' => $user->name,
+                'author_avatar' => $user->avatar,
+                'views' => 1247,
+                'meta_title' => null,
+                'meta_description' => null,
+                'meta_keywords' => null,
+                'tag_ids' => [],
+                'published_at' => now()->subDays(2)->format('d M Y H:i'),
+                'created_at' => now()->subDays(2)->format('d M Y H:i'),
+                'created_at_human' => '2 hari yang lalu',
+                'updated_at' => now()->subHours(6)->format('d M Y H:i'),
+                'deleted_at' => null,
+            ],
+            [
+                'id' => 'demo-2',
+                'title' => 'Workshop Keamanan Siber untuk Instansi Pemerintah',
+                'slug' => 'workshop-keamanan-siber-instansi-pemerintah',
+                'excerpt' => 'Workshop keamanan siber yang dihadiri perwakilan instansi...',
+                'content' => 'BTIKP menyelenggarakan workshop keamanan siber yang dihadiri oleh perwakilan dari berbagai instansi pemerintah. Materi yang disampaikan meliputi best practices keamanan data, penanganan insiden siber, dan implementasi zero trust architecture.',
+                'thumbnail' => '/storage/galleries/1767848791_695f3b57661f0.jpg',
+                'category_id' => 1,
+                'category_name' => 'Keamanan',
+                'category_color' => '#10b981',
+                'category_icon' => 'shield',
+                'read_time' => 4,
+                'status' => 'published',
+                'author_id' => $user->id,
+                'author_name' => $user->name,
+                'author_avatar' => $user->avatar,
+                'views' => 856,
+                'meta_title' => null,
+                'meta_description' => null,
+                'meta_keywords' => null,
+                'tag_ids' => [],
+                'published_at' => now()->subDays(5)->format('d M Y H:i'),
+                'created_at' => now()->subDays(5)->format('d M Y H:i'),
+                'created_at_human' => '5 hari yang lalu',
+                'updated_at' => now()->subDays(1)->format('d M Y H:i'),
+                'deleted_at' => null,
+            ],
+            [
+                'id' => 'demo-3',
+                'title' => 'Rencana Pembangunan Data Center Regional',
+                'slug' => 'rencana-pembangunan-data-center-regional',
+                'excerpt' => 'Pembangunan data center regional untuk transformasi digital...',
+                'content' => 'Pemerintah daerah berencana membangun data center regional untuk mendukung transformasi digital di berbagai sektor. Fasilitas ini akan menjadi backbone infrastruktur teknologi informasi untuk pelayanan publik yang lebih efisien.',
+                'thumbnail' => '/storage/galleries/1769425214_6977493e36d5a.JPEG',
+                'category_id' => 1,
+                'category_name' => 'Infrastruktur',
+                'category_color' => '#f59e0b',
+                'category_icon' => 'server',
+                'read_time' => 3,
+                'status' => 'draft',
+                'author_id' => $user->id,
+                'author_name' => $user->name,
+                'author_avatar' => $user->avatar,
+                'views' => 0,
+                'meta_title' => null,
+                'meta_description' => null,
+                'meta_keywords' => null,
+                'tag_ids' => [],
+                'published_at' => null,
+                'created_at' => now()->subHours(12)->format('d M Y H:i'),
+                'created_at_human' => '12 jam yang lalu',
+                'updated_at' => now()->subHours(2)->format('d M Y H:i'),
+                'deleted_at' => null,
+            ],
+        ];
+
+        return response()->json([
+            'success' => true,
+            'data' => $dummyData,
+            'meta' => [
+                'current_page' => 1,
+                'last_page' => 1,
+                'per_page' => 15,
+                'total' => 3,
+                'from' => 1,
+                'to' => 3,
+            ],
+            'links' => [
+                'first' => null,
+                'last' => null,
+                'prev' => null,
+                'next' => null,
+            ],
+            'is_demo' => true, // Flag to indicate this is demo data
+        ]);
     }
 
     /**

@@ -51,8 +51,8 @@
     {{-- Animated Background Elements --}}
     @include('layouts.partials.background')
 
-    {{-- Main Layout Container --}}
-    <div class="relative z-10 min-h-screen">
+    {{-- Main Layout Container - Flex layout for full-height sidebar --}}
+    <div class="relative z-10 flex min-h-screen">
 
         {{-- Mobile Sidebar Backdrop --}}
         <div x-show="sidebarOpen" 
@@ -66,18 +66,28 @@
              x-transition:leave-end="opacity-0"
              x-cloak>
         </div>
-
-        {{-- Sidebar Component --}}
-        @include('partials.sidebar')
+        {{-- Sidebar Wrapper - Full height background column --}}
+        <div 
+            :class="sidebarOpen ? 'lg:w-72' : 'lg:w-20'"
+            class="hidden lg:block flex-shrink-0 transition-all duration-300 bg-white/95 dark:bg-surface-900/95 border-r border-surface-200/50 dark:border-surface-800/50"
+        >
+            {{-- Sidebar Component (sticky inside the wrapper) --}}
+            @include('partials.sidebar')
+        </div>
+        
+        {{-- Mobile Sidebar (fixed positioning for mobile only) --}}
+        <div class="lg:hidden">
+            @include('partials.sidebar-mobile')
+        </div>
 
         {{-- Main Content Area --}}
-        <main id="main-content" :class="sidebarOpen ? 'lg:ml-72' : 'lg:ml-20'" class="transition-all duration-300 min-h-screen pt-0">
+        <main id="main-content" class="flex-1 transition-all duration-300 min-h-screen flex flex-col">
 
             {{-- Header Component --}}
             @include('partials.header')
 
             {{-- Page Content --}}
-            <div class="p-4 lg:p-8">
+            <div class="flex-1 p-4 lg:p-8">
                 @yield('content')
             </div>
 

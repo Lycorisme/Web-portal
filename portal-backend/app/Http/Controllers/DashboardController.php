@@ -99,23 +99,27 @@ class DashboardController extends Controller
         }
         
         // Stats array with role context
+        // If no real data exists, provide demo data
+        $hasRealData = $totalArticles > 0;
+        
         $stats = [
-            'total_articles' => $totalArticles,
-            'published_articles' => $publishedArticles,
-            'draft_articles' => $draftArticles,
-            'pending_articles' => $pendingArticles,
-            'total_views' => $formattedViews,
-            'total_views_raw' => $totalViews,
+            'total_articles' => $hasRealData ? $totalArticles : 5,
+            'published_articles' => $hasRealData ? $publishedArticles : 3,
+            'draft_articles' => $hasRealData ? $draftArticles : 1,
+            'pending_articles' => $hasRealData ? $pendingArticles : 1,
+            'total_views' => $hasRealData ? $formattedViews : '2.1K',
+            'total_views_raw' => $hasRealData ? $totalViews : 2103,
             'active_admins' => $activeAdmins,
             'total_admins' => $totalAdmins,
             'blocked_ips' => $blockedIps,
             'failed_logins' => $failedLogins,
-            'article_growth' => $articleGrowth,
-            'views_growth' => $viewsGrowth,
+            'article_growth' => $hasRealData ? $articleGrowth : 15,
+            'views_growth' => $hasRealData ? $viewsGrowth : 23,
             // Role context for view labels
             'is_author' => $isAuthor,
             'is_editor' => $isEditor,
             'is_admin' => $isAdmin,
+            'is_demo' => !$hasRealData, // Flag for demo data
         ];
 
         // Recent articles (role-filtered)
@@ -124,6 +128,12 @@ class DashboardController extends Controller
             ->latest('updated_at')
             ->take(5)
             ->get();
+        
+        // Add dummy articles for demo if no real articles exist
+        if ($recentArticles->isEmpty()) {
+            $dummyArticles = $this->getDummyArticles($user);
+            $recentArticles = collect($dummyArticles);
+        }
 
         // Recent activity logs - Admin only, or own activities for others
         // Exclude VIEW actions to prevent cluttering the log with page views
@@ -162,17 +172,29 @@ class DashboardController extends Controller
         
         // Calculate category percentages
         $totalCategoryArticles = $categories->sum('articles_count');
-        $categoryData = $categories->map(function ($category) use ($totalCategoryArticles) {
-            $percentage = $totalCategoryArticles > 0 
-                ? round(($category->articles_count / $totalCategoryArticles) * 100) 
-                : 0;
-            return [
-                'name' => $category->name,
-                'count' => $category->articles_count,
-                'percentage' => $percentage,
-                'color' => $category->color ?? '#6366f1',
-            ];
-        });
+        
+        // If no category data, provide dummy data for demo
+        if ($totalCategoryArticles == 0) {
+            $categoryData = collect([
+                ['name' => 'Teknologi', 'count' => 12, 'percentage' => 40, 'color' => '#6366f1'],
+                ['name' => 'Keamanan', 'count' => 8, 'percentage' => 27, 'color' => '#10b981'],
+                ['name' => 'Infrastruktur', 'count' => 5, 'percentage' => 17, 'color' => '#f59e0b'],
+                ['name' => 'Pelayanan', 'count' => 3, 'percentage' => 10, 'color' => '#ec4899'],
+                ['name' => 'Lainnya', 'count' => 2, 'percentage' => 6, 'color' => '#8b5cf6'],
+            ]);
+        } else {
+            $categoryData = $categories->map(function ($category) use ($totalCategoryArticles) {
+                $percentage = $totalCategoryArticles > 0 
+                    ? round(($category->articles_count / $totalCategoryArticles) * 100) 
+                    : 0;
+                return [
+                    'name' => $category->name,
+                    'count' => $category->articles_count,
+                    'percentage' => $percentage,
+                    'color' => $category->color ?? '#6366f1',
+                ];
+            });
+        }
 
         // Visit statistics for the last 7 days (role-filtered)
         // Use ActivityLog to get real daily view counts
@@ -207,6 +229,18 @@ class DashboardController extends Controller
         
         // Normalize visit stats for chart height (as percentage of max)
         $maxViews = max(array_column($visitStats, 'views')) ?: 1;
+        
+        // If no real views, provide dummy data for demo
+        $totalDayViews = array_sum(array_column($visitStats, 'views'));
+        if ($totalDayViews == 0) {
+            // Generate demo visit data with realistic patterns
+            $dummyViews = [45, 32, 58, 41, 67, 53, 38]; // Sample visit counts
+            foreach ($visitStats as $index => &$stat) {
+                $stat['views'] = $dummyViews[$index] ?? rand(30, 70);
+            }
+            $maxViews = max(array_column($visitStats, 'views')) ?: 1;
+        }
+        
         $visitStats = array_map(function ($stat) use ($maxViews) {
             $stat['percentage'] = round(($stat['views'] / $maxViews) * 100);
             $stat['percentage'] = max(5, $stat['percentage']); // Minimum 5% height
@@ -231,26 +265,31 @@ class DashboardController extends Controller
                 }
             }
             
+            // Handle date formatting (works for both Eloquent models and stdClass)
+            $createdAt = $article->created_at instanceof Carbon ? $article->created_at->format('d M Y, H:i') : (string) $article->created_at;
+            $updatedAt = $article->updated_at instanceof Carbon ? $article->updated_at->format('d M Y, H:i') : (string) $article->updated_at;
+            $publishedAt = isset($article->published_at) && $article->published_at instanceof Carbon ? $article->published_at->format('d M Y, H:i') : null;
+            
             $articlesForModal[$article->id] = [
                 'id' => $article->id,
                 'title' => $article->title,
                 'slug' => $article->slug,
-                'excerpt' => $article->excerpt,
+                'excerpt' => $article->excerpt ?? null,
                 'content' => $article->content,
                 'thumbnail' => $thumbnailUrl,
                 'status' => $article->status,
                 'views' => $article->views,
                 'read_time' => $article->read_time ?? 1,
                 'author_name' => $article->author->name ?? 'Admin',
-                'author_avatar' => $article->author && $article->author->avatar ? asset('storage/' . $article->author->avatar) : null,
+                'author_avatar' => isset($article->author) && $article->author->avatar ? asset('storage/' . $article->author->avatar) : null,
                 'category_name' => $article->categoryRelation->name ?? $article->category ?? null,
                 'category_color' => $article->categoryRelation->color ?? '#6366f1',
                 'category_icon' => $article->categoryRelation->icon ?? 'folder',
-                'meta_title' => $article->meta_title,
-                'meta_description' => $article->meta_description,
-                'published_at' => $article->published_at ? $article->published_at->format('d M Y, H:i') : null,
-                'created_at' => $article->created_at->format('d M Y, H:i'),
-                'updated_at' => $article->updated_at->format('d M Y, H:i'),
+                'meta_title' => $article->meta_title ?? null,
+                'meta_description' => $article->meta_description ?? null,
+                'published_at' => $publishedAt,
+                'created_at' => $createdAt,
+                'updated_at' => $updatedAt,
             ];
         }
 
@@ -384,5 +423,86 @@ class DashboardController extends Controller
         }
         
         return max(0, min(100, $score));
+    }
+
+    /**
+     * Generate dummy articles for demo purposes
+     * Uses existing images from galleries folder
+     */
+    private function getDummyArticles(User $user): array
+    {
+        $dummyData = [
+            [
+                'id' => 'demo-1',
+                'title' => 'Peluncuran Program Digitalisasi UMKM Tahun 2026',
+                'slug' => 'peluncuran-program-digitalisasi-umkm-2026',
+                'content' => 'Program digitalisasi UMKM yang diinisiasi oleh pemerintah bertujuan untuk meningkatkan daya saing usaha mikro, kecil, dan menengah di era digital. Program ini mencakup pelatihan e-commerce, pembukuan digital, dan pemasaran online.',
+                'excerpt' => 'Program digitalisasi UMKM untuk meningkatkan daya saing usaha...',
+                'thumbnail' => '/storage/galleries/1767844442_695f2a5a8d11c.jpg',
+                'status' => 'published',
+                'views' => 1247,
+                'read_time' => 5,
+                'created_at' => now()->subDays(2),
+                'updated_at' => now()->subHours(6),
+            ],
+            [
+                'id' => 'demo-2',
+                'title' => 'Workshop Keamanan Siber untuk Instansi Pemerintah',
+                'slug' => 'workshop-keamanan-siber-instansi-pemerintah',
+                'content' => 'BTIKP menyelenggarakan workshop keamanan siber yang dihadiri oleh perwakilan dari berbagai instansi pemerintah. Materi yang disampaikan meliputi best practices keamanan data, penanganan insiden siber, dan implementasi zero trust architecture.',
+                'excerpt' => 'Workshop keamanan siber yang dihadiri perwakilan instansi...',
+                'thumbnail' => '/storage/galleries/1767848791_695f3b57661f0.jpg',
+                'status' => 'published',
+                'views' => 856,
+                'read_time' => 4,
+                'created_at' => now()->subDays(5),
+                'updated_at' => now()->subDays(1),
+            ],
+            [
+                'id' => 'demo-3',
+                'title' => 'Rencana Pembangunan Data Center Regional',
+                'slug' => 'rencana-pembangunan-data-center-regional',
+                'content' => 'Pemerintah daerah berencana membangun data center regional untuk mendukung transformasi digital di berbagai sektor. Fasilitas ini akan menjadi backbone infrastruktur teknologi informasi untuk pelayanan publik yang lebih efisien.',
+                'excerpt' => 'Pembangunan data center regional untuk transformasi digital...',
+                'thumbnail' => '/storage/galleries/1769425214_6977493e36d5a.JPEG',
+                'status' => 'draft',
+                'views' => 0,
+                'read_time' => 3,
+                'created_at' => now()->subHours(12),
+                'updated_at' => now()->subHours(2),
+            ],
+        ];
+
+        // Convert to objects with necessary relationships
+        return array_map(function ($data) use ($user) {
+            $article = new \stdClass();
+            $article->id = $data['id'];
+            $article->title = $data['title'];
+            $article->slug = $data['slug'];
+            $article->content = $data['content'];
+            $article->excerpt = $data['excerpt'];
+            $article->thumbnail = $data['thumbnail'];
+            $article->status = $data['status'];
+            $article->views = $data['views'];
+            $article->read_time = $data['read_time'];
+            $article->created_at = $data['created_at'];
+            $article->updated_at = $data['updated_at'];
+            
+            // Mock author relationship
+            $article->author = (object) [
+                'name' => $user->name,
+                'avatar' => $user->avatar,
+            ];
+            
+            // Mock category relationship
+            $article->categoryRelation = (object) [
+                'name' => 'Teknologi',
+                'color' => '#6366f1',
+                'icon' => 'cpu',
+            ];
+            $article->category = 'Teknologi';
+            
+            return $article;
+        }, $dummyData);
     }
 }
