@@ -29,7 +29,7 @@
                         type="text"
                         x-model="filters.search"
                         @keyup.enter="applyFilters()"
-                        placeholder="Cari IP, alasan, atau route..."
+                        placeholder="Cari IP, user, alasan, atau route..."
                         class="w-full pl-12 pr-4 py-3.5 bg-surface-50 dark:bg-surface-800/80 border-2 border-surface-200 dark:border-surface-700 rounded-2xl text-sm text-surface-900 dark:text-white placeholder-surface-400 focus:ring-0 focus:border-theme-500 dark:focus:border-theme-500 transition-all duration-300 shadow-sm"
                     >
                     <div class="absolute right-3 flex items-center gap-1.5">
@@ -68,6 +68,7 @@
                     class="w-full px-3 py-2.5 bg-surface-50 dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-xl text-sm text-surface-900 dark:text-white focus:ring-2 focus:ring-theme-500 focus:border-transparent transition-all"
                 >
                     <option value="">Semua Status</option>
+                    <option value="logged_in">📍 Login Tercatat</option>
                     <option value="review">Ditinjau</option>
                     <option value="blocked">Terblokir</option>
                     <option value="unblocked">Tidak Terblokir</option>
@@ -86,8 +87,10 @@
                     class="w-full px-3 py-2.5 bg-surface-50 dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-xl text-sm text-surface-900 dark:text-white focus:ring-2 focus:ring-theme-500 focus:border-transparent transition-all"
                 >
                     <option value="created_at">Terbaru</option>
+                    <option value="last_login_at">Login Terakhir</option>
                     <option value="ip_address">IP Address</option>
                     <option value="attempt_count">Percobaan</option>
+                    <option value="login_count">Jumlah Login</option>
                     <option value="blocked_until">Waktu Expired</option>
                 </select>
             </div>

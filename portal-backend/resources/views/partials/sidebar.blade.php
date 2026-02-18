@@ -204,7 +204,7 @@
     </nav>
 
     {{-- Sidebar Footer - Version Info (always at bottom) --}}
-    <div x-show="sidebarOpen" x-cloak class="flex-shrink-0 p-4 border-t border-surface-200/50 dark:border-surface-800/50">
+    <div x-show="sidebarOpen" x-cloak class="mt-auto flex-shrink-0 p-4 border-t border-surface-200/50 dark:border-surface-800/50">
         <div class="flex items-center gap-3 px-3 py-2 bg-surface-100 dark:bg-surface-800/50 rounded-xl">
             <div class="w-8 h-8 rounded-lg bg-theme-gradient flex items-center justify-center flex-shrink-0">
                 <i data-lucide="sparkles" class="w-4 h-4 text-white"></i>

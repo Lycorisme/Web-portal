@@ -449,6 +449,9 @@ class AuthController extends Controller
             'created_at' => now(),
         ]);
 
+        // Record login IP for admin monitoring
+        BlockedClient::recordLogin($request, $user);
+
         // Redirect based on role
         if ($user->isMember()) {
             // Members cannot access dashboard

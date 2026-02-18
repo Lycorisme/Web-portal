@@ -76,7 +76,7 @@ class PasswordResetController extends Controller
             $otp = OtpCode::generate($email, OtpCode::TYPE_PASSWORD_RESET);
 
             // Send email
-            Mail::to($email)->send(new OtpVerificationMail(
+            Mail::to($email)->queue(new OtpVerificationMail(
                 $otp->code,
                 $user->name,
                 'password_reset'

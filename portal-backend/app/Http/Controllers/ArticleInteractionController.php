@@ -21,8 +21,38 @@ class ArticleInteractionController extends Controller
     /**
      * Get article statistics (likes, comments, views).
      */
-    public function getStatistics(Article $article): JsonResponse
+    public function getStatistics($id): JsonResponse
     {
+        // Handle demo articles - return mock statistics
+        if (is_string($id) && str_starts_with($id, 'demo-')) {
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'article_id' => $id,
+                    'article_title' => 'Demo Article',
+                    'statistics' => [
+                        'views' => rand(100, 500),
+                        'likes' => rand(10, 50),
+                        'comments' => rand(5, 20),
+                        'spam_comments' => 0,
+                    ],
+                    'comments' => [],
+                    'recent_likes' => [],
+                ],
+                'is_demo' => true,
+                'message' => 'Ini adalah statistik demo.',
+            ]);
+        }
+
+        // Find the article
+        $article = Article::find($id);
+        if (!$article) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Artikel tidak ditemukan.',
+            ], 404);
+        }
+
         $comments = $article->comments()
             ->with(['user:id,name,profile_photo'])
             ->whereNull('parent_id')
@@ -99,8 +129,29 @@ class ArticleInteractionController extends Controller
     /**
      * Get comments for an article (for detail modal).
      */
-    public function getComments(Article $article): JsonResponse
+    public function getComments($id): JsonResponse
     {
+        // Handle demo articles - return empty comments
+        if (is_string($id) && str_starts_with($id, 'demo-')) {
+            return response()->json([
+                'success' => true,
+                'data' => [],
+                'total' => 0,
+                'visible_count' => 0,
+                'is_demo' => true,
+                'message' => 'Artikel demo tidak memiliki komentar.',
+            ]);
+        }
+
+        // Find the article
+        $article = Article::find($id);
+        if (!$article) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Artikel tidak ditemukan.',
+            ], 404);
+        }
+
         $comments = $article->comments()
             ->with(['user:id,name,profile_photo'])
             ->whereNull('parent_id')

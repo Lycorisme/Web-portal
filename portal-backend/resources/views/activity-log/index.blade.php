@@ -37,3 +37,4 @@
 @push('scripts')
 @include('activity-log.partials.scripts')
 @endpush
+

@@ -72,9 +72,9 @@ class ArticleController extends Controller
         $articles = $query->paginate($perPage);
 
         // If no articles and not searching/filtering, return dummy data for demo
-        if ($articles->isEmpty() && !$request->filled('search') && !$request->filled('article_status') && !$request->filled('category_id') && $request->status !== 'trash') {
-            return $this->getDummyArticlesResponse();
-        }
+        // if ($articles->isEmpty() && !$request->filled('search') && !$request->filled('article_status') && !$request->filled('category_id') && $request->status !== 'trash') {
+        //     return $this->getDummyArticlesResponse();
+        // }
 
         // Transform data for frontend
         $data = $articles->getCollection()->map(function ($article) {
@@ -243,8 +243,27 @@ class ArticleController extends Controller
     /**
      * Get activity logs for a specific article.
      */
-    public function getActivities(Article $article): JsonResponse
+    public function getActivities($id): JsonResponse
     {
+        // Handle demo articles - return empty activities
+        if (is_string($id) && str_starts_with($id, 'demo-')) {
+            return response()->json([
+                'success' => true,
+                'data' => [],
+                'is_demo' => true,
+                'message' => 'Artikel demo tidak memiliki log aktivitas.',
+            ]);
+        }
+
+        // Find the article
+        $article = Article::find($id);
+        if (!$article) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Artikel tidak ditemukan.',
+            ], 404);
+        }
+
         $activities = ActivityLog::where('subject_type', Article::class)
             ->where('subject_id', $article->id)
             ->with(['user'])
@@ -275,38 +294,157 @@ class ArticleController extends Controller
     /**
      * Display the specified article.
      */
-    public function show(Article $article): JsonResponse
+    public function show($article): JsonResponse
     {
-        $article->load(['author', 'categoryRelation', 'tags']);
+        // Handle demo articles
+        if (is_string($article) && str_starts_with($article, 'demo-')) {
+            $dummyArticle = $this->getDummyArticle($article);
+            if ($dummyArticle) {
+                return response()->json([
+                    'success' => true,
+                    'data' => $dummyArticle,
+                    'is_demo' => true,
+                    'message' => 'Ini adalah data demo. Silakan buat artikel baru untuk mengedit.',
+                ]);
+            }
+            return response()->json([
+                'success' => false,
+                'message' => 'Artikel demo tidak ditemukan.',
+            ], 404);
+        }
+
+        // Find the actual article
+        $articleModel = Article::with(['author', 'categoryRelation', 'tags'])->find($article);
+        
+        if (!$articleModel) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Artikel tidak ditemukan.',
+            ], 404);
+        }
 
         return response()->json([
             'success' => true,
             'data' => [
-                'id' => $article->id,
-                'title' => $article->title,
-                'slug' => $article->slug,
-                'excerpt' => $article->excerpt,
-                'content' => $article->content,
-                'thumbnail' => $article->thumbnail,
-                'category_id' => $article->category_id,
-                'category_name' => $article->categoryRelation?->name,
-                'category_color' => $article->categoryRelation?->color,
-                'category_icon' => $article->categoryRelation?->icon,
-                'read_time' => $article->read_time,
-                'status' => $article->status,
-                'author_id' => $article->author_id,
-                'author_name' => $article->author?->name ?? 'Admin',
-                'author_avatar' => $article->author?->avatar ?? null,
-                'views' => $article->views,
-                'meta_title' => $article->meta_title,
-                'meta_description' => $article->meta_description,
-                'meta_keywords' => $article->meta_keywords,
-                'tag_ids' => $article->tags->pluck('id')->toArray(),
-                'published_at' => $article->published_at?->format('d M Y H:i'),
-                'created_at' => $article->created_at->format('d M Y H:i'),
-                'updated_at' => $article->updated_at->format('d M Y H:i'),
+                'id' => $articleModel->id,
+                'title' => $articleModel->title,
+                'slug' => $articleModel->slug,
+                'excerpt' => $articleModel->excerpt,
+                'content' => $articleModel->content,
+                'thumbnail' => $articleModel->thumbnail,
+                'category_id' => $articleModel->category_id,
+                'category_name' => $articleModel->categoryRelation?->name,
+                'category_color' => $articleModel->categoryRelation?->color,
+                'category_icon' => $articleModel->categoryRelation?->icon,
+                'read_time' => $articleModel->read_time,
+                'status' => $articleModel->status,
+                'author_id' => $articleModel->author_id,
+                'author_name' => $articleModel->author?->name ?? 'Admin',
+                'author_avatar' => $articleModel->author?->avatar ?? null,
+                'views' => $articleModel->views,
+                'meta_title' => $articleModel->meta_title,
+                'meta_description' => $articleModel->meta_description,
+                'meta_keywords' => $articleModel->meta_keywords,
+                'tag_ids' => $articleModel->tags->pluck('id')->toArray(),
+                'published_at' => $articleModel->published_at?->format('d M Y H:i'),
+                'created_at' => $articleModel->created_at->format('d M Y H:i'),
+                'updated_at' => $articleModel->updated_at->format('d M Y H:i'),
             ],
         ]);
+    }
+
+    /**
+     * Get a single dummy article by ID.
+     */
+    private function getDummyArticle(string $demoId): ?array
+    {
+        $user = auth()->user();
+        
+        $dummyArticles = [
+            'demo-1' => [
+                'id' => 'demo-1',
+                'title' => 'Peluncuran Program Digitalisasi UMKM Tahun 2026',
+                'slug' => 'peluncuran-program-digitalisasi-umkm-2026',
+                'excerpt' => 'Program digitalisasi UMKM untuk meningkatkan daya saing usaha...',
+                'content' => 'Program digitalisasi UMKM yang diinisiasi oleh pemerintah bertujuan untuk meningkatkan daya saing usaha mikro, kecil, dan menengah di era digital. Program ini mencakup pelatihan e-commerce, pembukuan digital, dan pemasaran online.',
+                'thumbnail' => '/storage/galleries/1767844442_695f2a5a8d11c.jpg',
+                'category_id' => 1,
+                'category_name' => 'Teknologi',
+                'category_color' => '#6366f1',
+                'category_icon' => 'cpu',
+                'read_time' => 5,
+                'status' => 'published',
+                'author_id' => $user->id,
+                'author_name' => $user->name,
+                'author_avatar' => $user->avatar,
+                'views' => 1247,
+                'meta_title' => null,
+                'meta_description' => null,
+                'meta_keywords' => null,
+                'tag_ids' => [],
+                'published_at' => now()->subDays(2)->format('d M Y H:i'),
+                'created_at' => now()->subDays(2)->format('d M Y H:i'),
+                'created_at_human' => '2 hari yang lalu',
+                'updated_at' => now()->subHours(6)->format('d M Y H:i'),
+                'deleted_at' => null,
+            ],
+            'demo-2' => [
+                'id' => 'demo-2',
+                'title' => 'Workshop Keamanan Siber untuk Instansi Pemerintah',
+                'slug' => 'workshop-keamanan-siber-instansi-pemerintah',
+                'excerpt' => 'Workshop keamanan siber yang dihadiri perwakilan instansi...',
+                'content' => 'BTIKP menyelenggarakan workshop keamanan siber yang dihadiri oleh perwakilan dari berbagai instansi pemerintah. Materi yang disampaikan meliputi best practices keamanan data, penanganan insiden siber, dan implementasi zero trust architecture.',
+                'thumbnail' => '/storage/galleries/1767848791_695f3b57661f0.jpg',
+                'category_id' => 1,
+                'category_name' => 'Keamanan',
+                'category_color' => '#10b981',
+                'category_icon' => 'shield',
+                'read_time' => 4,
+                'status' => 'published',
+                'author_id' => $user->id,
+                'author_name' => $user->name,
+                'author_avatar' => $user->avatar,
+                'views' => 856,
+                'meta_title' => null,
+                'meta_description' => null,
+                'meta_keywords' => null,
+                'tag_ids' => [],
+                'published_at' => now()->subDays(5)->format('d M Y H:i'),
+                'created_at' => now()->subDays(5)->format('d M Y H:i'),
+                'created_at_human' => '5 hari yang lalu',
+                'updated_at' => now()->subDays(1)->format('d M Y H:i'),
+                'deleted_at' => null,
+            ],
+            'demo-3' => [
+                'id' => 'demo-3',
+                'title' => 'Rencana Pembangunan Data Center Regional',
+                'slug' => 'rencana-pembangunan-data-center-regional',
+                'excerpt' => 'Pembangunan data center regional untuk transformasi digital...',
+                'content' => 'Pemerintah daerah berencana membangun data center regional untuk mendukung transformasi digital di berbagai sektor. Fasilitas ini akan menjadi backbone infrastruktur teknologi informasi untuk pelayanan publik yang lebih efisien.',
+                'thumbnail' => '/storage/galleries/1769425214_6977493e36d5a.JPEG',
+                'category_id' => 1,
+                'category_name' => 'Infrastruktur',
+                'category_color' => '#f59e0b',
+                'category_icon' => 'server',
+                'read_time' => 3,
+                'status' => 'draft',
+                'author_id' => $user->id,
+                'author_name' => $user->name,
+                'author_avatar' => $user->avatar,
+                'views' => 0,
+                'meta_title' => null,
+                'meta_description' => null,
+                'meta_keywords' => null,
+                'tag_ids' => [],
+                'published_at' => null,
+                'created_at' => now()->subHours(12)->format('d M Y H:i'),
+                'created_at_human' => '12 jam yang lalu',
+                'updated_at' => now()->subHours(2)->format('d M Y H:i'),
+                'deleted_at' => null,
+            ],
+        ];
+
+        return $dummyArticles[$demoId] ?? null;
     }
 
     /**
@@ -424,8 +562,26 @@ class ArticleController extends Controller
     /**
      * Update the specified article.
      */
-    public function update(Request $request, Article $article): JsonResponse
+    public function update(Request $request, $id): JsonResponse
     {
+        // Handle demo articles - cannot be updated
+        if (is_string($id) && str_starts_with($id, 'demo-')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Artikel demo tidak dapat diedit. Silakan buat artikel baru.',
+                'is_demo' => true,
+            ], 422);
+        }
+
+        // Find the article
+        $article = Article::find($id);
+        if (!$article) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Artikel tidak ditemukan.',
+            ], 404);
+        }
+
         // Author can only update their own articles
         $user = auth()->user();
         if ($user->isAuthor() && $article->author_id !== $user->id) {
@@ -584,8 +740,26 @@ class ArticleController extends Controller
     /**
      * Delete an article (soft delete).
      */
-    public function destroy(Article $article): JsonResponse
+    public function destroy($id): JsonResponse
     {
+        // Handle demo articles - cannot be deleted
+        if (is_string($id) && str_starts_with($id, 'demo-')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Artikel demo tidak dapat dihapus.',
+                'is_demo' => true,
+            ], 422);
+        }
+
+        // Find the article
+        $article = Article::find($id);
+        if (!$article) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Artikel tidak ditemukan.',
+            ], 404);
+        }
+
         // Author can only delete their own articles
         $user = auth()->user();
         if ($user->isAuthor() && $article->author_id !== $user->id) {
@@ -808,8 +982,26 @@ class ArticleController extends Controller
     /**
      * Toggle article status.
      */
-    public function toggleStatus(Article $article, Request $request): JsonResponse
+    public function toggleStatus($id, Request $request): JsonResponse
     {
+        // Handle demo articles - cannot toggle status
+        if (is_string($id) && str_starts_with($id, 'demo-')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Status artikel demo tidak dapat diubah.',
+                'is_demo' => true,
+            ], 422);
+        }
+
+        // Find the article
+        $article = Article::find($id);
+        if (!$article) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Artikel tidak ditemukan.',
+            ], 404);
+        }
+
         // Author cannot publish articles
         $user = auth()->user();
         if ($user->isAuthor()) {

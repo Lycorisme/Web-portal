@@ -29,7 +29,8 @@ class BlockedClientController extends Controller
                 $query->where('is_blocked', true);
             } elseif ($request->status === 'unblocked') {
                 $query->where('is_blocked', false)
-                      ->where('attempt_count', 0);
+                      ->where('attempt_count', 0)
+                      ->whereNull('user_id');
             } elseif ($request->status === 'review') {
                 // IP yang sedang ditinjau (tercatat tapi belum diblokir)
                 $query->where('is_blocked', false)
@@ -41,6 +42,11 @@ class BlockedClientController extends Controller
             } elseif ($request->status === 'permanent') {
                 $query->where('is_blocked', true)
                       ->whereNull('blocked_until');
+            } elseif ($request->status === 'logged_in') {
+                // IPs with login records (monitoring)
+                $query->where('is_blocked', false)
+                      ->whereNotNull('user_id')
+                      ->whereNotNull('last_login_at');
             }
         }
 
@@ -52,7 +58,8 @@ class BlockedClientController extends Controller
                 $q->where('ip_address', 'like', "%{$search}%")
                   ->orWhere('user_agent', 'like', "%{$search}%")
                   ->orWhere('reason', 'like', "%{$search}%")
-                  ->orWhere('blocked_route', 'like', "%{$search}%");
+                  ->orWhere('blocked_route', 'like', "%{$search}%")
+                  ->orWhere('user_name', 'like', "%{$search}%");
             });
         }
 
@@ -63,11 +70,34 @@ class BlockedClientController extends Controller
 
         // Pagination
         $perPage = $request->input('per_page', 15);
-        $data = $query->paginate($perPage);
+        $data = $query->with(['user' => fn($q) => $q->withTrashed()])->paginate($perPage);
+
+        // Transform data to include user tracking info
+        $items = collect($data->items())->map(function ($item) {
+            $arr = $item->toArray();
+            $arr['last_login_at_formatted'] = $item->last_login_at 
+                ? $item->last_login_at->format('d M Y, H:i') 
+                : null;
+            $arr['last_login_at_human'] = $item->last_login_at 
+                ? $item->last_login_at->diffForHumans() 
+                : null;
+            
+            // Enrich with fresh user data if relation exists
+            if ($item->user) {
+                $arr['user_name'] = $item->user->name;
+                $arr['user_avatar'] = $item->user->avatar;
+            } else {
+                // Fallback to snapshot
+                $arr['user_name'] = $item->user_name ?? 'Tidak diketahui';
+                $arr['user_avatar'] = null;
+            }
+            
+            return $arr;
+        });
 
         return response()->json([
             'success' => true,
-            'data' => $data->items(),
+            'data' => $items,
             'meta' => [
                 'current_page' => $data->currentPage(),
                 'last_page' => $data->lastPage(),
@@ -132,6 +162,8 @@ class BlockedClientController extends Controller
      */
     public function show(BlockedClient $blockedClient)
     {
+        $blockedClient->load(['user' => fn($q) => $q->withTrashed()]);
+
         return response()->json([
             'success' => true,
             'data' => [
@@ -145,6 +177,13 @@ class BlockedClientController extends Controller
                 'reason' => $blockedClient->reason,
                 'blocked_route' => $blockedClient->blocked_route,
                 'is_expired' => $blockedClient->isExpired(),
+                'user_id' => $blockedClient->user_id,
+                'user_name' => $blockedClient->user ? $blockedClient->user->name : $blockedClient->user_name,
+                'user_avatar' => $blockedClient->user ? $blockedClient->user->avatar : null,
+                'login_count' => $blockedClient->login_count,
+                'last_login_at' => $blockedClient->last_login_at?->toIso8601String(),
+                'last_login_at_formatted' => $blockedClient->last_login_at?->format('d M Y, H:i'),
+                'last_login_at_human' => $blockedClient->last_login_at?->diffForHumans(),
                 'created_at' => $blockedClient->created_at->format('d M Y, H:i'),
                 'updated_at' => $blockedClient->updated_at->format('d M Y, H:i'),
             ],

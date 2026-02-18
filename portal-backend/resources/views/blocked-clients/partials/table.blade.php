@@ -14,7 +14,7 @@
 
     {{-- Table Container with Horizontal Scroll --}}
     <div class="table-scroll-container overflow-x-auto" style="overflow-y: visible;">
-        <table class="w-full min-w-[900px]">
+        <table class="w-full min-w-[1100px]">
             <thead>
                 <tr class="bg-surface-50 dark:bg-surface-800/50">
                     <th class="w-12 px-4 py-3 text-left">
@@ -29,10 +29,11 @@
                         IP Address
                     </th>
                     <th class="px-4 py-3 text-left text-xs font-semibold text-surface-500 dark:text-surface-400 uppercase tracking-wider whitespace-nowrap">
-                        Route
+                        Pengguna
                     </th>
+
                     <th class="px-4 py-3 text-center text-xs font-semibold text-surface-500 dark:text-surface-400 uppercase tracking-wider whitespace-nowrap">
-                        Percobaan
+                        Login
                     </th>
                     <th class="px-4 py-3 text-center text-xs font-semibold text-surface-500 dark:text-surface-400 uppercase tracking-wider whitespace-nowrap">
                         Status
@@ -56,7 +57,8 @@
                             'bg-rose-50/70 dark:bg-rose-900/10': client.is_blocked && !isExpired(client),
                             'bg-amber-50/50 dark:bg-amber-900/10': client.is_blocked && isExpired(client),
                             'bg-cyan-50/50 dark:bg-cyan-900/10': isUnderReview(client),
-                            'bg-emerald-50/30 dark:bg-emerald-900/10': !client.is_blocked && !isUnderReview(client)
+                            'bg-blue-50/40 dark:bg-blue-900/10': isLoggedIn(client),
+                            'bg-emerald-50/30 dark:bg-emerald-900/10': !client.is_blocked && !isUnderReview(client) && !isLoggedIn(client)
                         }"
                     >
                         {{-- Checkbox --}}
@@ -87,40 +89,83 @@
                             </div>
                         </td>
 
-                        {{-- Blocked Route --}}
+                        {{-- User --}}
                         <td class="px-4 py-3 whitespace-nowrap">
-                            <span class="text-sm text-surface-700 dark:text-surface-300 font-mono" x-text="client.blocked_route || '-'"></span>
+                            <template x-if="client.user_name">
+                                <div class="flex items-center gap-3">
+                                    {{-- Avatar --}}
+                                    <template x-if="client.user_avatar">
+                                        <img 
+                                            :src="client.user_avatar" 
+                                            :alt="client.user_name"
+                                            class="w-9 h-9 rounded-full object-cover border border-surface-200 dark:border-surface-700 shadow-sm"
+                                        >
+                                    </template>
+                                    <template x-if="!client.user_avatar">
+                                        <div class="w-9 h-9 rounded-full bg-theme-gradient flex items-center justify-center flex-shrink-0 shadow-sm border border-white/20">
+                                            <span class="text-white text-xs font-bold" x-text="client.user_name.charAt(0).toUpperCase()"></span>
+                                        </div>
+                                    </template>
+
+                                    {{-- Name & Time --}}
+                                    <div class="flex flex-col">
+                                        <span class="text-sm font-semibold text-surface-900 dark:text-white" x-text="client.user_name"></span>
+                                        <span class="text-xs text-surface-500" x-text="client.last_login_at_human || ''"></span>
+                                    </div>
+                                </div>
+                            </template>
+                            <template x-if="!client.user_name">
+                                <span class="text-xs text-surface-400 italic">Tidak diketahui</span>
+                            </template>
                         </td>
 
-                        {{-- Attempt Count --}}
+
+
+                        {{-- Login Count --}}
                         <td class="px-4 py-3 text-center whitespace-nowrap">
-                            <span 
-                                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold"
-                                :class="client.attempt_count >= 5 
-                                    ? 'bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400'
-                                    : client.attempt_count >= 3
-                                        ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400'
-                                        : 'bg-surface-100 text-surface-700 dark:bg-surface-700 dark:text-surface-300'"
-                            >
-                                <i data-lucide="alert-triangle" class="w-3 h-3"></i>
-                                <span x-text="client.attempt_count"></span>
-                            </span>
+                            <template x-if="client.login_count > 0">
+                                <span 
+                                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400"
+                                >
+                                    <i data-lucide="log-in" class="w-3 h-3"></i>
+                                    <span x-text="client.login_count"></span>
+                                </span>
+                            </template>
+                            <template x-if="!client.login_count || client.login_count === 0">
+                                <span class="text-xs text-surface-400">-</span>
+                            </template>
                         </td>
 
                         {{-- Status --}}
                         <td class="px-4 py-3 text-center whitespace-nowrap">
-                            <span 
-                                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
-                                :class="{
-                                    'bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400': client.is_blocked && !isExpired(client),
-                                    'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400': client.is_blocked && isExpired(client),
-                                    'bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-400': isUnderReview(client),
-                                    'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400': !client.is_blocked && !isUnderReview(client)
-                                }"
-                            >
-                                <i :data-lucide="client.is_blocked ? (isExpired(client) ? 'clock' : 'shield-ban') : (isUnderReview(client) ? 'eye' : 'shield-check')" class="w-3 h-3"></i>
-                                <span x-text="getStatusLabel(client)"></span>
-                            </span>
+                            <div class="flex flex-col gap-1 items-center">
+                                <span 
+                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
+                                    :class="{
+                                        'bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400': client.is_blocked && !isExpired(client),
+                                        'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400': client.is_blocked && isExpired(client),
+                                        'bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-400': isUnderReview(client),
+                                        'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400': isLoggedIn(client),
+                                        'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400': !client.is_blocked && !isUnderReview(client) && !isLoggedIn(client)
+                                    }"
+                                >
+                                    <i :data-lucide="getStatusIcon(client)" class="w-3 h-3"></i>
+                                    <span x-text="getStatusLabel(client)"></span>
+                                </span>
+                                
+                                <span 
+                                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium"
+                                    :class="client.attempt_count >= 5 
+                                        ? 'bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400'
+                                        : client.attempt_count >= 3
+                                            ? 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400'
+                                            : 'bg-surface-100 text-surface-600 dark:bg-surface-800 dark:text-surface-400'"
+                                    x-show="client.attempt_count > 0"
+                                >
+                                    <i data-lucide="alert-triangle" class="w-3 h-3"></i>
+                                    <span x-text="client.attempt_count + ' Percobaan'"></span>
+                                </span>
+                            </div>
                         </td>
 
                         {{-- Blocked Until / Expired --}}
@@ -157,7 +202,7 @@
 
                         {{-- Reason --}}
                         <td class="px-4 py-3">
-                            <span class="text-sm text-surface-700 dark:text-surface-300 line-clamp-2 max-w-[200px]" x-text="client.reason || '-'"></span>
+                            <span class="text-sm text-surface-700 dark:text-surface-300 line-clamp-2 max-w-[200px]" x-text="(client.reason && client.reason !== 'Login tercatat') ? client.reason : '-'"></span>
                         </td>
 
                         {{-- Actions (Kebab Menu) --}}
@@ -178,7 +223,7 @@
                 {{-- Empty State --}}
                 <template x-if="!loading && clients.length === 0">
                     <tr>
-                        <td colspan="8" class="px-4 py-12">
+                        <td colspan="10" class="px-4 py-12">
                             <div class="flex flex-col items-center justify-center text-center">
                                 <div class="w-16 h-16 bg-surface-100 dark:bg-surface-800 rounded-full flex items-center justify-center mb-4">
                                     <i data-lucide="shield-check" class="w-8 h-8 text-emerald-500"></i>

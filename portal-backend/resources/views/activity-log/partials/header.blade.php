@@ -1,10 +1,10 @@
 <div class="relative mb-8 animate-fade-in group">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <div class="flex items-center gap-5">
+        <div class="flex items-center gap-3">
             {{-- Animated Icon Container --}}
             <div class="relative">
                 <div class="absolute inset-0 bg-gradient-to-tr from-theme-500/20 to-theme-300/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div class="relative p-3.5 bg-white dark:bg-surface-800 rounded-2xl border border-surface-200/50 dark:border-surface-700/50 shadow-lg shadow-surface-100/50 dark:shadow-surface-900/50 ring-1 ring-white/50 dark:ring-surface-700/50">
+                <div class="relative p-2 bg-white dark:bg-surface-800 rounded-2xl border border-surface-200/50 dark:border-surface-700/50 shadow-lg shadow-surface-100/50 dark:shadow-surface-900/50 ring-1 ring-white/50 dark:ring-surface-700/50">
                     <i data-lucide="history" class="w-8 h-8 text-theme-600 dark:text-theme-400"></i>
                 </div>
             </div>

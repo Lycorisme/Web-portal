@@ -171,9 +171,19 @@
                     Batal
                 </button>
                 <button type="submit"
-                        class="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r from-accent-rose to-pink-500 text-white rounded-xl font-semibold shadow-lg shadow-accent-rose/30 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 text-sm sm:text-base">
-                    <i data-lucide="key" class="w-4 h-4 inline mr-2"></i>
-                    Ubah Password
+                        :disabled="isUpdatingPassword"
+                        class="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r from-accent-rose to-pink-500 text-white rounded-xl font-semibold shadow-lg shadow-accent-rose/30 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 text-sm sm:text-base disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none">
+                    <span x-show="!isUpdatingPassword" class="flex items-center">
+                        <i data-lucide="key" class="w-4 h-4 mr-2"></i>
+                        Ubah Password
+                    </span>
+                    <span x-show="isUpdatingPassword" class="flex items-center" style="display: none;">
+                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        Memproses...
+                    </span>
                 </button>
             </div>
         </form>

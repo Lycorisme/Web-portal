@@ -81,7 +81,7 @@
         </div>
 
         {{-- Main Content Area --}}
-        <main id="main-content" class="flex-1 transition-all duration-300 min-h-screen flex flex-col">
+        <main id="main-content" class="flex-1 min-w-0 overflow-hidden transition-all duration-300 min-h-screen flex flex-col">
 
             {{-- Header Component --}}
             @include('partials.header')

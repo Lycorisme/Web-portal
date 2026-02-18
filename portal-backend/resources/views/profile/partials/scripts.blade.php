@@ -48,6 +48,7 @@ function profilePage() {
             password: '',
             password_confirmation: '',
         },
+        isUpdatingPassword: false,
         
         init() {
             // Store original values for reset and change detection
@@ -476,7 +477,7 @@ function profilePage() {
                 return;
             }
             
-            showLoading('Mengubah password...');
+            this.isUpdatingPassword = true;
             
             try {
                 const response = await fetch('{{ route("profile.password.update") }}', {
@@ -502,6 +503,8 @@ function profilePage() {
             } catch (error) {
                 console.error('Error:', error);
                 showError('Gagal!', error.message || 'Terjadi kesalahan saat mengubah password');
+            } finally {
+                this.isUpdatingPassword = false;
             }
         },
         

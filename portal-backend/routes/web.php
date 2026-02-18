@@ -138,24 +138,28 @@ Route::middleware('auth')->group(function () {
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
     Route::post('/profile/logout-all-devices', [ProfileController::class, 'logoutAllDevices'])->name('profile.logout-all-devices');
 
+    // Tag Routes (Read Access for Authors)
+    Route::get('/tags', [TagController::class, 'index'])->name('tags');
+    Route::get('/tags/data', [TagController::class, 'getData'])->name('tags.data');
+
     // Article Routes - All authenticated users (with role-based filtering in controller)
     Route::get('/articles', [ArticleController::class, 'index'])->name('articles');
     Route::get('/articles/data', [ArticleController::class, 'getData'])->name('articles.data');
     Route::post('/articles', [ArticleController::class, 'store'])->name('articles.store');
-    Route::get('/articles/{article}', [ArticleController::class, 'show'])->name('articles.show');
-    Route::put('/articles/{article}', [ArticleController::class, 'update'])->name('articles.update');
+    Route::get('/articles/{id}', [ArticleController::class, 'show'])->name('articles.show');
+    Route::put('/articles/{id}', [ArticleController::class, 'update'])->name('articles.update');
     Route::delete('/articles/bulk', [ArticleController::class, 'bulkDestroy'])->name('articles.bulk-destroy');
     Route::post('/articles/bulk-restore', [ArticleController::class, 'bulkRestore'])->name('articles.bulk-restore');
     Route::delete('/articles/bulk-force', [ArticleController::class, 'bulkForceDelete'])->name('articles.bulk-force-delete');
-    Route::delete('/articles/{article}', [ArticleController::class, 'destroy'])->name('articles.destroy');
+    Route::delete('/articles/{id}', [ArticleController::class, 'destroy'])->name('articles.destroy');
     Route::post('/articles/{id}/restore', [ArticleController::class, 'restore'])->name('articles.restore');
     Route::delete('/articles/{id}/force', [ArticleController::class, 'forceDelete'])->name('articles.force-delete');
-    Route::post('/articles/{article}/toggle-status', [ArticleController::class, 'toggleStatus'])->name('articles.toggle-status');
+    Route::post('/articles/{id}/toggle-status', [ArticleController::class, 'toggleStatus'])->name('articles.toggle-status');
 
     // Article Interaction Routes (Statistics, Comments, Likes)
-    Route::get('/articles/{article}/activities', [ArticleController::class, 'getActivities'])->name('articles.activities');
-    Route::get('/articles/{article}/statistics', [ArticleInteractionController::class, 'getStatistics'])->name('articles.statistics');
-    Route::get('/articles/{article}/comments', [ArticleInteractionController::class, 'getComments'])->name('articles.comments');
+    Route::get('/articles/{id}/activities', [ArticleController::class, 'getActivities'])->name('articles.activities');
+    Route::get('/articles/{id}/statistics', [ArticleInteractionController::class, 'getStatistics'])->name('articles.statistics');
+    Route::get('/articles/{id}/comments', [ArticleInteractionController::class, 'getComments'])->name('articles.comments');
     Route::post('/comments/{comment}/reply', [ArticleInteractionController::class, 'addAdminReply'])->name('comments.reply');
     Route::patch('/comments/{comment}/status', [ArticleInteractionController::class, 'updateCommentStatus'])->name('comments.update-status');
     Route::delete('/comments/{comment}', [ArticleInteractionController::class, 'deleteComment'])->name('comments.delete');
@@ -210,9 +214,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/categories/{category}/toggle-active', [CategoryController::class, 'toggleActive'])->name('categories.toggle-active');
         Route::post('/categories/update-sort', [CategoryController::class, 'updateSort'])->name('categories.update-sort');
 
-        // Tag Routes
-        Route::get('/tags', [TagController::class, 'index'])->name('tags');
-        Route::get('/tags/data', [TagController::class, 'getData'])->name('tags.data');
+
         Route::post('/tags', [TagController::class, 'store'])->name('tags.store');
         Route::get('/tags/{tag}', [TagController::class, 'show'])->name('tags.show');
         Route::put('/tags/{tag}', [TagController::class, 'update'])->name('tags.update');

@@ -112,11 +112,58 @@
                         <p class="font-mono font-semibold text-surface-900 dark:text-white" x-text="selectedClient?.ip_address"></p>
                     </div>
 
+                    {{-- User --}}
+                    <div class="p-4 bg-surface-50 dark:bg-surface-800/50 rounded-xl col-span-2 sm:col-span-1">
+                        <div class="flex items-center gap-2 text-xs text-surface-500 mb-2">
+                            <i data-lucide="user" class="w-3.5 h-3.5"></i>
+                            <span>User</span>
+                        </div>
+                        <template x-if="selectedClient?.user_name">
+                            <div class="flex items-center gap-3">
+                                {{-- Avatar --}}
+                                <template x-if="selectedClient?.user_avatar">
+                                    <img 
+                                        :src="selectedClient.user_avatar" 
+                                        class="w-8 h-8 rounded-full object-cover border border-surface-200 dark:border-surface-700"
+                                    >
+                                </template>
+                                <template x-if="!selectedClient?.user_avatar">
+                                    <div class="w-8 h-8 rounded-full bg-theme-gradient flex items-center justify-center flex-shrink-0 text-white text-xs font-bold shadow-sm">
+                                        <span x-text="selectedClient.user_name.charAt(0).toUpperCase()"></span>
+                                    </div>
+                                </template>
+                                <p class="font-semibold text-surface-900 dark:text-white" x-text="selectedClient.user_name"></p>
+                            </div>
+                        </template>
+                        <template x-if="!selectedClient?.user_name">
+                            <p class="font-semibold text-surface-400 italic">Tidak diketahui</p>
+                        </template>
+                    </div>
+
+                    {{-- Login Count --}}
+                    <div class="p-4 bg-surface-50 dark:bg-surface-800/50 rounded-xl">
+                        <div class="flex items-center gap-2 text-xs text-surface-500 mb-1">
+                            <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
+                            <span>Jumlah Login</span>
+                        </div>
+                        <p class="font-semibold text-surface-900 dark:text-white" x-text="(selectedClient?.login_count || 0) + ' kali'"></p>
+                    </div>
+
+                    {{-- Last Login --}}
+                    <div class="p-4 bg-surface-50 dark:bg-surface-800/50 rounded-xl">
+                        <div class="flex items-center gap-2 text-xs text-surface-500 mb-1">
+                            <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                            <span>Login Terakhir</span>
+                        </div>
+                        <p class="text-sm font-semibold text-surface-900 dark:text-white" x-text="selectedClient?.last_login_at_formatted || '-'"></p>
+                        <p class="text-xs text-surface-500" x-text="selectedClient?.last_login_at_human || ''"></p>
+                    </div>
+
                     {{-- Attempt Count --}}
                     <div class="p-4 bg-surface-50 dark:bg-surface-800/50 rounded-xl">
                         <div class="flex items-center gap-2 text-xs text-surface-500 mb-1">
                             <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
-                            <span>Jumlah Percobaan</span>
+                            <span>Jumlah Percobaan Gagal</span>
                         </div>
                         <p class="font-semibold text-surface-900 dark:text-white" x-text="selectedClient?.attempt_count + ' kali'"></p>
                     </div>
@@ -129,15 +176,6 @@
                         </div>
                         <p class="font-mono text-sm text-surface-900 dark:text-white" x-text="selectedClient?.blocked_route || '-'"></p>
                     </div>
-
-                    {{-- Duration --}}
-                    <div class="p-4 bg-surface-50 dark:bg-surface-800/50 rounded-xl">
-                        <div class="flex items-center gap-2 text-xs text-surface-500 mb-1">
-                            <i data-lucide="timer" class="w-3.5 h-3.5"></i>
-                            <span>Durasi Blokir</span>
-                        </div>
-                        <p class="font-semibold text-surface-900 dark:text-white" x-text="selectedClient?.blocked_until ? 'Sementara' : 'Permanen'"></p>
-                    </div>
                 </div>
 
                 {{-- Reason --}}
@@ -146,7 +184,7 @@
                         <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
                         <span>Alasan Blokir</span>
                     </div>
-                    <p class="text-sm text-surface-700 dark:text-surface-300" x-text="selectedClient?.reason || 'Tidak ada alasan yang tercatat'"></p>
+                    <p class="text-sm text-surface-700 dark:text-surface-300" x-text="(selectedClient?.reason && selectedClient?.reason !== 'Login tercatat') ? selectedClient?.reason : 'Tidak ada alasan yang tercatat'"></p>
                 </div>
 
                 {{-- User Agent --}}

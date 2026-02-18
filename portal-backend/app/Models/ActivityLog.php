@@ -185,20 +185,25 @@ class ActivityLog extends Model
      */
     public function getActionLabelAttribute(): string
     {
-        return match ($this->action) {
-            self::ACTION_CREATE => 'Membuat',
-            self::ACTION_UPDATE => 'Mengubah',
-            self::ACTION_DELETE => 'Menghapus',
-            self::ACTION_RESTORE => 'Memulihkan',
-            self::ACTION_FORCE_DELETE => 'Menghapus Permanen',
-            self::ACTION_LOGIN => 'Login',
-            self::ACTION_LOGIN_FAILED => 'Login Gagal',
-            self::ACTION_LOGOUT => 'Logout',
-            self::ACTION_VIEW => 'Melihat',
-            self::ACTION_EXPORT => 'Mengekspor',
-            self::ACTION_IMPORT => 'Mengimpor',
-            self::ACTION_PASSWORD_CHANGE => 'Mengubah Password',
-            self::ACTION_SETTINGS_UPDATE => 'Mengubah Pengaturan',
+        return match (true) {
+            $this->action === self::ACTION_CREATE => 'Membuat',
+            $this->action === self::ACTION_UPDATE => 'Mengubah',
+            $this->action === self::ACTION_DELETE => 'Menghapus',
+            $this->action === self::ACTION_RESTORE => 'Memulihkan',
+            $this->action === self::ACTION_FORCE_DELETE => 'Menghapus Permanen',
+            $this->action === self::ACTION_LOGIN => 'Masuk',
+            $this->action === self::ACTION_LOGIN_FAILED => 'Gagal Masuk',
+            $this->action === self::ACTION_LOGOUT => 'Keluar',
+            $this->action === self::ACTION_VIEW => 'Melihat',
+            $this->action === self::ACTION_EXPORT => 'Mengekspor',
+            $this->action === self::ACTION_IMPORT => 'Mengimpor',
+            $this->action === self::ACTION_PASSWORD_CHANGE => 'Mengubah Password',
+            $this->action === self::ACTION_SETTINGS_UPDATE => 'Mengubah Pengaturan',
+            $this->action === 'blocked_access_attempt' => 'Akses Ditolak',
+            $this->action === 'ip_auto_blocked' => 'IP Diblokir',
+            str_starts_with($this->action, 'suspicious_activity_') => 'Aktivitas Mencurigakan',
+            str_starts_with($this->action, 'Login') => 'Masuk',
+            str_starts_with($this->action, 'Logout') => 'Keluar',
             default => $this->action,
         };
     }

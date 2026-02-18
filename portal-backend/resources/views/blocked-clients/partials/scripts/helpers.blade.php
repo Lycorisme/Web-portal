@@ -32,17 +32,32 @@ isExpired(client) {
 
 // Check if IP is under review (tracked but not blocked)
 isUnderReview(client) {
-    return !client.is_blocked && client.attempt_count > 0;
+    return !client.is_blocked && client.attempt_count > 0 && !client.user_id;
+},
+
+// Check if IP is a logged-in monitoring record
+isLoggedIn(client) {
+    return !client.is_blocked && client.user_id && client.last_login_at;
 },
 
 // Get status label
 getStatusLabel(client) {
     // IP yang tercatat tapi belum di-block = Ditinjau
-    if (!client.is_blocked && client.attempt_count > 0) return 'Ditinjau';
+    if (!client.is_blocked && client.attempt_count > 0 && !client.user_id) return 'Ditinjau';
+    if (this.isLoggedIn(client)) return 'Login Tercatat';
     if (!client.is_blocked) return 'Tidak Terblokir';
     if (this.isExpired(client)) return 'Expired';
     if (!client.blocked_until) return 'Permanen';
     return 'Terblokir';
+},
+
+// Get status icon
+getStatusIcon(client) {
+    if (client.is_blocked && this.isExpired(client)) return 'clock';
+    if (client.is_blocked) return 'shield-ban';
+    if (this.isUnderReview(client)) return 'eye';
+    if (this.isLoggedIn(client)) return 'user-check';
+    return 'shield-check';
 },
 
 // Get expired column text
