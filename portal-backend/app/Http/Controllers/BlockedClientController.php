@@ -203,7 +203,7 @@ class BlockedClientController extends Controller
 
         $blockedClient->update([
             'reason' => $request->reason,
-            'is_blocked' => $request->is_blocked ?? $blockedClient->is_blocked,
+            'is_blocked' => $request->has('is_blocked') ? $request->boolean('is_blocked') : true,
             'blocked_until' => $request->filled('duration') 
                 ? now()->addMinutes($request->duration) 
                 : ($request->has('make_permanent') ? null : $blockedClient->blocked_until),

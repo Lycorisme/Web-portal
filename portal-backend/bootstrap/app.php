@@ -21,10 +21,14 @@ return Application::configure(basePath: dirname(__DIR__))
             'maintenance' => \App\Http\Middleware\CheckMaintenanceMode::class,
             'blocked.client' => \App\Http\Middleware\CheckBlockedClient::class,
         ]);
+
+        // Trust all proxies for testing purposes (allows X-Forwarded-For header)
+        $middleware->trustProxies(at: '*');
         
         // Apply maintenance check to all public web routes
         $middleware->appendToGroup('web', [
             \App\Http\Middleware\CheckMaintenanceMode::class,
+            \App\Http\Middleware\CheckBlockedClient::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

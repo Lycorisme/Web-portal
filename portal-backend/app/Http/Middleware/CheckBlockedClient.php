@@ -12,10 +12,20 @@ use App\Models\ActivityLog;
  * Middleware untuk memblokir akses dari IP yang sudah terdaftar di daftar blokir.
  * Ini adalah lapisan pertahanan pertama sebelum request mencapai controller.
  * 
- * Digunakan pada route sensitif seperti login, register, dan password reset.
+ * Admin/Super Admin yang sudah login dikecualikan agar tetap bisa mengelola blokir.
+ * Route pengelolaan blocked-clients juga dikecualikan.
  */
 class CheckBlockedClient
 {
+    /**
+     * Routes yang dikecualikan dari pengecekan blokir IP.
+     * Admin harus tetap bisa mengakses halaman ini untuk mengelola blokir.
+     */
+    protected array $excludedPaths = [
+        'blocked-clients',
+        'blocked-clients/*',
+    ];
+
     /**
      * Handle an incoming request.
      *
@@ -23,6 +33,18 @@ class CheckBlockedClient
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Skip pengecekan untuk route pengelolaan blocked-clients
+        if ($this->isExcludedPath($request)) {
+            return $next($request);
+        }
+
+        // Skip pengecekan untuk admin/super_admin yang sudah login
+        // Mereka harus tetap bisa mengakses sistem untuk mengelola blokir
+        $user = $request->user();
+        if ($user && in_array($user->role, ['super_admin', 'admin'])) {
+            return $next($request);
+        }
+
         // Cek apakah IP terblokir
         $blocked = BlockedClient::byIp($request->ip())
             ->activeBlocks()
@@ -31,7 +53,7 @@ class CheckBlockedClient
         if ($blocked) {
             // Log percobaan akses dari IP terblokir
             ActivityLog::create([
-                'user_id' => null,
+                'user_id' => $user?->id,
                 'action' => 'blocked_access_attempt',
                 'description' => "Akses ditolak: IP {$request->ip()} terblokir. Reason: {$blocked->reason}",
                 'ip_address' => $request->ip(),
@@ -61,4 +83,18 @@ class CheckBlockedClient
         
         return $next($request);
     }
+
+    /**
+     * Cek apakah request path termasuk yang dikecualikan.
+     */
+    protected function isExcludedPath(Request $request): bool
+    {
+        foreach ($this->excludedPaths as $path) {
+            if ($request->is($path)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
+

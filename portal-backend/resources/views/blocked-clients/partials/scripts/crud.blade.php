@@ -65,6 +65,7 @@ async submitForm() {
                 reason: this.formData.reason,
                 duration: duration,
                 make_permanent: this.formData.duration_type === 'permanent',
+                is_blocked: true,
             }),
         });
 
