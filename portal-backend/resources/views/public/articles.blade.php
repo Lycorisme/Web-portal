@@ -1,6 +1,6 @@
 @extends('public.layouts.public')
 
-@section('meta_title', 'Berita & Artikel')
+@section('meta_title', 'Berita')
 
 @section('content')
     <div class="relative pt-32 pb-8 md:pb-12 px-4 md:px-6 max-w-7xl mx-auto min-h-screen">
@@ -9,7 +9,7 @@
         <div class="text-center mb-16 relative z-10">
              <div class="inline-block animate-float-conserve">
                 <span class="px-5 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-md text-emerald-400 text-xs font-bold uppercase tracking-[0.2em] shadow-lg shadow-emerald-500/10">
-                    Berita & Artikel
+                    Berita
                 </span>
              </div>
             <h1 class="mt-8 text-4xl md:text-6xl lg:text-7xl font-display font-bold text-white leading-tight tracking-tight">
@@ -60,7 +60,7 @@
                     </h3>
                     <div class="flex flex-col space-y-2">
                         <a href="{{ route('public.articles') }}" wire:navigate class="flex justify-between items-center px-4 py-3.5 rounded-2xl transition-all {{ !request('kategori') ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'text-slate-400 hover:bg-white/5 hover:text-white border border-transparent hover:border-white/5' }}">
-                            <span class="text-xs font-bold uppercase tracking-wide">Semua Artikel</span>
+                            <span class="text-xs font-bold uppercase tracking-wide">Semua Berita</span>
                             @if(!request('kategori')) <i class="fas fa-check text-[10px]"></i> @endif
                         </a>
                         @foreach($categories as $category)

@@ -102,7 +102,7 @@
                         <li>
                             <a href="{{ route('public.articles') }}" wire:navigate class="group flex items-center gap-3 text-slate-400 hover:text-white transition-colors">
                                 <span class="w-1.5 h-1.5 rounded-full bg-slate-700 group-hover:bg-emerald-400 transition-colors"></span>
-                                <span class="text-sm font-medium">Artikel</span>
+                                <span class="text-sm font-medium">Berita</span>
                             </a>
                         </li>
                         <li>

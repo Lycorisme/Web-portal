@@ -114,7 +114,7 @@
                 <a href="{{ route('public.articles') }}" wire:navigate 
                    class="px-5 py-2 rounded-full text-sm font-bold transition-colors duration-300 relative z-10"
                    :class="isActive('{{ parse_url(route('public.articles'), PHP_URL_PATH) }}') ? 'text-emerald-400' : 'text-slate-400 hover:text-white'">
-                   Artikel
+                   Berita
                 </a>
                 <a href="{{ route('public.gallery') }}" wire:navigate 
                    class="px-5 py-2 rounded-full text-sm font-bold transition-colors duration-300 relative z-10"
@@ -204,7 +204,7 @@
                                             </div>
                                             <div class="flex-1">
                                                 <span class="block text-slate-200 font-bold group-hover:text-pink-300 transition-colors">Berita Disukai</span>
-                                                <span class="block text-xs text-slate-500 group-hover:text-slate-400">Artikel yang Anda simpan</span>
+                                                <span class="block text-xs text-slate-500 group-hover:text-slate-400">Berita yang Anda simpan</span>
                                             </div>
                                          </a>
                                          
@@ -302,7 +302,7 @@
                 <div class="space-y-6 flex flex-col items-center w-full">
                     @foreach([
                         ['label' => 'Beranda', 'route' => 'public.home'],
-                        ['label' => 'Artikel', 'route' => 'public.articles'],
+                        ['label' => 'Berita', 'route' => 'public.articles'],
                         ['label' => 'Galeri', 'route' => 'public.gallery']
                     ] as $index => $item)
                         <a href="{{ route($item['route']) }}" wire:navigate 

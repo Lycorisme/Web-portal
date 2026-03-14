@@ -101,7 +101,7 @@
         <div class="bg-white/80 backdrop-blur-2xl rounded-3xl p-6 shadow-2xl shadow-indigo-500/20 border border-white/50 space-y-4">
              @foreach([
                 ['label' => 'Beranda', 'route' => 'public.home', 'icon' => 'fa-home', 'color' => 'from-blue-400 to-cyan-400'],
-                ['label' => 'Berita & Artikel', 'route' => 'public.articles', 'icon' => 'fa-newspaper', 'color' => 'from-fuchsia-400 to-pink-400'],
+                ['label' => 'Berita', 'route' => 'public.articles', 'icon' => 'fa-newspaper', 'color' => 'from-fuchsia-400 to-pink-400'],
                 ['label' => 'Galeri Multimedia', 'route' => 'public.gallery', 'icon' => 'fa-images', 'color' => 'from-amber-400 to-orange-400'],
             ] as $item)
                 <a href="{{ route($item['route']) }}" class="flex items-center gap-4 p-4 rounded-2xl transition-all group {{ request()->routeIs($item['route'].'*') ? 'bg-slate-50 md:bg-white border-2 border-indigo-100' : 'hover:bg-indigo-50/50' }}">
