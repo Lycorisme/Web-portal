@@ -455,54 +455,42 @@ class ReportController extends Controller
         // Build flat rows: each row is [indikator, jumlah]
         $rows = [];
 
-        // Pengguna
+        // 1. Pengguna
         $rows[] = ['Total Pengguna Terdaftar', number_format(User::count())];
-        $usersByRole = User::select('role', DB::raw('COUNT(*) as total'))
-            ->groupBy('role')->orderByDesc('total')->get();
-        foreach ($usersByRole as $r) {
-            $label = match($r->role) {
-                'super_admin' => 'Super Admin',
-                'admin' => 'Admin',
-                'editor' => 'Editor',
-                'author' => 'Author',
-                'member' => 'Member',
-                default => ucfirst($r->role),
-            };
-            $rows[] = ['  — ' . $label, number_format($r->total)];
-        }
 
-        // Artikel
-        $rows[] = ['Total Artikel / Berita', number_format(Article::count())];
-        $rows[] = ['  — Published', number_format(Article::where('status', 'published')->count())];
-        $rows[] = ['  — Draft', number_format(Article::where('status', 'draft')->count())];
-        $rows[] = ['  — Pending', number_format(Article::where('status', 'pending')->count())];
+        // 2. Artikel & Kategori & Views
+        $totalArticles = Article::count();
+        $publishedArticles = Article::where('status', 'published')->count();
+        
+        if ($totalArticles > 0 && $totalArticles === $publishedArticles) {
+            $rows[] = ['Total Artikel / Berita', number_format($totalArticles) . ' (semua published)'];
+        } else {
+            $rows[] = ['Total Artikel / Berita', number_format($totalArticles)];
+            $rows[] = ['  — Published', number_format($publishedArticles)];
+            $rows[] = ['  — Draft / Pending / Rejected', number_format($totalArticles - $publishedArticles)];
+        }
+        
         $rows[] = ['Total Kategori', number_format(Category::count())];
         $rows[] = ['Total Views Keseluruhan', number_format(Article::sum('views'))];
 
-        // Gallery
+        // 3. Gallery
         $rows[] = ['Total Media Gallery', number_format(Gallery::count())];
-        $rows[] = ['  — Gambar (Image)', number_format(Gallery::where('media_type', 'image')->count())];
-        $rows[] = ['  — Video', number_format(Gallery::where('media_type', 'video')->count())];
-        $rows[] = ['  — Sudah Dipublikasikan', number_format(Gallery::where('is_published', true)->count())];
 
-        // Interaksi
-        $rows[] = ['Total Komentar', number_format(ArticleComment::count())];
-        $rows[] = ['  — Komentar Visible', number_format(ArticleComment::where('status', 'visible')->count())];
-        $rows[] = ['  — Komentar Spam', number_format(ArticleComment::where('status', 'spam')->count())];
-        $rows[] = ['Total Likes', number_format(ArticleLike::count())];
+        // 4. Interaksi
+        $totalInteractions = ArticleComment::count() + ArticleLike::count();
+        if ($totalInteractions === 0) {
+            $rows[] = ['Interaksi Pengguna (Komentar & Like)', 'Belum ada'];
+        } else {
+            $rows[] = ['Total Interaksi (Komentar & Like)', number_format($totalInteractions)];
+            $rows[] = ['  — Total Komentar', number_format(ArticleComment::count())];
+            $rows[] = ['  — Total Likes', number_format(ArticleLike::count())];
+        }
 
-        // Keamanan
-        $rows[] = ['IP Terblokir Aktif', number_format(BlockedClient::activeBlocks()->count())];
-        $rows[] = ['Login Gagal (7 Hari Terakhir)', number_format(
-            ActivityLog::where('action', ActivityLog::ACTION_LOGIN_FAILED)
-                ->where('created_at', '>=', now()->subDays(7))->count()
-        )];
-
-        // Activity Log
-        $rows[] = ['Total Aktivitas (7 Hari Terakhir)', number_format(
+        // 5. Activity Log (Pemantauan Umum)
+        $rows[] = ['Total Aktivitas Sistem (7 Hari Terakhir)', number_format(
             ActivityLog::where('created_at', '>=', now()->subDays(7))->count()
         )];
-        $rows[] = ['Total Aktivitas (Keseluruhan)', number_format(ActivityLog::count())];
+        $rows[] = ['Total Aktivitas Sistem (Keseluruhan)', number_format(ActivityLog::count())];
 
         $data = [
             'settings' => $this->getReportSettings(),
