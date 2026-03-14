@@ -1,0 +1,139 @@
+<script>
+function trashApp() {
+    return {
+        // State
+        items: [],
+        loading: false,
+        counts: <?php echo json_encode($counts ?? [], 15, 512) ?>,
+        currentUserIsSuperAdmin: <?php echo e(auth()->user()->isSuperAdmin() ? 'true' : 'false'); ?>,
+        
+        // Menu State
+        activeMenuItem: null,
+        activeMenuButton: null,
+        menuPosition: { top: 0, left: 0, placement: 'bottom' },
+        
+        // Selection - menggunakan Map untuk menyimpan item berdasarkan unique key (type-id)
+        selectedItems: [],
+        
+        // Computed untuk cek apakah semua item di halaman saat ini sudah dipilih
+        get selectAll() {
+            if (this.items.length === 0) return false;
+            return this.items.every(item => 
+                this.selectedItems.includes(JSON.stringify({type: item.type, id: item.id}))
+            );
+        },
+        set selectAll(value) {
+            // Setter ini diperlukan untuk x-model binding
+            // Logika toggle akan ditangani oleh toggleSelectAll()
+        },
+
+        // Filters
+        filters: { search: '', type: 'all' },
+
+        // Pagination
+        meta: { current_page: 1, last_page: 1, per_page: 15, total: 0, from: 0, to: 0 },
+
+        // ========================================
+        // CRUD MODULE
+        // ========================================
+        <?php echo $__env->make('trash.partials.scripts.crud', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+
+        // ========================================
+        // BULK ACTIONS MODULE
+        // ========================================
+        <?php echo $__env->make('trash.partials.scripts.bulk-actions', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+
+        // ========================================
+        // HELPERS MODULE
+        // ========================================
+        <?php echo $__env->make('trash.partials.scripts.helpers', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+
+        // ========================================
+        // CORE METHODS
+        // ========================================
+        init() {
+            this.fetchItems();
+            
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.kebab-menu-container') && !e.target.closest('[x-show="activeMenuItem"]')) {
+                    this.activeMenuItem = null;
+                }
+            });
+
+            const updatePositionHandler = () => {
+                if (this.activeMenuItem && this.activeMenuButton) { this.updateMenuPosition(); }
+            };
+
+            const scrollContainer = document.querySelector('.table-scroll-container');
+            if (scrollContainer) { scrollContainer.addEventListener('scroll', updatePositionHandler); }
+            window.addEventListener('scroll', updatePositionHandler, true);
+            window.addEventListener('resize', updatePositionHandler);
+        },
+
+        async fetchItems() {
+            this.loading = true;
+            // Tidak reset selectedItems agar persist lintas pagination
+
+            try {
+                const params = new URLSearchParams({
+                    page: this.meta.current_page,
+                    per_page: this.meta.per_page,
+                    type: this.filters.type,
+                    search: this.filters.search,
+                });
+
+                const response = await fetch(`<?php echo e(route('trash.data')); ?>?${params}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    this.items = result.data;
+                    this.meta = result.meta;
+                    this.counts = result.counts;
+                    this.$nextTick(() => { lucide.createIcons(); });
+                }
+            } catch (error) {
+                console.error('Error fetching items:', error);
+                showToast('error', 'Gagal memuat data');
+            } finally { this.loading = false; }
+        },
+
+        // Menu Logic
+        openMenu(item, event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (this.activeMenuItem && this.activeMenuItem.id === item.id && this.activeMenuItem.type === item.type) {
+                this.closeMenu();
+                return;
+            }
+
+            this.activeMenuItem = item;
+            this.activeMenuButton = event.currentTarget;
+            this.updateMenuPosition();
+        },
+
+        updateMenuPosition() {
+            if (!this.activeMenuButton) return;
+            const rect = this.activeMenuButton.getBoundingClientRect();
+            const viewportHeight = window.innerHeight;
+            const spaceBelow = viewportHeight - rect.bottom;
+            const menuHeightEstimate = 120;
+            
+            let placement = 'bottom';
+            let topPos = rect.bottom + 4;
+
+            if (spaceBelow < menuHeightEstimate && rect.top > menuHeightEstimate) {
+                placement = 'top';
+                topPos = rect.top - 4;
+            }
+
+            this.menuPosition = { top: topPos, left: rect.right - 192, placement: placement };
+        },
+
+        closeMenu() { this.activeMenuItem = null; this.activeMenuButton = null; },
+        applyFilters() { this.meta.current_page = 1; this.fetchItems(); },
+        goToPage(page) { if (page >= 1 && page <= this.meta.last_page) { this.meta.current_page = page; this.fetchItems(); } },
+    }
+}
+</script>
+<?php /**PATH C:\laragon\www\web-portal\portal-backend\resources\views\trash\partials\scripts.blade.php ENDPATH**/ ?>

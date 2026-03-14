@@ -1,0 +1,107 @@
+
+<div class="p-4 sm:p-6 pb-6 border-b border-surface-200/50 dark:border-surface-800/50">
+    
+    <div class="flex items-center gap-2 sm:gap-4 mb-6">
+        
+        <div class="flex items-center gap-2 flex-shrink-0">
+            <span class="text-sm font-medium text-surface-600 dark:text-surface-400 hidden sm:inline">Tampilkan</span>
+            <select 
+                x-model="meta.per_page"
+                @change="applyFilters()"
+                class="px-3 py-3 bg-surface-50 dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-xl text-sm font-medium text-surface-900 dark:text-white focus:ring-2 focus:ring-theme-500 focus:border-transparent transition-all hover:bg-surface-100 dark:hover:bg-surface-700/50 cursor-pointer"
+            >
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+        </div>
+
+        
+        <div class="flex-1 min-w-0">
+            <div class="relative group">
+                <div class="absolute inset-0 bg-gradient-to-r from-theme-500/20 to-theme-600/20 rounded-2xl blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-300"></div>
+                <div class="relative flex items-center">
+                    <div class="absolute left-3 sm:left-4 flex items-center justify-center">
+                        <i data-lucide="search" class="w-5 h-5 text-surface-400 group-focus-within:text-theme-500 transition-colors"></i>
+                    </div>
+                    <input 
+                        type="text"
+                        x-model="filters.search"
+                        @keyup.enter="applyFilters()"
+                        placeholder="Cari item..."
+                        class="w-full pl-10 sm:pl-12 pr-4 py-3 bg-surface-50 dark:bg-surface-800/80 border-2 border-surface-200 dark:border-surface-700 rounded-2xl text-sm text-surface-900 dark:text-white placeholder-surface-400 focus:ring-0 focus:border-theme-500 dark:focus:border-theme-500 transition-all duration-300 shadow-sm"
+                    >
+                    <div class="absolute right-3 flex items-center gap-1.5" x-show="filters.search" style="display: none;">
+                        <button 
+                            @click="filters.search = ''; applyFilters()"
+                            class="p-1.5 hover:bg-surface-200 dark:hover:bg-surface-700 rounded-lg transition-colors"
+                        >
+                            <i data-lucide="x" class="w-4 h-4 text-surface-400"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+        <button 
+            @click="emptyTrash()"
+            :disabled="counts.all === 0"
+            class="flex-shrink-0 inline-flex items-center justify-center p-3 sm:px-4 sm:py-3 bg-theme-gradient text-white rounded-2xl hover:opacity-90 transition-all duration-300 group/empty shadow-lg shadow-theme-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Kosongkan Tong Sampah"
+        >
+            <i data-lucide="trash-2" class="w-5 h-5 group-hover/empty:scale-110 transition-transform"></i>
+            <span class="hidden sm:inline ml-2 font-medium">Kosongkan</span>
+        </button>
+    </div>
+
+    
+    <div class="overflow-x-auto -mx-4 sm:-mx-6 px-4 sm:px-6 pb-2 scrollbar-thin scrollbar-thumb-surface-300 dark:scrollbar-thumb-surface-600">
+        <div class="flex gap-2 sm:gap-3 min-w-max">
+            
+            
+            <button 
+                @click="filters.type = 'all'; applyFilters()"
+                class="group flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl font-medium text-sm transition-colors duration-200 border whitespace-nowrap bg-white dark:bg-surface-800 text-surface-600 dark:text-surface-300 hover:bg-surface-50 dark:hover:bg-surface-700"
+                :class="filters.type === 'all' 
+                    ? 'border-theme-500 shadow-md ring-1 ring-theme-500/20' 
+                    : 'border-surface-200 dark:border-surface-700'"
+            >
+                
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors duration-200 bg-theme-100 dark:bg-theme-900/30 group-hover:bg-theme-200 dark:group-hover:bg-theme-900/50">
+                    <i data-lucide="layers" class="w-4 h-4 text-theme-600 dark:text-theme-400"></i>
+                </div>
+                
+                
+                <div class="flex flex-col items-start">
+                    <span class="text-xs opacity-70">Semua</span>
+                    <span class="font-bold" x-text="counts.all || 0"></span>
+                </div>
+            </button>
+
+            
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $typeLabels; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $type => $label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <button 
+                @click="filters.type = '<?php echo e($type); ?>'; applyFilters()"
+                class="group flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl font-medium text-sm transition-colors duration-200 border whitespace-nowrap bg-white dark:bg-surface-800 text-surface-600 dark:text-surface-300 hover:bg-surface-50 dark:hover:bg-surface-700"
+                :class="filters.type === '<?php echo e($type); ?>' 
+                    ? 'border-theme-500 shadow-md ring-1 ring-theme-500/20' 
+                    : 'border-surface-200 dark:border-surface-700'"
+            >
+                
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors duration-200 bg-theme-100 dark:bg-theme-900/30 group-hover:bg-theme-200 dark:group-hover:bg-theme-900/50">
+                    <i data-lucide="<?php echo e($typeIcons[$type]); ?>" class="w-4 h-4 text-theme-600 dark:text-theme-400"></i>
+                </div>
+
+                
+                <div class="flex flex-col items-start">
+                    <span class="text-xs opacity-70"><?php echo e($label); ?></span>
+                    <span class="font-bold" x-text="counts['<?php echo e($type); ?>'] || 0"></span>
+                </div>
+            </button>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+        </div>
+    </div>
+</div><?php /**PATH C:\laragon\www\web-portal\portal-backend\resources\views\trash\partials\filter.blade.php ENDPATH**/ ?>

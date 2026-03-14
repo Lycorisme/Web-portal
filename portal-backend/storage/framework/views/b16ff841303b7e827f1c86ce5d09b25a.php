@@ -1,0 +1,224 @@
+
+<div x-show="activeTab === 'general'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
+    <div class="bg-white dark:bg-surface-900/50 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-surface-200/50 dark:border-surface-800/50 p-4 sm:p-6 lg:p-8">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+            <div class="w-12 sm:w-14 h-12 sm:h-14 rounded-xl sm:rounded-2xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shadow-lg shadow-primary-500/30 flex-shrink-0">
+                <i data-lucide="globe" class="w-6 sm:w-7 h-6 sm:h-7 text-white"></i>
+            </div>
+            <div>
+                <h2 class="text-lg sm:text-xl font-bold text-surface-900 dark:text-white">Pengaturan Umum</h2>
+                <p class="text-xs sm:text-sm text-surface-500 dark:text-surface-400">Informasi dasar tentang portal berita Anda</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+            
+            <div class="space-y-2">
+                <label for="site_name" class="block text-sm font-medium text-surface-700 dark:text-surface-300">
+                    Nama Portal <span class="text-accent-rose">*</span>
+                </label>
+                <input type="text" name="site_name" id="site_name"
+                    value="<?php echo e($rawSettings['site_name'] ?? ''); ?>"
+                    class="w-full px-4 py-3 bg-surface-50 dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-xl text-surface-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
+                    placeholder="Contoh: Portal Berita BTIKP">
+            </div>
+
+            
+            <div class="space-y-2">
+                <label for="site_tagline" class="block text-sm font-medium text-surface-700 dark:text-surface-300">
+                    Tagline
+                </label>
+                <input type="text" name="site_tagline" id="site_tagline"
+                    value="<?php echo e($rawSettings['site_tagline'] ?? ''); ?>"
+                    class="w-full px-4 py-3 bg-surface-50 dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-xl text-surface-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
+                    placeholder="Contoh: Informasi Terkini dan Terpercaya">
+            </div>
+
+            
+            <div class="md:col-span-2 space-y-2">
+                <label for="site_description" class="block text-sm font-medium text-surface-700 dark:text-surface-300">
+                    Deskripsi Website
+                </label>
+                <textarea name="site_description" id="site_description" rows="4"
+                    class="w-full px-4 py-3 bg-surface-50 dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-xl text-surface-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200 resize-y"
+                    placeholder="Deskripsi singkat tentang portal berita Anda..."><?php echo e($rawSettings['site_description'] ?? ''); ?></textarea>
+                <p class="text-xs text-surface-400">Deskripsi ini akan digunakan untuk SEO dan meta description</p>
+            </div>
+
+            
+            <div class="space-y-4" x-data="{ isDragging: false, previewUrl: '<?php echo e($rawSettings['logo_url'] ?? ''); ?>', deleteImage: false }">
+                <label class="block text-sm font-medium text-surface-700 dark:text-surface-300">
+                    Logo Utama
+                </label>
+                <div 
+                    @dragover.prevent="isDragging = true"
+                    @dragleave.prevent="isDragging = false"
+                    @drop.prevent="
+                        isDragging = false;
+                        const file = $event.dataTransfer.files[0];
+                        if (file) {
+                            $refs.logoInput.files = $event.dataTransfer.files; 
+                            previewUrl = URL.createObjectURL(file);
+                            deleteImage = false;
+                        }
+                    "
+                    class="relative w-full h-48 rounded-2xl border-2 border-dashed transition-all duration-300 ease-out overflow-hidden group"
+                    :class="isDragging 
+                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/10 scale-[1.02] shadow-xl ring-4 ring-primary-500/10' 
+                        : 'border-surface-300 dark:border-surface-700 bg-surface-50 dark:bg-surface-800/50 hover:border-primary-400 hover:bg-surface-100 dark:hover:bg-surface-800'"
+                >
+                    <input 
+                        type="file" 
+                        name="logo_url" 
+                        x-ref="logoInput"
+                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                        accept="image/*"
+                        @change="
+                            const file = $event.target.files[0];
+                            if (file) {
+                                previewUrl = URL.createObjectURL(file);
+                                deleteImage = false;
+                            }
+                        "
+                    >
+                    <input type="hidden" name="logo_url_current" value="<?php echo e($rawSettings['logo_url'] ?? ''); ?>">
+                    <input type="hidden" name="delete_logo_url" x-bind:value="deleteImage ? '1' : ''">
+
+                    
+                    <button 
+                        x-show="previewUrl"
+                        @click.stop.prevent="
+                            Swal.fire({
+                                title: 'Hapus Logo?',
+                                text: 'Logo akan dihapus setelah menyimpan pengaturan.',
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonColor: '#ef4444',
+                                cancelButtonColor: '#64748b',
+                                confirmButtonText: 'Ya, Hapus',
+                                cancelButtonText: 'Batal',
+                                reverseButtons: true
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    previewUrl = '';
+                                    deleteImage = true;
+                                    $refs.logoInput.value = '';
+                                }
+                            });
+                        "
+                        type="button"
+                        class="absolute top-2 right-2 z-30 p-2 bg-rose-500 text-white rounded-xl shadow-lg hover:bg-rose-600 transition-all hover:scale-110 opacity-0 group-hover:opacity-100"
+                        title="Hapus Logo"
+                    >
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+
+                    
+                    <div x-show="!previewUrl" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none transition-transform duration-300" :class="isDragging ? 'scale-110' : 'scale-100'">
+                        <div class="p-3 bg-white dark:bg-surface-700 rounded-xl shadow-sm mb-3 group-hover:scale-110 transition-transform duration-300">
+                            <i data-lucide="upload-cloud" class="w-8 h-8 text-surface-400 group-hover:text-primary-500 transition-colors"></i>
+                        </div>
+                        <p class="text-sm font-medium text-surface-600 dark:text-surface-300">Klik atau Drop Logo</p>
+                        <p class="text-xs text-surface-400 mt-1">PNG, JPG, SVG (Max 2MB)</p>
+                    </div>
+
+                    
+                    <div x-show="previewUrl" class="absolute inset-0 w-full h-full p-4 flex items-center justify-center bg-surface-100 dark:bg-surface-800">
+                         <img :src="previewUrl" class="max-w-full max-h-full object-contain drop-shadow-sm transition-transform duration-500 group-hover:scale-105">
+                         
+                         
+                        <div class="absolute inset-0 bg-black/40 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center text-white z-20 pointer-events-none">
+                            <i data-lucide="refresh-cw" class="w-8 h-8 mb-2 drop-shadow-md"></i>
+                            <span class="text-xs font-medium bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm">Ganti Logo</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="space-y-4" x-data="{ isDragging: false, previewUrl: '<?php echo e($rawSettings['favicon_url'] ?? ''); ?>', deleteImage: false }">
+                <label class="block text-sm font-medium text-surface-700 dark:text-surface-300">
+                    Favicon
+                </label>
+                <div 
+                    @dragover.prevent="isDragging = true"
+                    @dragleave.prevent="isDragging = false"
+                    @drop.prevent="
+                        isDragging = false;
+                        const file = $event.dataTransfer.files[0];
+                        if (file) {
+                             $refs.favInput.files = $event.dataTransfer.files;
+                             previewUrl = URL.createObjectURL(file);
+                             deleteImage = false;
+                        }
+                    "
+                    class="relative w-32 h-32 rounded-2xl border-2 border-dashed transition-all duration-300 ease-out overflow-hidden group"
+                    :class="isDragging 
+                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/10 scale-[1.02] shadow-xl ring-4 ring-primary-500/10' 
+                        : 'border-surface-300 dark:border-surface-700 bg-surface-50 dark:bg-surface-800/50 hover:border-primary-400 hover:bg-surface-100 dark:hover:bg-surface-800'"
+                >
+                    <input 
+                        type="file" 
+                        name="favicon_url" 
+                        x-ref="favInput"
+                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                        accept="image/*,.ico"
+                        @change="
+                            const file = $event.target.files[0];
+                            if (file) {
+                                previewUrl = URL.createObjectURL(file);
+                                deleteImage = false;
+                            }
+                        "
+                    >
+                    <input type="hidden" name="favicon_url_current" value="<?php echo e($rawSettings['favicon_url'] ?? ''); ?>">
+                    <input type="hidden" name="delete_favicon_url" x-bind:value="deleteImage ? '1' : ''">
+
+                    
+                    <button 
+                        x-show="previewUrl"
+                        @click.stop.prevent="
+                            Swal.fire({
+                                title: 'Hapus Favicon?',
+                                text: 'Favicon akan dihapus setelah menyimpan pengaturan.',
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonColor: '#ef4444',
+                                cancelButtonColor: '#64748b',
+                                confirmButtonText: 'Ya, Hapus',
+                                cancelButtonText: 'Batal',
+                                reverseButtons: true
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    previewUrl = '';
+                                    deleteImage = true;
+                                    $refs.favInput.value = '';
+                                }
+                            });
+                        "
+                        type="button"
+                        class="absolute top-1 right-1 z-30 p-1.5 bg-rose-500 text-white rounded-lg shadow-lg hover:bg-rose-600 transition-all hover:scale-110 opacity-0 group-hover:opacity-100"
+                        title="Hapus Favicon"
+                    >
+                        <i data-lucide="trash-2" class="w-3 h-3"></i>
+                    </button>
+
+                    
+                    <div x-show="!previewUrl" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center p-2">
+                        <i data-lucide="bookmark" class="w-6 h-6 text-surface-400 mb-2 group-hover:text-primary-500 transition-colors"></i>
+                        <span class="text-xs text-surface-500">Upload</span>
+                    </div>
+
+                    
+                    <div x-show="previewUrl" class="absolute inset-0 w-full h-full p-6 flex items-center justify-center bg-surface-100 dark:bg-surface-800">
+                         <img :src="previewUrl" class="w-16 h-16 object-contain drop-shadow-sm transition-transform duration-500 group-hover:scale-110">
+                         
+                         
+                         <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-200 z-20"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<?php /**PATH C:\laragon\www\web-portal\portal-backend\resources\views\settings\partials\general.blade.php ENDPATH**/ ?>

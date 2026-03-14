@@ -97,9 +97,6 @@ function reportsPage() {
                     }
                 });
 
-                // Add cache buster to prevent browser from serving an old cached PDF
-                params.append('_t', new Date().getTime());
-
                 const url = `/reports/${type}?${params.toString()}`;
                 
                 // Open in new tab or download
@@ -122,3 +119,4 @@ function reportsPage() {
     };
 }
 </script>
+<?php /**PATH C:\laragon\www\web-portal\portal-backend\resources\views\reports\partials\scripts.blade.php ENDPATH**/ ?>

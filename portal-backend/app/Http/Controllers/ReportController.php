@@ -514,7 +514,7 @@ class ReportController extends Controller
         $pdf = Pdf::loadView('reports.pdf.statistics', $data);
         $pdf->setPaper('A4', 'portrait');
         
-        $filename = 'laporan-statistik-rekapitulasi-' . now()->format('Ymd') . '.pdf';
+        $filename = 'laporan-statistik-rekapitulasi-' . now()->format('Ymd-His') . '.pdf';
         
         return $pdf->download($filename);
     }
