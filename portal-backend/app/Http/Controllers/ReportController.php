@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
+use App\Models\ArticleComment;
+use App\Models\ArticleLike;
 use App\Models\Category;
 use App\Models\User;
 use App\Models\ActivityLog;
@@ -12,6 +14,7 @@ use App\Models\SiteSetting;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
@@ -78,7 +81,6 @@ class ReportController extends Controller
 
     /**
      * Parse date range from request.
-     * Returns [startDate|null, endDate|null, hasDateFilter].
      */
     private function parseDateRange(Request $request): array
     {
@@ -106,126 +108,34 @@ class ReportController extends Controller
     }
 
     /**
-     * Generate Article Report PDF.
+     * Apply date filter to a query builder.
      */
-    public function generateArticleReport(Request $request)
+    private function applyDateFilter($query, ?Carbon $startDate, ?Carbon $endDate, bool $hasDateFilter, string $column = 'created_at')
     {
-        [$startDate, $endDate, $hasDateFilter] = $this->parseDateRange($request);
-        
-        $query = Article::with(['author', 'categoryRelation']);
-
-        // Apply date filter only if provided
         if ($hasDateFilter) {
             if ($startDate && $endDate) {
-                $query->whereBetween('created_at', [$startDate, $endDate]);
+                $query->whereBetween($column, [$startDate, $endDate]);
             } elseif ($startDate) {
-                $query->where('created_at', '>=', $startDate);
+                $query->where($column, '>=', $startDate);
             } elseif ($endDate) {
-                $query->where('created_at', '<=', $endDate);
+                $query->where($column, '<=', $endDate);
             }
         }
-
-        // Filter by status if provided
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        // Filter by category if provided
-        if ($request->filled('category_id')) {
-            $query->where('category_id', $request->category_id);
-        }
-
-        // Filter by author if provided
-        if ($request->filled('author_id')) {
-            $query->where('author_id', $request->author_id);
-        }
-
-        $articles = $query->orderBy('created_at', 'desc')->get();
-
-        $data = [
-            'settings' => $this->getReportSettings(),
-            'title' => 'Laporan Data Berita',
-            'date_from' => $this->formatDate($startDate),
-            'date_to' => $this->formatDate($endDate),
-            'has_date_filter' => $hasDateFilter,
-            'items' => $articles,
-            'columns' => ['No', 'Judul', 'Kategori', 'Penulis', 'Status', 'Tanggal Publish'],
-        ];
-
-        $pdf = Pdf::loadView('reports.pdf.articles', $data);
-        $pdf->setPaper('A4', 'portrait');
-        
-        $filename = 'laporan-berita-' . ($startDate ? $startDate->format('Ymd') : 'all') . '-' . ($endDate ? $endDate->format('Ymd') : 'now') . '.pdf';
-        
-        return $pdf->download($filename);
+        return $query;
     }
 
     /**
-     * Generate Category Report PDF.
-     */
-    public function generateCategoryReport(Request $request)
-    {
-        [$startDate, $endDate, $hasDateFilter] = $this->parseDateRange($request);
-        
-        $query = Category::withCount('articles');
-
-        // Apply date filter only if provided
-        if ($hasDateFilter) {
-            if ($startDate && $endDate) {
-                $query->whereBetween('created_at', [$startDate, $endDate]);
-            } elseif ($startDate) {
-                $query->where('created_at', '>=', $startDate);
-            } elseif ($endDate) {
-                $query->where('created_at', '<=', $endDate);
-            }
-        }
-
-        // Filter by status if provided
-        if ($request->filled('is_active')) {
-            $query->where('is_active', $request->is_active === 'true');
-        }
-
-        $categories = $query->orderBy('sort_order', 'asc')->get();
-
-        $data = [
-            'settings' => $this->getReportSettings(),
-            'title' => 'Laporan Data Kategori',
-            'date_from' => $this->formatDate($startDate),
-            'date_to' => $this->formatDate($endDate),
-            'has_date_filter' => $hasDateFilter,
-            'items' => $categories,
-            'columns' => ['No', 'Nama Kategori', 'Slug', 'Jumlah Artikel', 'Status', 'Dibuat'],
-        ];
-
-        $pdf = Pdf::loadView('reports.pdf.categories', $data);
-        $pdf->setPaper('A4', 'portrait');
-        
-        $filename = 'laporan-kategori-' . ($startDate ? $startDate->format('Ymd') : 'all') . '-' . ($endDate ? $endDate->format('Ymd') : 'now') . '.pdf';
-        
-        return $pdf->download($filename);
-    }
-
-    /**
-     * Generate User Report PDF.
+     * ============================================================
+     * REPORT 1: Laporan Data Pengguna
+     * ============================================================
      */
     public function generateUserReport(Request $request)
     {
         [$startDate, $endDate, $hasDateFilter] = $this->parseDateRange($request);
         
         $query = User::query();
+        $this->applyDateFilter($query, $startDate, $endDate, $hasDateFilter);
 
-        // Apply date filter only if provided
-        if ($hasDateFilter) {
-            if ($startDate && $endDate) {
-                $query->whereBetween('created_at', [$startDate, $endDate]);
-            } elseif ($startDate) {
-                $query->where('created_at', '>=', $startDate);
-            } elseif ($endDate) {
-                $query->where('created_at', '<=', $endDate);
-            }
-        }
-
-        // Filter by role if provided
         if ($request->filled('role')) {
             $query->where('role', $request->role);
         }
@@ -239,7 +149,7 @@ class ReportController extends Controller
             'date_to' => $this->formatDate($endDate),
             'has_date_filter' => $hasDateFilter,
             'items' => $users,
-            'columns' => ['No', 'Nama', 'Email', 'Role', 'Status', 'Login Terakhir'],
+            'doc_number' => '001',
         ];
 
         $pdf = Pdf::loadView('reports.pdf.users', $data);
@@ -251,136 +161,105 @@ class ReportController extends Controller
     }
 
     /**
-     * Generate Activity Log Report PDF.
+     * ============================================================
+     * REPORT 2: Laporan Data Berita/Artikel
+     * ============================================================
      */
-    public function generateActivityLogReport(Request $request)
+    public function generateArticleReport(Request $request)
     {
         [$startDate, $endDate, $hasDateFilter] = $this->parseDateRange($request);
         
-        $query = ActivityLog::with('user');
+        $query = Article::with(['author', 'categoryRelation']);
+        $this->applyDateFilter($query, $startDate, $endDate, $hasDateFilter);
 
-        // Apply date filter only if provided
-        if ($hasDateFilter) {
-            if ($startDate && $endDate) {
-                $query->whereBetween('created_at', [$startDate, $endDate]);
-            } elseif ($startDate) {
-                $query->where('created_at', '>=', $startDate);
-            } elseif ($endDate) {
-                $query->where('created_at', '<=', $endDate);
-            }
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
         }
 
-        // Filter by action if provided
-        if ($request->filled('action')) {
-            $query->where('action', $request->action);
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
         }
 
-        // Filter by level if provided
-        if ($request->filled('level')) {
-            $query->where('level', $request->level);
+        if ($request->filled('author_id')) {
+            $query->where('author_id', $request->author_id);
         }
 
-        // Filter by user if provided
-        if ($request->filled('user_id')) {
-            $query->where('user_id', $request->user_id);
-        }
-
-        $activityLogs = $query->orderBy('created_at', 'desc')->get();
+        $articles = $query->orderBy('created_at', 'desc')->get();
 
         $data = [
             'settings' => $this->getReportSettings(),
-            'title' => 'Laporan Activity Log',
+            'title' => 'Laporan Data Berita',
             'date_from' => $this->formatDate($startDate),
             'date_to' => $this->formatDate($endDate),
             'has_date_filter' => $hasDateFilter,
-            'items' => $activityLogs,
-            'columns' => ['No', 'Tanggal', 'User', 'Action', 'Deskripsi', 'IP Address'],
+            'items' => $articles,
+            'doc_number' => '002',
         ];
 
-        $pdf = Pdf::loadView('reports.pdf.activity-logs', $data);
-        $pdf->setPaper('A4', 'portrait');
+        $pdf = Pdf::loadView('reports.pdf.articles', $data);
+        $pdf->setPaper('A4', 'landscape');
         
-        $filename = 'laporan-activity-log-' . ($startDate ? $startDate->format('Ymd') : 'all') . '-' . ($endDate ? $endDate->format('Ymd') : 'now') . '.pdf';
+        $filename = 'laporan-berita-' . ($startDate ? $startDate->format('Ymd') : 'all') . '-' . ($endDate ? $endDate->format('Ymd') : 'now') . '.pdf';
         
         return $pdf->download($filename);
     }
 
     /**
-     * Generate Blocked Client Report PDF.
+     * ============================================================
+     * REPORT 3: Laporan Data Kategori
+     * ============================================================
      */
-    public function generateBlockedClientReport(Request $request)
+    public function generateCategoryReport(Request $request)
     {
         [$startDate, $endDate, $hasDateFilter] = $this->parseDateRange($request);
         
-        $query = BlockedClient::query();
+        $query = Category::withCount('articles');
+        $this->applyDateFilter($query, $startDate, $endDate, $hasDateFilter);
 
-        // Apply date filter only if provided
-        if ($hasDateFilter) {
-            if ($startDate && $endDate) {
-                $query->whereBetween('created_at', [$startDate, $endDate]);
-            } elseif ($startDate) {
-                $query->where('created_at', '>=', $startDate);
-            } elseif ($endDate) {
-                $query->where('created_at', '<=', $endDate);
-            }
+        if ($request->filled('is_active')) {
+            $query->where('is_active', $request->is_active === 'true');
         }
 
-        // Filter by status if provided
-        if ($request->filled('is_blocked')) {
-            $query->where('is_blocked', $request->is_blocked === 'true');
-        }
-
-        $blockedClients = $query->orderBy('created_at', 'desc')->get();
+        $categories = $query->orderBy('sort_order', 'asc')->get();
 
         $data = [
             'settings' => $this->getReportSettings(),
-            'title' => 'Laporan IP Terblokir',
+            'title' => 'Laporan Data Kategori',
             'date_from' => $this->formatDate($startDate),
             'date_to' => $this->formatDate($endDate),
             'has_date_filter' => $hasDateFilter,
-            'items' => $blockedClients,
-            'columns' => ['No', 'IP Address', 'Alasan', 'Diblokir Sampai', 'Status', 'User Agent'],
+            'items' => $categories,
+            'doc_number' => '003',
         ];
 
-        $pdf = Pdf::loadView('reports.pdf.blocked-clients', $data);
+        $pdf = Pdf::loadView('reports.pdf.categories', $data);
         $pdf->setPaper('A4', 'portrait');
         
-        $filename = 'laporan-ip-terblokir-' . ($startDate ? $startDate->format('Ymd') : 'all') . '-' . ($endDate ? $endDate->format('Ymd') : 'now') . '.pdf';
+        $filename = 'laporan-kategori-' . ($startDate ? $startDate->format('Ymd') : 'all') . '-' . ($endDate ? $endDate->format('Ymd') : 'now') . '.pdf';
         
         return $pdf->download($filename);
     }
 
     /**
-     * Generate Gallery Report PDF.
+     * ============================================================
+     * REPORT 4: Laporan Data Gallery/Media
+     * ============================================================
      */
     public function generateGalleryReport(Request $request)
     {
         [$startDate, $endDate, $hasDateFilter] = $this->parseDateRange($request);
         
         $query = Gallery::with('uploader');
+        $this->applyDateFilter($query, $startDate, $endDate, $hasDateFilter);
 
-        // Apply date filter only if provided
-        if ($hasDateFilter) {
-            if ($startDate && $endDate) {
-                $query->whereBetween('created_at', [$startDate, $endDate]);
-            } elseif ($startDate) {
-                $query->where('created_at', '>=', $startDate);
-            } elseif ($endDate) {
-                $query->where('created_at', '<=', $endDate);
-            }
-        }
-
-        // Filter by media type if provided
         if ($request->filled('media_type')) {
             $query->where('media_type', $request->media_type);
         }
 
-        // Filter by album if provided
         if ($request->filled('album')) {
             $query->where('album', $request->album);
         }
 
-        // Filter by published status if provided
         if ($request->filled('is_published')) {
             $query->where('is_published', $request->is_published === 'true');
         }
@@ -394,13 +273,272 @@ class ReportController extends Controller
             'date_to' => $this->formatDate($endDate),
             'has_date_filter' => $hasDateFilter,
             'items' => $galleries,
-            'columns' => ['No', 'Judul', 'Album', 'Tipe Media', 'Uploader', 'Tanggal Upload'],
+            'doc_number' => '004',
         ];
 
         $pdf = Pdf::loadView('reports.pdf.galleries', $data);
         $pdf->setPaper('A4', 'portrait');
         
         $filename = 'laporan-gallery-' . ($startDate ? $startDate->format('Ymd') : 'all') . '-' . ($endDate ? $endDate->format('Ymd') : 'now') . '.pdf';
+        
+        return $pdf->download($filename);
+    }
+
+    /**
+     * ============================================================
+     * REPORT 5: Laporan Interaksi Publik
+     * ============================================================
+     */
+    public function generateInteractionReport(Request $request)
+    {
+        [$startDate, $endDate, $hasDateFilter] = $this->parseDateRange($request);
+        
+        // Get articles with counts
+        $query = Article::withCount([
+                'comments',
+                'comments as spam_comments_count' => function ($q) {
+                    $q->where('status', 'spam');
+                },
+                'likes',
+            ])
+            ->where('status', 'published');
+
+        $this->applyDateFilter($query, $startDate, $endDate, $hasDateFilter, 'published_at');
+
+        $articles = $query->orderByDesc('views')->get();
+
+        // For each article, find the top commenter
+        $articles->each(function ($article) {
+            $topCommenter = ArticleComment::where('article_id', $article->id)
+                ->where('status', 'visible')
+                ->select('user_id', DB::raw('COUNT(*) as comment_count'))
+                ->groupBy('user_id')
+                ->orderByDesc('comment_count')
+                ->with('user:id,name')
+                ->first();
+            
+            $article->top_commenter_name = $topCommenter?->user?->name ?? '-';
+        });
+
+        // Summary stats
+        $summary = [
+            'total_articles' => $articles->count(),
+            'total_comments' => $articles->sum('comments_count'),
+            'total_spam' => $articles->sum('spam_comments_count'),
+            'total_likes' => $articles->sum('likes_count'),
+            'total_views' => $articles->sum('views'),
+        ];
+
+        $data = [
+            'settings' => $this->getReportSettings(),
+            'title' => 'Laporan Interaksi Publik',
+            'date_from' => $this->formatDate($startDate),
+            'date_to' => $this->formatDate($endDate),
+            'has_date_filter' => $hasDateFilter,
+            'items' => $articles,
+            'summary' => $summary,
+            'doc_number' => '005',
+        ];
+
+        $pdf = Pdf::loadView('reports.pdf.interactions', $data);
+        $pdf->setPaper('A4', 'landscape');
+        
+        $filename = 'laporan-interaksi-' . ($startDate ? $startDate->format('Ymd') : 'all') . '-' . ($endDate ? $endDate->format('Ymd') : 'now') . '.pdf';
+        
+        return $pdf->download($filename);
+    }
+
+    /**
+     * ============================================================
+     * REPORT 6: Laporan Activity Log
+     * ============================================================
+     */
+    public function generateActivityLogReport(Request $request)
+    {
+        [$startDate, $endDate, $hasDateFilter] = $this->parseDateRange($request);
+        
+        $query = ActivityLog::with('user');
+        $this->applyDateFilter($query, $startDate, $endDate, $hasDateFilter);
+
+        if ($request->filled('action')) {
+            $query->where('action', $request->action);
+        }
+
+        if ($request->filled('level')) {
+            $query->where('level', $request->level);
+        }
+
+        if ($request->filled('user_id')) {
+            $query->where('user_id', $request->user_id);
+        }
+
+        $activityLogs = $query->orderBy('created_at', 'desc')->get();
+
+        $data = [
+            'settings' => $this->getReportSettings(),
+            'title' => 'Laporan Activity Log',
+            'date_from' => $this->formatDate($startDate),
+            'date_to' => $this->formatDate($endDate),
+            'has_date_filter' => $hasDateFilter,
+            'items' => $activityLogs,
+            'doc_number' => '006',
+        ];
+
+        $pdf = Pdf::loadView('reports.pdf.activity-logs', $data);
+        $pdf->setPaper('A4', 'landscape');
+        
+        $filename = 'laporan-activity-log-' . ($startDate ? $startDate->format('Ymd') : 'all') . '-' . ($endDate ? $endDate->format('Ymd') : 'now') . '.pdf';
+        
+        return $pdf->download($filename);
+    }
+
+    /**
+     * ============================================================
+     * REPORT 7: Laporan Keamanan & IP Terblokir
+     * ============================================================
+     */
+    public function generateSecurityReport(Request $request)
+    {
+        [$startDate, $endDate, $hasDateFilter] = $this->parseDateRange($request);
+        
+        $query = BlockedClient::query();
+        $this->applyDateFilter($query, $startDate, $endDate, $hasDateFilter);
+
+        if ($request->filled('is_blocked')) {
+            $query->where('is_blocked', $request->is_blocked === 'true');
+        }
+
+        $blockedClients = $query->orderBy('created_at', 'desc')->get();
+
+        // Security logs from ActivityLog
+        $securityLogQuery = ActivityLog::securityLogs()->with('user');
+        $this->applyDateFilter($securityLogQuery, $startDate, $endDate, $hasDateFilter);
+        $securityLogs = $securityLogQuery->orderBy('created_at', 'desc')->limit(50)->get();
+
+        // Security summary
+        $securitySummary = [
+            'total_blocked' => BlockedClient::where('is_blocked', true)->count(),
+            'active_blocks' => BlockedClient::activeBlocks()->count(),
+            'total_failed_logins' => ActivityLog::where('action', ActivityLog::ACTION_LOGIN_FAILED)->count(),
+            'recent_failed_logins' => ActivityLog::where('action', ActivityLog::ACTION_LOGIN_FAILED)
+                ->where('created_at', '>=', now()->subDays(7))->count(),
+        ];
+
+        $data = [
+            'settings' => $this->getReportSettings(),
+            'title' => 'Laporan Keamanan & IP Terblokir',
+            'date_from' => $this->formatDate($startDate),
+            'date_to' => $this->formatDate($endDate),
+            'has_date_filter' => $hasDateFilter,
+            'items' => $blockedClients,
+            'security_logs' => $securityLogs,
+            'security_summary' => $securitySummary,
+            'doc_number' => '007',
+        ];
+
+        $pdf = Pdf::loadView('reports.pdf.security', $data);
+        $pdf->setPaper('A4', 'landscape');
+        
+        $filename = 'laporan-keamanan-' . ($startDate ? $startDate->format('Ymd') : 'all') . '-' . ($endDate ? $endDate->format('Ymd') : 'now') . '.pdf';
+        
+        return $pdf->download($filename);
+    }
+
+    /**
+     * ============================================================
+     * REPORT 8: Laporan Statistik & Rekapitulasi
+     * ============================================================
+     */
+    public function generateStatisticsReport(Request $request)
+    {
+        [$startDate, $endDate, $hasDateFilter] = $this->parseDateRange($request);
+
+        // --- Users per role ---
+        $usersByRole = User::select('role', DB::raw('COUNT(*) as total'))
+            ->groupBy('role')
+            ->orderByDesc('total')
+            ->get();
+
+        // --- Articles per status ---
+        $articlesByStatus = Article::select('status', DB::raw('COUNT(*) as total'))
+            ->groupBy('status')
+            ->orderByDesc('total')
+            ->get();
+
+        // --- Gallery totals ---
+        $galleryStats = [
+            'total' => Gallery::count(),
+            'images' => Gallery::where('media_type', 'image')->count(),
+            'videos' => Gallery::where('media_type', 'video')->count(),
+            'published' => Gallery::where('is_published', true)->count(),
+        ];
+
+        // --- Comments & Likes ---
+        $interactionStats = [
+            'total_comments' => ArticleComment::count(),
+            'visible_comments' => ArticleComment::where('status', 'visible')->count(),
+            'spam_comments' => ArticleComment::where('status', 'spam')->count(),
+            'total_likes' => ArticleLike::count(),
+        ];
+
+        // --- Security ---
+        $securityStats = [
+            'active_blocks' => BlockedClient::activeBlocks()->count(),
+            'total_blocked_ever' => BlockedClient::where('is_blocked', true)->count(),
+            'failed_logins_7d' => ActivityLog::where('action', ActivityLog::ACTION_LOGIN_FAILED)
+                ->where('created_at', '>=', now()->subDays(7))->count(),
+        ];
+
+        // --- Activity Log 7 days ---
+        $activityStats = [
+            'total_7d' => ActivityLog::where('created_at', '>=', now()->subDays(7))->count(),
+            'total_all' => ActivityLog::count(),
+        ];
+
+        // --- Top 5 Articles by Views ---
+        $topArticles = Article::with(['author', 'categoryRelation'])
+            ->where('status', 'published')
+            ->orderByDesc('views')
+            ->limit(5)
+            ->get();
+
+        // --- Top 5 Active Categories ---
+        $topCategories = Category::withCount('articles')
+            ->orderByDesc('articles_count')
+            ->limit(5)
+            ->get();
+
+        // --- Overview totals ---
+        $overview = [
+            'total_users' => User::count(),
+            'total_articles' => Article::count(),
+            'total_categories' => Category::count(),
+            'total_galleries' => Gallery::count(),
+            'total_views' => Article::sum('views'),
+        ];
+
+        $data = [
+            'settings' => $this->getReportSettings(),
+            'title' => 'Laporan Statistik & Rekapitulasi',
+            'date_from' => $this->formatDate($startDate),
+            'date_to' => $this->formatDate($endDate),
+            'has_date_filter' => $hasDateFilter,
+            'overview' => $overview,
+            'usersByRole' => $usersByRole,
+            'articlesByStatus' => $articlesByStatus,
+            'galleryStats' => $galleryStats,
+            'interactionStats' => $interactionStats,
+            'securityStats' => $securityStats,
+            'activityStats' => $activityStats,
+            'topArticles' => $topArticles,
+            'topCategories' => $topCategories,
+            'doc_number' => '008',
+        ];
+
+        $pdf = Pdf::loadView('reports.pdf.statistics', $data);
+        $pdf->setPaper('A4', 'portrait');
+        
+        $filename = 'laporan-statistik-rekapitulasi-' . now()->format('Ymd') . '.pdf';
         
         return $pdf->download($filename);
     }

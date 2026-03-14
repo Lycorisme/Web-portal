@@ -2,14 +2,21 @@
 function reportsPage() {
     return {
         loading: {
+            users: false,
             articles: false,
             categories: false,
-            users: false,
+            galleries: false,
+            interactions: false,
             activityLogs: false,
-            blockedClients: false,
-            galleries: false
+            security: false,
+            statistics: false
         },
         forms: {
+            users: {
+                start_date: '',
+                end_date: '',
+                role: ''
+            },
             articles: {
                 start_date: '',
                 end_date: '',
@@ -20,26 +27,26 @@ function reportsPage() {
                 end_date: '',
                 is_active: ''
             },
-            users: {
+            galleries: {
                 start_date: '',
                 end_date: '',
-                role: ''
+                media_type: ''
+            },
+            interactions: {
+                start_date: '',
+                end_date: ''
             },
             activityLogs: {
                 start_date: '',
                 end_date: '',
                 action: ''
             },
-            blockedClients: {
+            security: {
                 start_date: '',
                 end_date: '',
                 is_blocked: ''
             },
-            galleries: {
-                start_date: '',
-                end_date: '',
-                media_type: ''
-            }
+            statistics: {}
         },
 
         init() {
@@ -52,23 +59,27 @@ function reportsPage() {
         },
 
         async generateReport(type) {
-            // Map form key to loading key
+            // Map URL type to loading/form key
             const loadingKeys = {
+                'users': 'users',
                 'articles': 'articles',
                 'categories': 'categories',
-                'users': 'users',
+                'galleries': 'galleries',
+                'interactions': 'interactions',
                 'activity-logs': 'activityLogs',
-                'blocked-clients': 'blockedClients',
-                'galleries': 'galleries'
+                'security': 'security',
+                'statistics': 'statistics'
             };
 
             const formKeys = {
+                'users': 'users',
                 'articles': 'articles',
                 'categories': 'categories',
-                'users': 'users',
+                'galleries': 'galleries',
+                'interactions': 'interactions',
                 'activity-logs': 'activityLogs',
-                'blocked-clients': 'blockedClients',
-                'galleries': 'galleries'
+                'security': 'security',
+                'statistics': 'statistics'
             };
 
             const loadingKey = loadingKeys[type];
