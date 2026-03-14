@@ -447,91 +447,67 @@ class ReportController extends Controller
     /**
      * ============================================================
      * REPORT 8: Laporan Statistik & Rekapitulasi
+     * Single-table executive summary — no duplicate data from other reports.
      * ============================================================
      */
     public function generateStatisticsReport(Request $request)
     {
-        [$startDate, $endDate, $hasDateFilter] = $this->parseDateRange($request);
+        // Build flat rows: each row is [indikator, jumlah]
+        $rows = [];
 
-        // --- Users per role ---
+        // Pengguna
+        $rows[] = ['Total Pengguna Terdaftar', number_format(User::count())];
         $usersByRole = User::select('role', DB::raw('COUNT(*) as total'))
-            ->groupBy('role')
-            ->orderByDesc('total')
-            ->get();
+            ->groupBy('role')->orderByDesc('total')->get();
+        foreach ($usersByRole as $r) {
+            $label = match($r->role) {
+                'super_admin' => 'Super Admin',
+                'admin' => 'Admin',
+                'editor' => 'Editor',
+                'author' => 'Author',
+                'member' => 'Member',
+                default => ucfirst($r->role),
+            };
+            $rows[] = ['  — ' . $label, number_format($r->total)];
+        }
 
-        // --- Articles per status ---
-        $articlesByStatus = Article::select('status', DB::raw('COUNT(*) as total'))
-            ->groupBy('status')
-            ->orderByDesc('total')
-            ->get();
+        // Artikel
+        $rows[] = ['Total Artikel / Berita', number_format(Article::count())];
+        $rows[] = ['  — Published', number_format(Article::where('status', 'published')->count())];
+        $rows[] = ['  — Draft', number_format(Article::where('status', 'draft')->count())];
+        $rows[] = ['  — Pending', number_format(Article::where('status', 'pending')->count())];
+        $rows[] = ['Total Kategori', number_format(Category::count())];
+        $rows[] = ['Total Views Keseluruhan', number_format(Article::sum('views'))];
 
-        // --- Gallery totals ---
-        $galleryStats = [
-            'total' => Gallery::count(),
-            'images' => Gallery::where('media_type', 'image')->count(),
-            'videos' => Gallery::where('media_type', 'video')->count(),
-            'published' => Gallery::where('is_published', true)->count(),
-        ];
+        // Gallery
+        $rows[] = ['Total Media Gallery', number_format(Gallery::count())];
+        $rows[] = ['  — Gambar (Image)', number_format(Gallery::where('media_type', 'image')->count())];
+        $rows[] = ['  — Video', number_format(Gallery::where('media_type', 'video')->count())];
+        $rows[] = ['  — Sudah Dipublikasikan', number_format(Gallery::where('is_published', true)->count())];
 
-        // --- Comments & Likes ---
-        $interactionStats = [
-            'total_comments' => ArticleComment::count(),
-            'visible_comments' => ArticleComment::where('status', 'visible')->count(),
-            'spam_comments' => ArticleComment::where('status', 'spam')->count(),
-            'total_likes' => ArticleLike::count(),
-        ];
+        // Interaksi
+        $rows[] = ['Total Komentar', number_format(ArticleComment::count())];
+        $rows[] = ['  — Komentar Visible', number_format(ArticleComment::where('status', 'visible')->count())];
+        $rows[] = ['  — Komentar Spam', number_format(ArticleComment::where('status', 'spam')->count())];
+        $rows[] = ['Total Likes', number_format(ArticleLike::count())];
 
-        // --- Security ---
-        $securityStats = [
-            'active_blocks' => BlockedClient::activeBlocks()->count(),
-            'total_blocked_ever' => BlockedClient::where('is_blocked', true)->count(),
-            'failed_logins_7d' => ActivityLog::where('action', ActivityLog::ACTION_LOGIN_FAILED)
-                ->where('created_at', '>=', now()->subDays(7))->count(),
-        ];
+        // Keamanan
+        $rows[] = ['IP Terblokir Aktif', number_format(BlockedClient::activeBlocks()->count())];
+        $rows[] = ['Login Gagal (7 Hari Terakhir)', number_format(
+            ActivityLog::where('action', ActivityLog::ACTION_LOGIN_FAILED)
+                ->where('created_at', '>=', now()->subDays(7))->count()
+        )];
 
-        // --- Activity Log 7 days ---
-        $activityStats = [
-            'total_7d' => ActivityLog::where('created_at', '>=', now()->subDays(7))->count(),
-            'total_all' => ActivityLog::count(),
-        ];
-
-        // --- Top 5 Articles by Views ---
-        $topArticles = Article::with(['author', 'categoryRelation'])
-            ->where('status', 'published')
-            ->orderByDesc('views')
-            ->limit(5)
-            ->get();
-
-        // --- Top 5 Active Categories ---
-        $topCategories = Category::withCount('articles')
-            ->orderByDesc('articles_count')
-            ->limit(5)
-            ->get();
-
-        // --- Overview totals ---
-        $overview = [
-            'total_users' => User::count(),
-            'total_articles' => Article::count(),
-            'total_categories' => Category::count(),
-            'total_galleries' => Gallery::count(),
-            'total_views' => Article::sum('views'),
-        ];
+        // Activity Log
+        $rows[] = ['Total Aktivitas (7 Hari Terakhir)', number_format(
+            ActivityLog::where('created_at', '>=', now()->subDays(7))->count()
+        )];
+        $rows[] = ['Total Aktivitas (Keseluruhan)', number_format(ActivityLog::count())];
 
         $data = [
             'settings' => $this->getReportSettings(),
             'title' => 'Laporan Statistik & Rekapitulasi',
-            'date_from' => $this->formatDate($startDate),
-            'date_to' => $this->formatDate($endDate),
-            'has_date_filter' => $hasDateFilter,
-            'overview' => $overview,
-            'usersByRole' => $usersByRole,
-            'articlesByStatus' => $articlesByStatus,
-            'galleryStats' => $galleryStats,
-            'interactionStats' => $interactionStats,
-            'securityStats' => $securityStats,
-            'activityStats' => $activityStats,
-            'topArticles' => $topArticles,
-            'topCategories' => $topCategories,
+            'rows' => $rows,
             'doc_number' => '008',
         ];
 
